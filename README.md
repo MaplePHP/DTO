@@ -1,5 +1,6 @@
 
 
+
 # PHPFuse - DTO
 Using a DTO library in PHP provides benefits such as encapsulating data, enforcing immutability, validating data, facilitating data transformation, maintaining API compatibility, reducing coupling, improving code readability, and simplifying testing.
 
@@ -73,16 +74,16 @@ echo $obj->date("DateTime")->format("y/m/d, \k\l. H:i")."<br>";
 ## How it works
 
 ### Traverse
-You can pass array and object data that you later can traverse. You can alose modify using the Format Handlers. 
+When you pass array and object data to the Traverse object it will make it possible for you to easily traverse the array/object. you can then use one of the Handlers to modify the data when you have traversed to the right position.
 ```php
 use PHPFuse\DTO\Traverse;
-Traverse::value([MIXED_DATA]);
+$obj = Traverse::value([MIXED_DATA]);
+$obj->arrayKey1()->arrayKey2("HANDLER")->modifyFunction1->modifyFunction2();
 ```
 
 ### Format handlers
-Start with initiate  the PHPFuse Cache class and pass on a Handler to it. 
+You can also just access the handlers directly to modify data quickly. 
 ```php
-use PHPFuse\DTO\Traverse;
 use PHPFuse\DTO\Format;
 
 // If you want only to direct
@@ -92,3 +93,9 @@ Format\Num::value([NUMBER]);
 Format\DateTime::value([STRING]);
 Format\Arr::value([ARRAY]);
 ```
+#### Example
+```php
+echo Format\Str::value("lorem")->ucfirst();
+// Lorem
+```
+
