@@ -1,5 +1,10 @@
+
+
 # PHPFuse - DTO
 Using a DTO library in PHP provides benefits such as encapsulating data, enforcing immutability, validating data, facilitating data transformation, maintaining API compatibility, reducing coupling, improving code readability, and simplifying testing.
+
+
+
 
 
 ## Usage
@@ -58,7 +63,7 @@ echo $obj->slug("Uri")->formatSlug()."<br>";
 echo $obj->price("Num")->toFilesize()."<br>";
 // 1.95 kb
 
-echo $obj->price("Num")->round(2)->currency("SEK", 2)->get()."<br>";
+echo $obj->price("Num")->round(2)->currency("SEK", 2)."<br>";
 // 1 999,99 kr
 
 echo $obj->date("DateTime")->format("y/m/d, \k\l. H:i")."<br>";

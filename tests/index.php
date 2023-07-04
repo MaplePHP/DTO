@@ -46,7 +46,7 @@ echo $obj->slug("Uri")->formatSlug()."<br>";
 
 echo "<br><strong>Num:</strong><br>";
 echo $obj->price("Num")->toFilesize()."<br>";
-echo $obj->price("Num")->round(2)->currency("SEK", 2)->get()."<br>";
+echo $obj->price("Num")->round(2)->currency("SEK", 2)."<br>";
 
 echo "<br><strong>DateTime:</strong><br>";
 echo $obj->date("DateTime")->format("y/m/d, \k\l. H:i")."<br>";
