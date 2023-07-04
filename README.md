@@ -86,12 +86,11 @@ You can also just access the handlers directly to modify data quickly.
 ```php
 use PHPFuse\DTO\Format;
 
-// If you want only to direct
 Format\Str::value([STRING]);
 Format\Uri::value([STRING]);
 Format\Num::value([NUMBER]);
-Format\DateTime::value([STRING]);
 Format\Arr::value([ARRAY]);
+Format\DateTime::value([STRING]);
 ```
 #### Example
 ```php
