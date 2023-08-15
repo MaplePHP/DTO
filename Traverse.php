@@ -14,6 +14,7 @@ class Traverse extends dynamicDataAbstract {
 
 	protected $row; // Use row to access current instance (access inst/object)
 	protected $raw; // Use raw to access current instance data (access array)
+	protected $data = array();
 	
 	/**
 	 * Init intance
@@ -25,7 +26,9 @@ class Traverse extends dynamicDataAbstract {
 		$inst->raw = $raw;
 
 		if(is_array($data) || is_object($data)) {
-			foreach($data as $k => $v) $inst->{$k} = $v;
+			foreach($data as $k => $v) {
+				$inst->data[$k] = $inst->{$k} = $v;
+			}
 		}
 		return $inst;
 	}
@@ -62,9 +65,26 @@ class Traverse extends dynamicDataAbstract {
 		return $this;
 	}
 
-
+	/**
+	 * Get raw
+	 * @return mixed
+	 */
 	function getRaw() {
 		return $this->raw;
+	}
+
+	/**
+	 * Callable factory
+	 * @return Callable
+	 */
+	function fetchFactory() {
+		return function($arr, $row, $key, $index) {
+			$data = array_values($this->raw);
+			if(isset($data[$index])) {
+				return $data[$index]($arr, $row);
+			}
+			return false;	
+		};
 	}
 
 	/**
@@ -74,13 +94,20 @@ class Traverse extends dynamicDataAbstract {
 	 * @return self
 	 */
 	function fetch(?callable $callback = NULL) {
+		$index = 0;
 		$new = array();
+
+		if(is_null($this->raw)) {
+			$this->raw = $this->data;
+		}
+
 		foreach($this->raw as $key => $row) {
 			if(!is_null($callback)) {
-				$new[$key] = $callback($r, $key, $row);
-
+				if(($get = $callback($this::value($this->raw), $row, $key, $index)) !== false) {
+					$new[$key] = $get;
+				}
+				
 			} else {
-
 				if(is_array($row) || (is_object($row) && ($row instanceOf \stdClass))) {
 					// Incremental -> object
 					$r = $this::value($row);
@@ -95,10 +122,22 @@ class Traverse extends dynamicDataAbstract {
 			
 				$new[$key] = $r;
 			}
+			$index++;
 		}
 
 		$this->row = $new;
 		return $this;
+	}
+
+
+	/**
+	 * Chech if current traverse data is equal to val
+	 * @param  string $isVal
+	 * @return bool
+	 */
+	function equalTo(string $isVal): bool 
+	{
+		return (bool)($this->row === $isVal);
 	}
 
 	/**
@@ -109,6 +148,10 @@ class Traverse extends dynamicDataAbstract {
 		return (is_array($this->raw) ? count($this->raw) : 0);
 	}
 
+	/**
+	 * Isset
+	 * @return mixed
+	 */
 	function isset(): mixed 
 	{
 		return (isset($this->raw)) ? $this->row : false;
@@ -124,11 +167,15 @@ class Traverse extends dynamicDataAbstract {
 		return $this;
 	}
 
+	/**
+	 * Sprit
+	 * @param  string $add
+	 * @return self
+	 */
 	function sprint(string $add) {
 		if(!is_null($this->row)) $this->row = sprintf($add, $this->row);
 		return $this;
 	}
 
-	
 
 }

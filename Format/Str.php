@@ -11,6 +11,11 @@ namespace PHPFuse\DTO\Format;
 class Str extends formatAbstract implements FormatInterface {
 
 	protected $value;
+
+
+	function strVal() {
+		return (string)$this->value;
+	}
 	
 	/**
 	 * Excerpt/shorten down text/string 
@@ -32,7 +37,7 @@ class Str extends formatAbstract implements FormatInterface {
 	 * @return [type] [description]
 	 */
 	function nl2br() {
-		$this->value = nl2br($this->value);
+		$this->value = nl2br($this->strVal());
 		return $this;
 	}
 
@@ -41,7 +46,7 @@ class Str extends formatAbstract implements FormatInterface {
 	 * @return self§
 	 */
 	function trailingSlash() {
-		$this->value = rtrim($this->value, "/").'/';
+		$this->value = rtrim($this->strVal(), "/").'/';
 		return $this;
 	}
 
@@ -51,7 +56,7 @@ class Str extends formatAbstract implements FormatInterface {
 	 * @return self
 	 */
 	function stripTags(string $whitelist = "") {
-		$this->value = strip_tags($this->value, $whitelist);
+		$this->value = strip_tags($this->strVal(), $whitelist);
 		return $this;
 	}
 
@@ -60,7 +65,7 @@ class Str extends formatAbstract implements FormatInterface {
 	 * @return self
 	 */
 	function specialchars() {
-		$this->value = htmlspecialchars($this->value, ENT_QUOTES, 'UTF-8');
+		$this->value = htmlspecialchars($this->strVal(), ENT_QUOTES, 'UTF-8');
 		return $this;
 	}
 
@@ -69,7 +74,7 @@ class Str extends formatAbstract implements FormatInterface {
 	 * @return self
 	 */
 	function clearBreaks() {
-		$this->value = preg_replace('/(\v|\s)+/', ' ', $this->value);
+		$this->value = preg_replace('/(\v|\s)+/', ' ', $this->strVal());
 		return $this;
 	}
 
@@ -78,7 +83,7 @@ class Str extends formatAbstract implements FormatInterface {
 	 * @return self
 	 */
 	function entityDecode() {
-		$this->value = html_entity_decode($this->value);
+		$this->value = html_entity_decode($this->strVal());
 		return $this;
 	}
 
@@ -87,7 +92,7 @@ class Str extends formatAbstract implements FormatInterface {
 	 * @return self
 	 */
 	function trim() {
-		$this->value = trim($this->value);
+		$this->value = trim($this->strVal());
 		return $this;
 	}
 
@@ -96,7 +101,7 @@ class Str extends formatAbstract implements FormatInterface {
 	 * @return self
 	 */
 	function toLower() {
-		$this->value = strtolower($this->value);
+		$this->value = strtolower($this->strVal());
 		return $this;
 	}
 
@@ -105,7 +110,7 @@ class Str extends formatAbstract implements FormatInterface {
 	 * @return self
 	 */
 	function toUpper() {
-		$this->value = strtoupper($this->value);
+		$this->value = strtoupper($this->strVal());
 		return $this;
 	}
 
@@ -114,7 +119,7 @@ class Str extends formatAbstract implements FormatInterface {
 	 * @return self
 	 */
 	function ucfirst() {
-		$this->value = ucfirst($this->value);
+		$this->value = ucfirst($this->strVal());
 		return $this;
 	}
 
@@ -123,7 +128,7 @@ class Str extends formatAbstract implements FormatInterface {
 	 * @return self
 	 */
 	function leadingZero() {
-		$this->value = str_pad($this->value, 2, '0', STR_PAD_LEFT);
+		$this->value = str_pad($this->strVal(), 2, '0', STR_PAD_LEFT);
 		return $this;
 	}
 
@@ -133,7 +138,7 @@ class Str extends formatAbstract implements FormatInterface {
 	 * @return self
 	 */
 	function replaceSpaces(string $replaceWith = "-") {
-		$this->value = preg_replace("/\s/", $replaceWith, $this->value);
+		$this->value = preg_replace("/\s/", $replaceWith, $this->strVal());
 		return $this;
 	}
 
@@ -151,7 +156,7 @@ class Str extends formatAbstract implements FormatInterface {
 	 * @return self
 	 */
 	function trimSpaces() {
-		 $this->value = preg_replace("/[\s-]+/", " ", $this->value);
+		 $this->value = preg_replace("/[\s-]+/", " ", $this->strVal());
 		 return $this;
 	}
 
@@ -173,7 +178,7 @@ class Str extends formatAbstract implements FormatInterface {
 	function replaceSpecialChar() {
 	   $pattern = array('é','è','ë','ê','É','È','Ë','Ê','á','à','ä','â','å','Á','À','Ä','Â','Å','ó','ò','ö','ô','Ó','Ò','Ö','Ô','í','ì','ï','î','Í','Ì','Ï','Î','ú','ù','ü','û','Ú','Ù','Ü','Û','ý','ÿ','Ý','ø','Ø','œ','Œ','Æ','ç','Ç');
 	   $replace = array('e','e','e','e','E','E','E','E','a','a','a','a','a','A','A','A','A','A','o','o','o','o','O','O','O','O','i','i','i','I','I','I','I','I','u','u','u','u','U','U','U','U','y','y','Y','o','O','a','A','A','c','C');
-	   $this->value = str_replace($pattern, $replace, $this->value);
+	   $this->value = str_replace($pattern, $replace, $this->strVal());
 
 	   return $this;
 	}
@@ -184,7 +189,7 @@ class Str extends formatAbstract implements FormatInterface {
 	 */
 	function urldecode(): self 
 	{
-		$this->value = urldecode($this->value);
+		$this->value = urldecode($this->strVal());
 		return $this;
 	}
 
@@ -196,7 +201,7 @@ class Str extends formatAbstract implements FormatInterface {
 	 */
 	function urlencode(?array $find = NULL, ?array $replace = NULL): self 
 	{
-		$this->value = urlencode($this->value);
+		$this->value = urlencode($this->strVal());
 		if(!is_null($find) && !is_null($replace)) $this->replace($find, $replace);
 		return $this;
 	}
@@ -207,7 +212,7 @@ class Str extends formatAbstract implements FormatInterface {
 	 */
 	function rawurldecode(): self 
 	{
-		$this->value = rawurldecode($this->value);
+		$this->value = rawurldecode($this->strVal());
 		return $this;
 	}
 
@@ -218,7 +223,7 @@ class Str extends formatAbstract implements FormatInterface {
 	 * @return self
 	 */
 	function rawurlencode(?array $find = NULL, ?array $replace = NULL) {
-		$this->value = rawurlencode($this->value);
+		$this->value = rawurlencode($this->strVal());
 		if(!is_null($find) && !is_null($replace)) $this->replace($find, $replace);
 		return $this;
 	}
@@ -231,7 +236,7 @@ class Str extends formatAbstract implements FormatInterface {
 	 */
 	function replace($find, $replace): self 
 	{
-		$this->value = str_replace($find, $replace, $this->value);
+		$this->value = str_replace($find, $replace, $this->strVal());
 		return $this;
 	}
 

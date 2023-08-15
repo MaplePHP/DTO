@@ -1,16 +1,16 @@
 <?php
 /**
- * @Package: 	PHPFuse Dynamic data abstraction Class
- * @Author: 	Daniel Ronkainen
- * @Licence: 	The MIT License (MIT), Copyright © Daniel Ronkainen
- 				Don't delete this comment, its part of the license.
+ * @Package:    PHPFuse Dynamic data abstraction Class
+ * @Author:     Daniel Ronkainen
+ * @Licence:    The MIT License (MIT), Copyright © Daniel Ronkainen
+                Don't delete this comment, its part of the license.
  */
 
 namespace PHPFuse\DTO\Format;
 
 abstract class formatAbstract {
 
-	protected $value;
+    protected $value;
 
     /**
      * Init format by adding data to modify/format/traverse
@@ -60,6 +60,16 @@ abstract class formatAbstract {
     public function __toString() 
     {
         return $this->get();
+    }
+
+    /**
+     * Sprit
+     * @param  string $add
+     * @return self
+     */
+    function sprint(string $add) {
+        if(!is_null($this->value)) $this->value = sprintf($add, $this->value);
+        return $this;
     }
 
 }

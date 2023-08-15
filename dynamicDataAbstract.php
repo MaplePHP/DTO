@@ -1,27 +1,28 @@
 <?php
 /**
- * @Package: 	PHPFuse Dynamic data abstraction Class
- * @Author: 	Daniel Ronkainen
- * @Licence: 	The MIT License (MIT), Copyright © Daniel Ronkainen
- 				Don't delete this comment, its part of the license.
+ * @Package:    PHPFuse Dynamic data abstraction Class
+ * @Author:     Daniel Ronkainen
+ * @Licence:    The MIT License (MIT), Copyright © Daniel Ronkainen
+                Don't delete this comment, its part of the license.
  */
 
 namespace PHPFuse\DTO;
 
 abstract class dynamicDataAbstract {
 
-	private $data;
+    private $data;
 
     abstract function get();
 
-	public function __construct() 
+    public function __construct() 
     {
         $this->data = new \stdClass();
     }
 
     public function __toString() 
     {
-        return $this->get();
+        $val = $this->get();
+        return (is_string($val) ? $val : "");
     }
 
     public function __set($key, $value)
@@ -36,7 +37,7 @@ abstract class dynamicDataAbstract {
 
     public function getData(): mixed 
     {
-    	return $this->data;
+        return $this->data;
     }    
 
 }
