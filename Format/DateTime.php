@@ -42,12 +42,29 @@ class DateTime extends MainDateTime implements FormatInterface {
 	/**
 	 * Init
 	 * @param  string $value
-	 * @return DateTime
+	 * @return new self
 	 */
 	static function value(string $value): \DateTime 
 	{
 		$inst = new self($value);
 		return $inst;
+	}
+
+	/**
+	 * Clone data
+	 * @return static
+	 */
+	function clone() {
+		return clone $this;
+	}
+
+	/**
+	 * New instance
+	 * @param  string $value
+	 * @return new self
+	 */
+	function withValue(string $value) {
+		return self::value($value);
 	}
 
 	/**
@@ -105,13 +122,7 @@ class DateTime extends MainDateTime implements FormatInterface {
 		return $this;
 	}
 
-	/**
-	 * Clone data
-	 * @return static
-	 */
-	function clone() {
-		return clone $this;
-	}
+	
 
 	
 	/**
