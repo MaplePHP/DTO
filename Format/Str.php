@@ -70,6 +70,24 @@ class Str extends formatAbstract implements FormatInterface {
 	}
 
 	/**
+	 * Cleans GET/POST data (XSS protection)
+	 * @return self
+	 */
+	function encode() {
+		$this->specialchars();
+		return $this;
+	}
+
+	/**
+	 * Decode html special characters
+	 * @return self
+	 */
+	function decode() {
+		$this->value = htmlspecialchars_decode($this->strVal(), ENT_QUOTES);
+		return $this;
+	}
+
+	/**
 	 * Clears soft breaks
 	 * @return self
 	 */

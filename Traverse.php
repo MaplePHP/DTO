@@ -14,7 +14,7 @@ class Traverse extends dynamicDataAbstract {
 
 	protected $row; // Use row to access current instance (access inst/object)
 	protected $raw; // Use raw to access current instance data (access array)
-	protected $data = array();
+	protected $data = NULL;
 	
 	/**
 	 * Init intance
@@ -29,6 +29,8 @@ class Traverse extends dynamicDataAbstract {
 			foreach($data as $k => $v) {
 				$inst->data[$k] = $inst->{$k} = $v;
 			}
+		} else {
+			$inst->row = $data;
 		}
 		return $inst;
 	}
@@ -48,9 +50,15 @@ class Traverse extends dynamicDataAbstract {
 	 */
 	function __call($a, $b) {
 		
-		$this->row = ($this->{$a} ?? NULL);
+		$this->row = ($this->{$a} ?? $this->row);
 		$this->raw = $this->row;
-		
+
+		if(is_string($this->row) && is_null($this->data)) {
+			$r = new \ReflectionClass("PHPFuse\\DTO\\Format\\Str");
+			$instance = $r->newInstanceWithoutConstructor();
+			return $instance->value($this->row)->{$a}(...$b);
+		}
+
 		if(count($b) > 0) {
 			$name = ucfirst($b[0]);
 			$r = new \ReflectionClass("PHPFuse\\DTO\\Format\\{$name}");

@@ -62,6 +62,7 @@ abstract class formatAbstract {
         return $this->get();
     }
 
+
     /**
      * Sprit
      * @param  string $add
