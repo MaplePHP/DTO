@@ -49,16 +49,9 @@ class Traverse extends dynamicDataAbstract {
 	 * @return self
 	 */
 	function __call($a, $b) {
-		
-		$this->row = ($this->{$a} ?? $this->row);
+		$this->row = ($this->{$a} ?? NULL);
 		$this->raw = $this->row;
-
-		if(is_string($this->row) && is_null($this->data)) {
-			$r = new \ReflectionClass("PHPFuse\\DTO\\Format\\Str");
-			$instance = $r->newInstanceWithoutConstructor();
-			return $instance->value($this->row)->{$a}(...$b);
-		}
-
+		
 		if(count($b) > 0) {
 			$name = ucfirst($b[0]);
 			$r = new \ReflectionClass("PHPFuse\\DTO\\Format\\{$name}");
@@ -68,6 +61,9 @@ class Traverse extends dynamicDataAbstract {
 
 		if(is_array($this->row) || is_object($this->row)) {
 			return $this::value($this->row, $this->raw);
+			
+		} else {
+			return self::value([]);
 		}
 		
 		return $this;

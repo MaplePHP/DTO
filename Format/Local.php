@@ -8,9 +8,14 @@
  */
 namespace PHPFuse\DTO\Format;
 
+use Exception;
+
 class Local {
 
 	static protected $prefix;
+	static protected $dir;
+	static protected $data = array();
+
 	protected $value;
 	protected $sprint = array();
 
@@ -19,10 +24,31 @@ class Local {
 	 * @param  array  $arr
 	 * @return self
 	 */
-	public static function value($arr) {
+	public static function value(array|string $data) {
+
+		if(is_string($data)) {
+			if(is_null(self::$dir)) throw new Exception("You need to set default lang directory.", 1);
+			if(!is_file(self::$dir."{$data}.php")) throw new Exception("Could not find the language file ({$data}) in \"".self::$dir."\".", 1);
+
+			if(!isset(self::$data[$data])) {
+				self::$data[$data] = require_once(self::$dir."{$data}.php");
+				if(!is_array(self::$data[$data])) throw new Exception("The language file ({$data}) needs to be returned as an array!", 1);
+			}
+
+			if(is_null(self::$data[$data])) {
+				die("EHH?");
+			}
+
+			$data = self::$data[$data];
+		}
 		$inst = new static();
-		$inst->value = $arr;
+		$inst->value = $data;
 		return $inst;
+	}
+
+	public static function setDir(string $prefix): void 
+	{
+		static::$dir = $prefix;
 	}
 
 	public static function setLang(string $prefix): void 
