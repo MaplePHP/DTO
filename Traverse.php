@@ -29,8 +29,9 @@ class Traverse extends dynamicDataAbstract {
 			foreach($data as $k => $v) {
 				$inst->data[$k] = $inst->{$k} = $v;
 			}
+
 		} else {
-			$inst->row = $data;
+			$inst->raw = $inst->row = $data;
 		}
 		return $inst;
 	}
@@ -63,7 +64,7 @@ class Traverse extends dynamicDataAbstract {
 			return $this::value($this->row, $this->raw);
 			
 		} else {
-			return self::value([]);
+			return self::value($this->row);
 		}
 		
 		return $this;
