@@ -269,4 +269,23 @@ class Str extends formatAbstract implements FormatInterface {
 		return $this->urldecode()->rawurlencode($find, $replace);
 	}
 
+
+
+	/**
+	 * Explode return array instance
+	 * @return Arr
+	 */
+	function explode(string $delimiter): Arr {
+		return Arr::value(explode($delimiter, $this->value));
+	}
+
+	/**
+	 * Will convert all camlecase words to array and return array instance
+	 * @return Arr
+	 */
+	function CamelCaseToArr(): Arr
+	{
+		return Arr::value(preg_split('#([A-Z][^A-Z]*)#', $this->value, 0, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY));
+	}
+
 }

@@ -31,6 +31,21 @@ class Arr extends formatAbstract implements FormatInterface {
 		return $this;
 	}
 
+
+	function shift(?Str &$shiftedValue = NULL): Str 
+	{
+		$inst = clone $this;
+		$shift = array_shift($this->value);
+		return $this;
+	}
+
+	function pop(?Str &$poppedValue = NULL): Str 
+	{
+		$inst = clone $this;
+		$pop = array_pop($this->value);
+		return $this;
+	}
+
 	/**
 	 * Extract all array items with arrat key prefix ("prefix_"name) 
 	 * @param  string $search  wildcard prefix
