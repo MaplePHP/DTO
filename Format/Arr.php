@@ -82,7 +82,6 @@ class Arr extends formatAbstract implements FormatInterface {
 		return count($this->value);
 	}
 
-
 	/**
 	 * Array walk over and make recursive changes to all array items 
 	 * @param  callable $call return value with changes
