@@ -8,18 +8,18 @@
 
 namespace PHPFuse\DTO;
 
-abstract class dynamicDataAbstract {
-
+abstract class DynamicDataAbstract
+{
     private $data;
 
-    abstract function get();
+    abstract public function get();
 
-    public function __construct() 
+    public function __construct()
     {
         $this->data = new \stdClass();
     }
 
-    public function __toString() 
+    public function __toString()
     {
         $val = $this->get();
         return (is_string($val) ? $val : "");
@@ -32,12 +32,11 @@ abstract class dynamicDataAbstract {
 
     public function __get($key)
     {
-        return ($this->data->{$key} ?? NULL);
+        return ($this->data->{$key} ?? null);
     }
 
-    public function getData(): mixed 
+    public function getData(): mixed
     {
         return $this->data;
-    }    
-
+    }
 }

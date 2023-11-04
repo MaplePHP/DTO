@@ -8,8 +8,8 @@
 
 namespace PHPFuse\DTO\Format;
 
-abstract class formatAbstract {
-
+abstract class FormatAbstract
+{
     protected $value;
 
     /**
@@ -17,18 +17,18 @@ abstract class formatAbstract {
      * @param  array  $arr
      * @return self
      */
-    public static function value($value): FormatInterface 
+    public static function value($value): FormatInterface
     {
         $inst = new static();
         $inst->value = $value;
         return $inst;
     }
-    
+
     /**
      * Get DTO value
      * @return mixed
      */
-    public function get(): mixed 
+    public function get(): mixed
     {
         return $this->value;
     }
@@ -38,9 +38,11 @@ abstract class formatAbstract {
      * @param  string $fallback
      * @return self
      */
-    public function fallback(string $fallback): self 
+    public function fallback(string $fallback): self
     {
-        if(!$this->value) $this->value = $fallback;
+        if (!$this->value) {
+            $this->value = $fallback;
+        }
         return $this;
     }
 
@@ -48,7 +50,7 @@ abstract class formatAbstract {
      * Clone data
      * @return static
      */
-    public function clone(): self 
+    public function clone(): self
     {
         return clone $this;
     }
@@ -57,7 +59,7 @@ abstract class formatAbstract {
      * Get Value
      * @return string
      */
-    public function __toString() 
+    public function __toString()
     {
         return $this->get();
     }
@@ -68,9 +70,11 @@ abstract class formatAbstract {
      * @param  string $add
      * @return self
      */
-    function sprint(string $add) {
-        if(!is_null($this->value)) $this->value = sprintf($add, $this->value);
+    public function sprint(string $add)
+    {
+        if (!is_null($this->value)) {
+            $this->value = sprintf($add, $this->value);
+        }
         return $this;
     }
-
 }
