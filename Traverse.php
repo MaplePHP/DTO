@@ -24,7 +24,7 @@ class Traverse extends DynamicDataAbstract
      */
     public static function value($data, $raw = null)
     {
-        $inst = new static();
+        $inst = new self();
         $inst->raw = $raw;
 
         if (is_array($data) || is_object($data)) {
@@ -51,15 +51,15 @@ class Traverse extends DynamicDataAbstract
      * If you want
      * @return self
      */
-    public function __call($a, $b)
+    public function __call($method, $args)
     {
-        $this->row = ($this->{$a} ?? null);
+        $this->row = ($this->{$method} ?? null);
         $this->raw = $this->row;
 
-        if (count($b) > 0) {
-            $name = ucfirst($b[0]);
-            $r = new \ReflectionClass("PHPFuse\\DTO\\Format\\{$name}");
-            $instance = $r->newInstanceWithoutConstructor();
+        if (count($args) > 0) {
+            $name = ucfirst($args[0]);
+            $reflect = new \ReflectionClass("PHPFuse\\DTO\\Format\\{$name}");
+            $instance = $reflect->newInstanceWithoutConstructor();
             return $instance->value($this->row);
         }
 
@@ -119,15 +119,15 @@ class Traverse extends DynamicDataAbstract
             } else {
                 if (is_array($row) || (is_object($row) && ($row instanceof \stdClass))) {
                     // Incremental -> object
-                    $r = $this::value($row);
+                    $value = $this::value($row);
                 } elseif (is_object($row)) {
-                    $r = $row;
+                    $value = $row;
                 } else {
                     // Incremental -> value
-                    $r = Format\Str::value($row);
+                    $value = Format\Str::value($row);
                 }
 
-                $new[$key] = $r;
+                $new[$key] = $value;
             }
             $index++;
         }

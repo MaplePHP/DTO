@@ -11,17 +11,9 @@ namespace PHPFuse\DTO\Format;
 abstract class FormatAbstract
 {
     protected $value;
-
-    /**
-     * Init format by adding data to modify/format/traverse
-     * @param  array  $arr
-     * @return self
-     */
-    public static function value($value): FormatInterface
-    {
-        $inst = new static();
-        $inst->value = $value;
-        return $inst;
+    
+    public function __construct(mixed $value) {
+        $this->value = $value;
     }
 
     /**
@@ -61,9 +53,8 @@ abstract class FormatAbstract
      */
     public function __toString()
     {
-        return $this->get();
+        return (string)$this->get();
     }
-
 
     /**
      * Sprit

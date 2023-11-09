@@ -9,8 +9,20 @@
 
 namespace PHPFuse\DTO\Format;
 
-class Arr extends FormatAbstract implements FormatInterface
+final class Arr extends FormatAbstract implements FormatInterface
 {
+
+    /**
+     * Init format by adding data to modify/format/traverse
+     * @param  array  $arr
+     * @return self
+     */
+    public static function value($value): FormatInterface
+    {
+        $inst = new static($value);
+        return $inst;
+    }
+
     /**
      * Unset array
      * @param  keys Keys that you want to unset (@unset("username", "password", "email", ....))
@@ -38,15 +50,15 @@ class Arr extends FormatAbstract implements FormatInterface
 
     public function shift(?Str &$shiftedValue = null): Str
     {
-        $inst = clone $this;
-        $shift = array_shift($this->value);
+        //$inst = clone $this;
+        $shiftedValue = array_shift($this->value);
         return $this;
     }
 
     public function pop(?Str &$poppedValue = null): Str
     {
-        $inst = clone $this;
-        $pop = array_pop($this->value);
+        //$inst = clone $this;
+        $poppedValue = array_pop($this->value);
         return $this;
     }
 

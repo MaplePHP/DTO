@@ -11,7 +11,7 @@ namespace PHPFuse\DTO\Format;
 
 use Exception;
 
-class Local
+final class Local
 {
     protected static $prefix;
     protected static $dir;
@@ -44,11 +44,12 @@ class Local
             }
 
             if (is_null(self::$data[$data])) {
-                die("EHH?");
+                throw new Exception("Could not propagate the language data object with any information.", 1);
             }
 
             $data = self::$data[$data];
         }
+
         $inst = new static();
         $inst->value = $data;
         return $inst;
@@ -84,7 +85,7 @@ class Local
     public function get(string|array $key, ?string $fallback = null, ?array $sprint = null): string
     {
         if (is_null($this::$prefix)) {
-            throw new \Exception("Lang prefix is null.", 1);
+            throw new Exception("Lang prefix is null.", 1);
         }
         if (!is_null($sprint)) {
             $this->sprint($sprint);

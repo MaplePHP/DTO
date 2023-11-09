@@ -9,16 +9,17 @@
 namespace PHPFuse\DTO\Format;
 
 use PHPFuse\Output\Dom\Document;
+use PHPFuse\DTO\Format\FormatInterface;
 
-class Dom extends Str
+final class Dom extends FormatAbstract
 {
     protected $value;
     protected $dom;
+    protected $str;
 
-    public static function value($value): FormatInterface
+    public static function value($value)
     {
-        $inst = new static();
-        $inst->value = $value;
+        $inst = new static($value);
         $inst->dom = Document::dom("DTO");
         return $inst;
     }
@@ -29,14 +30,17 @@ class Dom extends Str
         if (is_array($this->value)) {
             $arr = $this->value;
             $this->value = (isset($arr['value'])) ? $arr['value'] : "";
+            $this->str = Str::value($this->value);
+
             $attr = ($arr['attr'] ?? []);
-            $el = $this->dom->create($tag, $this->value)->hideEmptyTag(true);
+            $elem = $this->dom->create($tag, $this->str)->hideEmptyTag(true);
             if (is_array($attr) && count($attr) > 0) {
-                $el->attrArr($attr);
+                $elem->attrArr($attr);
             }
-            return $el;
+            return $elem;
         }
 
-        return $this->dom->create($tag, $this->strVal())->hideEmptyTag(true);
+        $this->str = Str::value($this->value);
+        return $this->dom->create($tag, $this->str)->hideEmptyTag(true);
     }
 }

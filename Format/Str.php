@@ -8,9 +8,21 @@
 
 namespace PHPFuse\DTO\Format;
 
-class Str extends FormatAbstract implements FormatInterface
+final class Str extends FormatAbstract implements FormatInterface
 {
     protected $value;
+
+
+    /**
+     * Init format by adding data to modify/format/traverse
+     * @param  array  $arr
+     * @return self
+     */
+    public static function value($value): FormatInterface
+    {
+        $inst = new static($value);
+        return $inst;
+    }
 
 
     public function strVal()
@@ -323,5 +335,51 @@ class Str extends FormatAbstract implements FormatInterface
             0,
             PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY
         ));
+    }
+
+
+    /**
+     * Extract path from URL
+     * @return self
+     */
+    public function extractPath(): self
+    {
+        $this->value = (string)parse_url($this->value, PHP_URL_PATH);
+        return $this;
+    }
+
+    /**
+     * Get only dirname from path
+     * @return self
+     */
+    public function dirname(): self
+    {
+        $this->value = dirname($this->value);
+        return $this;
+    }
+
+    /**
+     * Trim tailing slash
+     * @return self
+     */
+    public function trimTrailingSlash(): self
+    {
+        $this->value = ltrim($this->value, '/');
+        return $this;
+    }
+
+    /**
+     * XXS protection
+     * @param  string $str
+     * @return self
+     */
+    public function xxs(): self
+    {
+        if (is_null($this->value)) {
+            $this->value = null;
+        } else {
+            $this->value = Str::value($this->value)->specialchars()->get();
+        }
+        return $this;
     }
 }

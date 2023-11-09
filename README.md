@@ -87,7 +87,6 @@ You can also just access the handlers directly to modify data quickly.
 use PHPFuse\DTO\Format;
 
 Format\Str::value([STRING]);
-Format\Uri::value([STRING]);
 Format\Num::value([NUMBER]);
 Format\Arr::value([ARRAY]);
 Format\DateTime::value([STRING]);

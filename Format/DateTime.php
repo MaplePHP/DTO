@@ -13,7 +13,7 @@ namespace PHPFuse\DTO\Format;
 use DateTime as MainDateTime;
 use DateTimeZone;
 
-class DateTime extends MainDateTime implements FormatInterface
+final class DateTime extends MainDateTime implements FormatInterface
 {
     // Default lang key
     public const DEFAULT_LANG = "sv";
