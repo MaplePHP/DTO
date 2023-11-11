@@ -20,7 +20,7 @@ abstract class DynamicDataAbstract
         $this->data = new \stdClass();
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         $val = $this->get();
         return (is_string($val) ? $val : "");

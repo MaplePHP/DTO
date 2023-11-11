@@ -19,7 +19,7 @@ class Traverse extends DynamicDataAbstract
 
     /**
      * Init intance
-     * @param  array|object $data [description]
+     * @param  array|object $data
      * @return static
      */
     public static function value($data, $raw = null)
@@ -39,9 +39,10 @@ class Traverse extends DynamicDataAbstract
 
     /**
      * Get/return result
-     * @return inherit
+     * @param  string|null $fallback
+     * @return mixed
      */
-    public function get(?string $fallback = null)
+    public function get(?string $fallback = null): mixed
     {
         return (!is_null($this->row) ? $this->row : $fallback);
     }
@@ -65,11 +66,9 @@ class Traverse extends DynamicDataAbstract
 
         if (is_array($this->row) || is_object($this->row)) {
             return $this::value($this->row, $this->raw);
-        } else {
-            return self::value($this->row);
         }
-
-        return $this;
+        return self::value($this->row);
+        //return $this;
     }
 
     /**
@@ -98,8 +97,7 @@ class Traverse extends DynamicDataAbstract
 
     /**
      * Access incremental array
-     * @param  string   $key      Column name
-     * @param  callable $callback Access array row in the callbacks argumnet 1
+     * @param  callable|null $callback Access array row in the callbacks argumnet 1
      * @return self
      */
     public function fetch(?callable $callback = null)

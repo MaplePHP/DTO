@@ -46,9 +46,9 @@ final class Num extends FormatAbstract implements FormatInterface
 
     /**
      * Convert to integer
-     * @return int
+     * @return self
      */
-    public function int()
+    public function int(): self
     {
         $this->value = (int)$this->value;
         return $this;
@@ -57,9 +57,9 @@ final class Num extends FormatAbstract implements FormatInterface
     /**
      * Round number
      * @param  int    $dec Set decimals
-     * @return float
+     * @return self
      */
-    public function round(int $dec = 0)
+    public function round(int $dec = 0): self
     {
         $this->value = round($this->float()->get(), $dec);
         return $this;
@@ -67,9 +67,9 @@ final class Num extends FormatAbstract implements FormatInterface
 
     /**
      * Floor float
-     * @return int
+     * @return self
      */
-    public function floor()
+    public function floor(): self
     {
         $this->value = floor($this->float()->get());
         return $this;
@@ -79,7 +79,7 @@ final class Num extends FormatAbstract implements FormatInterface
      * Ceil float
      * @return int
      */
-    public function ceil()
+    public function ceil(): self
     {
         $this->value = ceil($this->float()->get());
         return $this;
@@ -87,9 +87,9 @@ final class Num extends FormatAbstract implements FormatInterface
 
     /**
      * Get file size in KB
-     * @return slef
+     * @return self
      */
-    public function toKb()
+    public function toKb(): self
     {
         $this->value = round(($this->float()->get() / 1024), 2);
         return $this;
@@ -97,11 +97,9 @@ final class Num extends FormatAbstract implements FormatInterface
 
     /**
      * Formats the bytes to appropiate ending (k,M,G,T)
-     * @param  float  $size bytesum
-     * @param  integer $precision float precision (decimal count)
-     * @return float
+     * @return self
      */
-    public function toFilesize()
+    public function toFilesize(): self
     {
         $precision = 2;
         $base = log($this->float()->get()) / log(1024);
@@ -146,7 +144,7 @@ final class Num extends FormatAbstract implements FormatInterface
      * Convert number to a currence (e.g. 1000 = 1.000,00 kr)
      * @param  string      $currency SEK, EUR
      * @param  int|integer $decimals
-     * @return FormatInterface::Str
+     * @return FormatInterface
      */
     public function currency(string $currency, int $decimals = 2): FormatInterface
     {

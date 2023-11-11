@@ -14,7 +14,7 @@ interface FormatInterface
 {
     /**
      * Init format by adding data to modify/format/traverse
-     * @param  array  $arr
+     * @param  string  $value
      * @return self
      */
     public static function value(string $value);

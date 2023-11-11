@@ -13,7 +13,7 @@ namespace PHPFuse\DTO\Format;
 use DateTime as MainDateTime;
 use DateTimeZone;
 
-final class DateTime extends MainDateTime implements FormatInterface
+class DateTime extends MainDateTime implements FormatInterface
 {
     // Default lang key
     public const DEFAULT_LANG = "sv";
@@ -47,9 +47,9 @@ final class DateTime extends MainDateTime implements FormatInterface
     /**
      * Init
      * @param  string $value
-     * @return new self
+     * @return self
      */
-    public static function value(string $value): \DateTime
+    public static function value(string $value): self
     {
         $inst = new self($value);
         return $inst;
@@ -67,9 +67,9 @@ final class DateTime extends MainDateTime implements FormatInterface
     /**
      * New instance
      * @param  string $value
-     * @return new self
+     * @return self
      */
-    public function withValue(string $value)
+    public function withValue(string $value): self
     {
         return self::value($value);
     }
@@ -78,7 +78,7 @@ final class DateTime extends MainDateTime implements FormatInterface
      * Get Value
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->format("Y/m/d H:i");
     }
@@ -148,9 +148,9 @@ final class DateTime extends MainDateTime implements FormatInterface
      */
     private function translate(string $format): string
     {
-        $k = $this->langKey();
-        if (isset($this::LANG[$k])) {
-            return str_replace($this::LANG['en'], $this::LANG[$k], $format);
+        $langKey = $this->langKey();
+        if (isset($this::LANG[$langKey])) {
+            return str_replace($this::LANG['en'], $this::LANG[$langKey], $format);
         }
         return $format;
     }

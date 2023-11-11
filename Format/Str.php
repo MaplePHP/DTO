@@ -26,7 +26,11 @@ final class Str extends FormatAbstract implements FormatInterface
     }
 
 
-    public function strVal()
+    /**
+     * Gte value as string
+     * @return string
+     */
+    public function strVal(): string
     {
         return (string)$this->value;
     }
@@ -37,7 +41,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * @param  string  $ending When break text add a ending (...)
      * @return string
      */
-    public function excerpt($length = 40, $ending = "...")
+    public function excerpt($length = 40, $ending = "..."): self
     {
         $this->stripTags()->entityDecode();
         $this->value = str_replace(array("'", '"', "”"), array("", "", ""), $this->value);
@@ -53,7 +57,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * Convert new line to html <br>
      * @return [type] [description]
      */
-    public function nl2br()
+    public function nl2br(): self
     {
         $this->value = nl2br($this->strVal());
         return $this;
@@ -61,9 +65,9 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * Make sure string allways end with a trailing slash (will only add slash if it does not exist)
-     * @return self§
+     * @return self
      */
-    public function trailingSlash()
+    public function trailingSlash(): self
     {
         $this->value = rtrim($this->strVal(), "/") . '/';
         return $this;
@@ -74,7 +78,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * @param  string $whitelist "<em><strong>"
      * @return self
      */
-    public function stripTags(string $whitelist = "")
+    public function stripTags(string $whitelist = ""): self
     {
         $this->value = strip_tags($this->strVal(), $whitelist);
         return $this;
@@ -84,7 +88,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * Cleans GET/POST data (XSS protection)
      * @return self
      */
-    public function specialchars()
+    public function specialchars(): self
     {
         $this->value = htmlspecialchars($this->strVal(), ENT_QUOTES, 'UTF-8');
         return $this;
@@ -94,7 +98,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * Cleans GET/POST data (XSS protection)
      * @return self
      */
-    public function encode()
+    public function encode(): self
     {
         $this->specialchars();
         return $this;
@@ -104,7 +108,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * Decode html special characters
      * @return self
      */
-    public function decode()
+    public function decode(): self
     {
         $this->value = htmlspecialchars_decode($this->strVal(), ENT_QUOTES);
         return $this;
@@ -114,7 +118,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * Clears soft breaks
      * @return self
      */
-    public function clearBreaks()
+    public function clearBreaks(): self
     {
         $this->value = preg_replace('/(\v|\s)+/', ' ', $this->strVal());
         return $this;
@@ -124,7 +128,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * Entity Decode
      * @return self
      */
-    public function entityDecode()
+    public function entityDecode(): self
     {
         $this->value = html_entity_decode($this->strVal());
         return $this;
@@ -134,7 +138,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * Trim
      * @return self
      */
-    public function trim()
+    public function trim(): self
     {
         $this->value = trim($this->strVal());
         return $this;
@@ -144,7 +148,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * strtolower
      * @return self
      */
-    public function toLower()
+    public function toLower(): self
     {
         $this->value = strtolower($this->strVal());
         return $this;
@@ -154,7 +158,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * strtoupper
      * @return self
      */
-    public function toUpper()
+    public function toUpper(): self
     {
         $this->value = strtoupper($this->strVal());
         return $this;
@@ -164,7 +168,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * ucfirst
      * @return self
      */
-    public function ucfirst()
+    public function ucfirst(): self
     {
         $this->value = ucfirst($this->strVal());
         return $this;
@@ -174,7 +178,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * Add leading zero to string
      * @return self
      */
-    public function leadingZero()
+    public function leadingZero(): self
     {
         $this->value = str_pad($this->strVal(), 2, '0', STR_PAD_LEFT);
         return $this;
@@ -185,7 +189,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * @param  string $replaceWith
      * @return self
      */
-    public function replaceSpaces(string $replaceWith = "-")
+    public function replaceSpaces(string $replaceWith = "-"): self
     {
         $this->value = preg_replace("/\s/", $replaceWith, $this->strVal());
         return $this;
@@ -195,7 +199,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * Remove unwanted characters from string/mail and make it consistent
      * @return self
      */
-    public function formatEmail()
+    public function formatEmail(): self
     {
         return $this->trim()->replaceSpecialChar()->toLower();
     }
@@ -205,7 +209,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * Replace multiple space between words with a single space
      * @return self
      */
-    public function trimSpaces()
+    public function trimSpaces(): self
     {
         $this->value = preg_replace("/[\s-]+/", " ", $this->strVal());
         return $this;
@@ -215,7 +219,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * Remove unwanted characters from string/slug and make it consistent
      * @return self
      */
-    public function formatSlug()
+    public function formatSlug(): self
     {
         $this->clearBreaks("-")->trim()->replaceSpecialChar()->trimSpaces()->replaceSpaces("-")->tolower();
         $this->value = preg_replace("/[^a-z0-9\s-]/", "", $this->value);
@@ -224,10 +228,9 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * Replaces special characters to it's counter part to "A" or "O"
-     * @param  string $str
-     * @return string
+     * @return self
      */
-    public function replaceSpecialChar()
+    public function replaceSpecialChar(): self
     {
         $pattern = array('é','è','ë','ê','É','È','Ë','Ê','á','à','ä','â','å','Á','À','Ä','Â','Å',
             'ó','ò','ö','ô','Ó','Ò','Ö','Ô','í','ì','ï','î','Í','Ì','Ï','Î','ú','ù','ü','û','Ú',
@@ -281,7 +284,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * @param  array $replace  Replace values
      * @return self
      */
-    public function rawurlencode(?array $find = null, ?array $replace = null)
+    public function rawurlencode(?array $find = null, ?array $replace = null): self
     {
         $this->value = rawurlencode($this->strVal());
         if (!is_null($find) && !is_null($replace)) {
@@ -371,7 +374,6 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * XXS protection
-     * @param  string $str
      * @return self
      */
     public function xxs(): self
