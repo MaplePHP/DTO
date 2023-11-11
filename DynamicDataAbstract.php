@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @Package:    PHPFuse Dynamic data abstraction Class
  * @Author:     Daniel Ronkainen

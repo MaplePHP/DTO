@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @Package:    PHPFuse Format array
  * @Author:     Daniel Ronkainen
@@ -32,12 +33,12 @@ final class Local
             if (is_null(self::$dir)) {
                 throw new Exception("You need to set default lang directory.", 1);
             }
-            if (!is_file(self::$dir."{$data}.php")) {
-                throw new Exception("Could not find the language file ({$data}) in \"".self::$dir."\".", 1);
+            if (!is_file(self::$dir . "{$data}.php")) {
+                throw new Exception("Could not find the language file ({$data}) in \"" . self::$dir . "\".", 1);
             }
 
             if (!isset(self::$data[$data])) {
-                self::$data[$data] = require_once(self::$dir."{$data}.php");
+                self::$data[$data] = require_once(self::$dir . "{$data}.php");
                 if (!is_array(self::$data[$data])) {
                     throw new Exception("The language file ({$data}) needs to be returned as an array!", 1);
                 }

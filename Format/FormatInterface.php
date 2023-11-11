@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @Package:    PHPFuse Format Abstraction Class
  * @Author:     Daniel Ronkainen

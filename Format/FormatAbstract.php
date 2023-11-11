@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @Package:    PHPFuse Dynamic data abstraction Class
  * @Author:     Daniel Ronkainen
@@ -11,8 +12,9 @@ namespace PHPFuse\DTO\Format;
 abstract class FormatAbstract
 {
     protected $value;
-    
-    public function __construct(mixed $value) {
+
+    public function __construct(mixed $value)
+    {
         $this->value = $value;
     }
 

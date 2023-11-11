@@ -123,7 +123,7 @@ final class DateTime extends MainDateTime implements FormatInterface
     public function setLanguage(string $lang): self
     {
         if (!isset($this->translations[$lang])) {
-            throw new \Exception("Translation for the language \"{$lang}\" does not exists! ".
+            throw new \Exception("Translation for the language \"{$lang}\" does not exists! " .
                 "You can add custom translation with @setTranslation method.", 1);
         }
         $this->lang = $lang;

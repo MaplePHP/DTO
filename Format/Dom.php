@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @Package:    PHPFuse Format string
  * @Author:     Daniel Ronkainen

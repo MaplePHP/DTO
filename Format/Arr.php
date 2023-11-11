@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @Package:    PHPFuse Format array
  * @Author:     Daniel Ronkainen
@@ -11,7 +12,6 @@ namespace PHPFuse\DTO\Format;
 
 final class Arr extends FormatAbstract implements FormatInterface
 {
-
     /**
      * Init format by adding data to modify/format/traverse
      * @param  array  $arr
@@ -70,7 +70,7 @@ final class Arr extends FormatAbstract implements FormatInterface
     public function wildcardSearch(string $search): self
     {
         $search = str_replace('\*', '.*?', preg_quote($search, '/'));
-        $result = preg_grep('/^'.$search.'$/i', array_keys($this->value));
+        $result = preg_grep('/^' . $search . '$/i', array_keys($this->value));
         $this->value = array_intersect_key($this->value, array_flip($result));
         return $this;
     }

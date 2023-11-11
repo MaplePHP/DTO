@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @Package:    PHPFuse Format string
  * @Author:     Daniel Ronkainen
@@ -64,7 +65,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function trailingSlash()
     {
-        $this->value = rtrim($this->strVal(), "/").'/';
+        $this->value = rtrim($this->strVal(), "/") . '/';
         return $this;
     }
 

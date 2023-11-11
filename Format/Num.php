@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @Package:    PHPFuse Format numbers
  * @Author:     Daniel Ronkainen
@@ -105,7 +106,7 @@ final class Num extends FormatAbstract implements FormatInterface
         $precision = 2;
         $base = log($this->float()->get()) / log(1024);
         $suffixes = array('', ' kb', ' mb', ' g', ' t');
-        $this->value = round(pow(1024, $base - floor($base)), $precision).$suffixes[floor($base)];
+        $this->value = round(pow(1024, $base - floor($base)), $precision) . $suffixes[floor($base)];
         return $this;
     }
 
