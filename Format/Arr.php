@@ -48,14 +48,14 @@ final class Arr extends FormatAbstract implements FormatInterface
     }
 
 
-    public function shift(?Str &$shiftedValue = null): Str
+    public function shift(?Str &$shiftedValue = null): self
     {
         //$inst = clone $this;
         $shiftedValue = array_shift($this->value);
         return $this;
     }
 
-    public function pop(?Str &$poppedValue = null): Str
+    public function pop(?Str &$poppedValue = null): self
     {
         //$inst = clone $this;
         $poppedValue = array_pop($this->value);

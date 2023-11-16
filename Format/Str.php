@@ -39,7 +39,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * Excerpt/shorten down text/string
      * @param  integer $length total length
      * @param  string  $ending When break text add a ending (...)
-     * @return string
+     * @return self
      */
     public function excerpt($length = 40, $ending = "..."): self
     {
@@ -55,7 +55,7 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * Convert new line to html <br>
-     * @return [type] [description]
+     * @return self
      */
     public function nl2br(): self
     {
@@ -221,7 +221,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function formatSlug(): self
     {
-        $this->clearBreaks("-")->trim()->replaceSpecialChar()->trimSpaces()->replaceSpaces("-")->tolower();
+        $this->clearBreaks()->trim()->replaceSpecialChar()->trimSpaces()->replaceSpaces("-")->tolower();
         $this->value = preg_replace("/[^a-z0-9\s-]/", "", $this->value);
         return $this;
     }

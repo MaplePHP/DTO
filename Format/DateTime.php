@@ -13,6 +13,9 @@ namespace PHPFuse\DTO\Format;
 use DateTime as MainDateTime;
 use DateTimeZone;
 
+/**
+ * @psalm-seal-methods
+ */
 class DateTime extends MainDateTime implements FormatInterface
 {
     // Default lang key
@@ -45,6 +48,25 @@ class DateTime extends MainDateTime implements FormatInterface
     }
 
     /**
+     * Get Value
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->format("Y/m/d H:i");
+    }
+
+    /**
+     * @param array $data
+     * @return void
+     */
+    public function __unserialize(array $data): void
+    {
+        $dateTime = new DateTime();
+        $dateTime->setTimestamp($data['timestamp']); // Replace with your logic to unserialize the data
+    }
+
+    /**
      * Init
      * @param  string $value
      * @return self
@@ -72,15 +94,6 @@ class DateTime extends MainDateTime implements FormatInterface
     public function withValue(string $value): self
     {
         return self::value($value);
-    }
-
-    /**
-     * Get Value
-     * @return string
-     */
-    public function __toString(): string
-    {
-        return $this->format("Y/m/d H:i");
     }
 
     /**

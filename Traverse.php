@@ -82,19 +82,24 @@ class Traverse extends DynamicDataAbstract
 
     /**
      * Callable factory
-     * @return Callable
+     * @psalm-suppress InvalidFunctionCall Psalm do not understand that $call is callable
+     * @return mixed
      */
-    public function fetchFactory()
+    /*
+    public function fetchFactory(): mixed
     {
-        return function ($arr, $row, $key, $index) {
+        return function ($arr, $row, $_unusedKey, $index) {
             $data = array_values($this->raw);
-            if (isset($data[$index])) {
-                return $data[$index]($arr, $row);
+            $call = (isset($data[$index])) ? $data[$index] : null;
+            
+            if (is_callable($call)) {
+                return $call($arr, $row);
             }
             return false;
         };
     }
-
+     */
+    
     /**
      * Access incremental array
      * @param  callable|null $callback Access array row in the callbacks argumnet 1
@@ -142,7 +147,7 @@ class Traverse extends DynamicDataAbstract
      */
     public function equalTo(string $isVal): bool
     {
-        return (bool)($this->row === $isVal);
+        return ($this->row === $isVal);
     }
 
     /**

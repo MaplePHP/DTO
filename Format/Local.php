@@ -56,9 +56,13 @@ final class Local
         return $inst;
     }
 
-    public static function setDir(string $prefix): void
+    /**
+     * Set directory
+     * @param string $dir
+     */
+    public static function setDir(string $dir): void
     {
-        static::$dir = $prefix;
+        static::$dir = $dir;
     }
 
     public static function setLang(string $prefix): void
@@ -83,7 +87,7 @@ final class Local
         return ($this->value[$key][$this::$prefix] ?? null);
     }
 
-    public function get(string|array $key, ?string $fallback = null, ?array $sprint = null): string
+    public function get(string|array $key, ?string $fallback = null, ?array $sprint = null): ?string
     {
         if (is_null($this::$prefix)) {
             throw new Exception("Lang prefix is null.", 1);

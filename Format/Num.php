@@ -36,9 +36,9 @@ final class Num extends FormatAbstract implements FormatInterface
 
     /**
      * Convert to float number
-     * @return float
+     * @return self
      */
-    public function float()
+    public function float(): self
     {
         $this->value = (float)$this->value;
         return $this;
@@ -61,7 +61,8 @@ final class Num extends FormatAbstract implements FormatInterface
      */
     public function round(int $dec = 0): self
     {
-        $this->value = round($this->float()->get(), $dec);
+        $this->float();
+        $this->value = round($this->value, $dec);
         return $this;
     }
 
@@ -71,17 +72,19 @@ final class Num extends FormatAbstract implements FormatInterface
      */
     public function floor(): self
     {
-        $this->value = floor($this->float()->get());
+        $this->float();
+        $this->value = floor($this->value);
         return $this;
     }
 
     /**
      * Ceil float
-     * @return int
+     * @return self
      */
     public function ceil(): self
     {
-        $this->value = ceil($this->float()->get());
+        $this->float();
+        $this->value = ceil($this->value);
         return $this;
     }
 
@@ -91,7 +94,8 @@ final class Num extends FormatAbstract implements FormatInterface
      */
     public function toKb(): self
     {
-        $this->value = round(($this->float()->get() / 1024), 2);
+        $this->float();
+        $this->value = round(($this->value / 1024), 2);
         return $this;
     }
 
@@ -101,10 +105,13 @@ final class Num extends FormatAbstract implements FormatInterface
      */
     public function toFilesize(): self
     {
+        $this->float();
         $precision = 2;
-        $base = log($this->float()->get()) / log(1024);
+        $base = log($this->value) / log(1024);
         $suffixes = array('', ' kb', ' mb', ' g', ' t');
-        $this->value = round(pow(1024, $base - floor($base)), $precision) . $suffixes[floor($base)];
+        $baseFloor = (int)floor($base);
+        $suffix = (isset($suffixes[$baseFloor])) ? $suffixes[$baseFloor] : "";
+        $this->value = round(pow(1024, $base - $baseFloor), $precision) . $suffix;
         return $this;
     }
 
