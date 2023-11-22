@@ -23,10 +23,10 @@ final class Local
 
     /**
      * Init format by adding data to modify/format/traverse
-     * @param  array  $arr
+     * @param  mixed  $data
      * @return self
      */
-    public static function value(array|string $data)
+    public static function value(mixed $data)
     {
 
         if (is_string($data)) {
@@ -87,7 +87,7 @@ final class Local
         return ($this->value[$key][$this::$prefix] ?? null);
     }
 
-    public function get(string|array $key, ?string $fallback = null, ?array $sprint = null): ?string
+    public function get(string|array $key, string $fallback = "", ?array $sprint = null): ?string
     {
         if (is_null($this::$prefix)) {
             throw new Exception("Lang prefix is null.", 1);

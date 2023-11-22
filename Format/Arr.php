@@ -13,11 +13,21 @@ namespace PHPFuse\DTO\Format;
 final class Arr extends FormatAbstract implements FormatInterface
 {
     /**
+     * Input is mixed data type in the interface becouse I do not know the type before the class
+     * The class constructor MUST handle the input validation
+     * @param array $value
+     */
+    public function __construct(array $value)
+    {
+        $this->value = $value;
+    }
+
+    /**
      * Init format by adding data to modify/format/traverse
-     * @param  array  $arr
+     * @param  mixed $value
      * @return self
      */
-    public static function value($value): FormatInterface
+    public static function value(mixed $value): FormatInterface
     {
         $inst = new static($value);
         return $inst;

@@ -14,10 +14,10 @@ interface FormatInterface
 {
     /**
      * Init format by adding data to modify/format/traverse
-     * @param  string  $value
+     * @param  mixed $value
      * @return self
      */
-    public static function value(string $value);
+    public static function value(mixed $value);
 
     public function __toString();
 

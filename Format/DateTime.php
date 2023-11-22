@@ -41,6 +41,11 @@ class DateTime extends MainDateTime implements FormatInterface
     private $translations = array();
 
 
+    /**
+     * Input is mixed data type in the interface becouse I do not know the type before the class
+     * The class constructor MUST handle the input validation
+     * @param string $datetime Default value is NOW
+     */
     public function __construct(string $datetime = "now", ?DateTimeZone $timezone = null)
     {
         parent::__construct($datetime, $timezone);
@@ -68,10 +73,10 @@ class DateTime extends MainDateTime implements FormatInterface
 
     /**
      * Init
-     * @param  string $value
+     * @param  mixed $value
      * @return self
      */
-    public static function value(string $value): self
+    public static function value(mixed $value): self
     {
         $inst = new self($value);
         return $inst;

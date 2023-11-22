@@ -1,6 +1,6 @@
 <?php
-
 /**
+ * DEPRECATED
  * @Package:    PHPFuse Format numbers
  * @Author:     Daniel Ronkainen
  * @Licence:    The MIT License (MIT), Copyright © Daniel Ronkainen
@@ -17,10 +17,10 @@ final class Num extends FormatAbstract implements FormatInterface
 
     /**
      * Init format by adding data to modify/format/traverse
-     * @param  array  $arr
+     * @param  mixed  $value
      * @return self
      */
-    public static function value($value): FormatInterface
+    public static function value(mixed $value): FormatInterface
     {
         $inst = new static($value);
         return $inst;

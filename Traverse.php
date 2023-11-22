@@ -19,10 +19,10 @@ class Traverse extends DynamicDataAbstract
 
     /**
      * Init intance
-     * @param  array|object $data
-     * @return static
+     * @param  mixed $data
+     * @return self
      */
-    public static function value($data, $raw = null)
+    public static function value(mixed $data, $raw = null): self
     {
         $inst = new self();
         $inst->raw = $raw;
@@ -59,7 +59,11 @@ class Traverse extends DynamicDataAbstract
 
         if (count($args) > 0) {
             $name = ucfirst($args[0]);
-            $reflect = new \ReflectionClass("PHPFuse\\DTO\\Format\\{$name}");
+            $className = "PHPFuse\\DTO\\Format\\{$name}";
+            if (!class_exists($className)) {
+                throw new \Exception("The DTO Format class do not exist!", 1);
+            }
+            $reflect = new \ReflectionClass($className);
             $instance = $reflect->newInstanceWithoutConstructor();
             return $instance->value($this->row);
         }
@@ -67,8 +71,8 @@ class Traverse extends DynamicDataAbstract
         if (is_array($this->row) || is_object($this->row)) {
             return $this::value($this->row, $this->raw);
         }
+
         return self::value($this->row);
-        //return $this;
     }
 
     /**
@@ -91,7 +95,6 @@ class Traverse extends DynamicDataAbstract
         return function ($arr, $row, $_unusedKey, $index) {
             $data = array_values($this->raw);
             $call = (isset($data[$index])) ? $data[$index] : null;
-            
             if (is_callable($call)) {
                 return $call($arr, $row);
             }

@@ -9,25 +9,39 @@
 
 namespace PHPFuse\DTO\Format;
 
+use InvalidArgumentException;
+
 final class Str extends FormatAbstract implements FormatInterface
 {
-    protected $value;
+    //protected $value;
 
+    /**
+     * Input is mixed data type in the interface becouse I do not know the type before the class
+     * The class constructor MUST handle the input validation
+     * @param string $value
+     */
+    public function __construct(mixed $value)
+    {
+        if (is_array($value) || is_object($value)) {
+            throw new InvalidArgumentException("Is expecting a string or a convertable string value.", 1);
+        }
+        $this->value = (string)$value;
+    }
 
     /**
      * Init format by adding data to modify/format/traverse
-     * @param  array  $arr
+     * @param  mixed $value
      * @return self
      */
-    public static function value($value): FormatInterface
+    public static function value(mixed $value): FormatInterface
     {
-        $inst = new static($value);
+        $inst = new static((string)$value);
         return $inst;
     }
 
 
     /**
-     * Gte value as string
+     * Get value as string
      * @return string
      */
     public function strVal(): string
@@ -44,9 +58,9 @@ final class Str extends FormatAbstract implements FormatInterface
     public function excerpt($length = 40, $ending = "..."): self
     {
         $this->stripTags()->entityDecode();
-        $this->value = str_replace(array("'", '"', "”"), array("", "", ""), $this->value);
-        $strlen = strlen($this->value);
-        $this->value = trim(mb_substr($this->value, 0, $length));
+        $this->value = str_replace(array("'", '"', "”"), array("", "", ""), $this->strVal());
+        $strlen = strlen($this->strVal());
+        $this->value = trim(mb_substr($this->strVal(), 0, $length));
         if ($strlen > $length) {
             $this->value .= $ending;
         }
@@ -86,31 +100,38 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * Cleans GET/POST data (XSS protection)
+     * In most cases I want to encode dubble and single quotes but when it comes to
+     * escaping value in DB the i rather escape quoutes the mysql way
+     * @param  int $flag ENT_QUOTES|ENT_SUBSTITUTE|ENT_HTML401|null
      * @return self
      */
-    public function specialchars(): self
+    public function specialchars(int $flag = ENT_QUOTES): self
     {
-        $this->value = htmlspecialchars($this->strVal(), ENT_QUOTES, 'UTF-8');
+        $this->value = htmlspecialchars($this->strVal(), $flag, 'UTF-8');
         return $this;
     }
 
     /**
      * Cleans GET/POST data (XSS protection)
+     * In most cases I want to encode dubble and single quotes but when it comes to
+     * escaping value in DB the i rather escape quoutes the mysql way
+     * @param  int $flag ENT_QUOTES|ENT_SUBSTITUTE|ENT_HTML401|null
      * @return self
      */
-    public function encode(): self
+    public function encode(int $flag = ENT_QUOTES): self
     {
-        $this->specialchars();
+        $this->specialchars($flag);
         return $this;
     }
 
     /**
      * Decode html special characters
+     * @param  ?int $flag ENT_QUOTES|ENT_SUBSTITUTE|ENT_HTML401|null
      * @return self
      */
-    public function decode(): self
+    public function decode(?int $flag = ENT_QUOTES): self
     {
-        $this->value = htmlspecialchars_decode($this->strVal(), ENT_QUOTES);
+        $this->value = htmlspecialchars_decode($this->strVal(), $flag);
         return $this;
     }
 
@@ -302,6 +323,9 @@ final class Str extends FormatAbstract implements FormatInterface
     public function replace($find, $replace): self
     {
         $this->value = str_replace($find, $replace, $this->strVal());
+        if(!is_string($this->value)) {
+            throw new InvalidArgumentException("The value has to be an string value!", 1);
+        }
         return $this;
     }
 
@@ -315,11 +339,10 @@ final class Str extends FormatAbstract implements FormatInterface
     {
         return $this->urldecode()->rawurlencode($find, $replace);
     }
-
-
-
+    
     /**
      * Explode return array instance
+     * @param  non-empty-string $delimiter
      * @return Arr
      */
     public function explode(string $delimiter): Arr
@@ -384,5 +407,35 @@ final class Str extends FormatAbstract implements FormatInterface
             $this->value = Str::value($this->value)->specialchars()->get();
         }
         return $this;
+    }
+
+    /**
+     * To bool value
+     * @return bool
+     */
+    public function toBool(): bool
+    {
+        if(is_numeric($this->value)) {
+            return ((float)$this->value > 0);
+        }
+        return ($this->value !== "false" && strlen($this->value));
+    }
+
+    /**
+     * To int value
+     * @return int
+     */
+    public function toInt(): int
+    {
+        return (int)$this->value;
+    }
+
+    /**
+     * To float value
+     * @return float
+     */
+    public function toFloat(): float
+    {
+        return (float)$this->value;
     }
 }
