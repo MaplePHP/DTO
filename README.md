@@ -58,9 +58,6 @@ foreach($obj->feed()->fetch()->get() as $row) {
 echo $obj->firstname("Str")->stripTags()->ucfirst()."<br>";
 // Daniel
 
-echo $obj->slug("Uri")->formatSlug()."<br>";
-// lorem-ipsum-aao
-
 echo $obj->price("Num")->toFilesize()."<br>";
 // 1.95 kb
 
