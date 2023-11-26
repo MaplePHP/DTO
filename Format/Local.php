@@ -1,14 +1,14 @@
 <?php
 
 /**
- * @Package:    PHPFuse Format array
+ * @Package:    MaplePHP Format array
  * @Author:     Daniel Ronkainen
  * @Licence:    The MIT License (MIT), Copyright © Daniel Ronkainen
                 Don't delete this comment, its part of the license.
  * @Version:    1.0.0
  */
 
-namespace PHPFuse\DTO\Format;
+namespace MaplePHP\DTO\Format;
 
 use Exception;
 

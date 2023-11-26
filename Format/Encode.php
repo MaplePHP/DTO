@@ -1,6 +1,6 @@
 <?php
 
-namespace PHPFuse\DTO\Format;
+namespace MaplePHP\DTO\Format;
 
 final class Encode extends FormatAbstract implements FormatInterface
 {

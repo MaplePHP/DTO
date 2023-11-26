@@ -1,7 +1,7 @@
 
 
 
-# PHPFuse - DTO
+# MaplePHP - DTO
 Using a DTO library in PHP provides benefits such as encapsulating data, enforcing immutability, validating data, facilitating data transformation, maintaining API compatibility, reducing coupling, improving code readability, and simplifying testing.
 
 
@@ -12,7 +12,7 @@ Using a DTO library in PHP provides benefits such as encapsulating data, enforci
 The easiest way is to always start from the **Traverse** class and this will give you the most control.
 
 ```php
-use PHPFuse\DTO\Traverse;
+use MaplePHP\DTO\Traverse;
 
 $obj = Traverse::value(["firstname" => "<em>daniel</em>", "lastname" => "doe", "slug" => "Lorem ipsum åäö", "price" => "1999.99", "date" => "2023-08-21 14:35:12", "feed" => [
 		"t1" => ["firstname" => "<em>john 1</em>", "lastname" => "doe 1"],
@@ -73,7 +73,7 @@ echo $obj->date("DateTime")->format("y/m/d, \k\l. H:i")."<br>";
 ### Traverse
 When you pass array and object data to the Traverse object it will make it possible for you to easily traverse the array/object. you can then use one of the Handlers to modify the data when you have traversed to the right position.
 ```php
-use PHPFuse\DTO\Traverse;
+use MaplePHP\DTO\Traverse;
 $obj = Traverse::value([MIXED_DATA]);
 $obj->arrayKey1()->arrayKey2("HANDLER")->modifyFunction1->modifyFunction2();
 ```
@@ -81,7 +81,7 @@ $obj->arrayKey1()->arrayKey2("HANDLER")->modifyFunction1->modifyFunction2();
 ### Format handlers
 You can also just access the handlers directly to modify data quickly. 
 ```php
-use PHPFuse\DTO\Format;
+use MaplePHP\DTO\Format;
 
 Format\Str::value([STRING]);
 Format\Num::value([NUMBER]);

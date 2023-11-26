@@ -1,15 +1,15 @@
 <?php
 
 /**
- * @Package:    PHPFuse - The main traverse class
+ * @Package:    MaplePHP - The main traverse class
  * @Author:     Daniel Ronkainen
  * @Licence:    The MIT License (MIT), Copyright © Daniel Ronkainen
                 Don't delete this comment, its part of the license.
  */
 
-namespace PHPFuse\DTO;
+namespace MaplePHP\DTO;
 
-use PHPFuse\DTO\Format;
+use MaplePHP\DTO\Format;
 
 class Traverse extends DynamicDataAbstract
 {
@@ -59,7 +59,7 @@ class Traverse extends DynamicDataAbstract
 
         if (count($args) > 0) {
             $name = ucfirst($args[0]);
-            $className = "PHPFuse\\DTO\\Format\\{$name}";
+            $className = "MaplePHP\\DTO\\Format\\{$name}";
             if (!class_exists($className)) {
                 throw new \Exception("The DTO Format class do not exist!", 1);
             }

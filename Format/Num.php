@@ -1,14 +1,14 @@
 <?php
 /**
  * DEPRECATED
- * @Package:    PHPFuse Format numbers
+ * @Package:    MaplePHP Format numbers
  * @Author:     Daniel Ronkainen
  * @Licence:    The MIT License (MIT), Copyright © Daniel Ronkainen
                 Don't delete this comment, its part of the license.
  * @Version:    1.0.0
  */
 
-namespace PHPFuse\DTO\Format;
+namespace MaplePHP\DTO\Format;
 
 final class Num extends FormatAbstract implements FormatInterface
 {

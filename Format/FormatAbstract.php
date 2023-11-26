@@ -1,13 +1,13 @@
 <?php
 
 /**
- * @Package:    PHPFuse Dynamic data abstraction Class
+ * @Package:    MaplePHP Dynamic data abstraction Class
  * @Author:     Daniel Ronkainen
  * @Licence:    The MIT License (MIT), Copyright © Daniel Ronkainen
                 Don't delete this comment, its part of the license.
  */
 
-namespace PHPFuse\DTO\Format;
+namespace MaplePHP\DTO\Format;
 
 abstract class FormatAbstract
 {

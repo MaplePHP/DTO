@@ -1,13 +1,13 @@
 <?php
 
 /**
- * @Package:    PHPFuse Format string
+ * @Package:    MaplePHP Format string
  * @Author:     Daniel Ronkainen
  * @Licence:    The MIT License (MIT), Copyright © Daniel Ronkainen
                 Don't delete this comment, its part of the license.
  */
 
-namespace PHPFuse\DTO\Format;
+namespace MaplePHP\DTO\Format;
 
 use InvalidArgumentException;
 

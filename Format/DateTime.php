@@ -1,14 +1,14 @@
 <?php
 
 /**
- * @Package:    PHPFuse Format date class with translations
+ * @Package:    MaplePHP Format date class with translations
  * @Author:     Daniel Ronkainen
  * @Licence:    The MIT License (MIT), Copyright © Daniel Ronkainen
                 Don't delete this comment, its part of the license.
  * @Version:    1.0.0
  */
 
-namespace PHPFuse\DTO\Format;
+namespace MaplePHP\DTO\Format;
 
 use DateTime as MainDateTime;
 use DateTimeZone;
