@@ -6,6 +6,8 @@ final class Encode extends FormatAbstract implements FormatInterface
 {
     //protected $value;
     protected $jsonEncode = true;
+    protected $specialChar = true;
+    protected $specialCharFlag = ENT_NOQUOTES;
     protected $urlencode = false;
 
     /**
@@ -34,39 +36,71 @@ final class Encode extends FormatAbstract implements FormatInterface
      * @param  bool $urlencode
      * @return self
      */
-    public function urlEncode(bool $urlencode = true): self
+    public function urlEncode(bool $encode): self
     {
-        $this->urlencode = $urlencode;
+        $this->urlencode = $encode;
+        return $this;
+    }
+
+    /**
+     * Special Char encode
+     * @param  bool $urlencode
+     * @param  int  $flag ENT_QUOTES|ENT_SUBSTITUTE|ENT_HTML401
+     * @return self
+     */
+    public function specialChar(bool $encode, $flag = ENT_NOQUOTES): self
+    {
+        $this->specialChar = $encode;
+        $this->specialCharFlag = $flag;
         return $this;
     }
 
     /**
      * Encode values
      * @param  callable|null $callback Access encode value with callable and build upon
-     * @param  int           $flag ENT_QUOTES|ENT_SUBSTITUTE|ENT_HTML401
-     * @return self
+     * @return string|array
      */
-    public function encode(?callable $callback = null, int $flag = ENT_QUOTES): self
+    public function encode(?callable $callback = null): string|array
+    {
+        // Allways url decode first
+        $this->value = $this->urldecode(function($value) {
+            $uri = Str::value((string)$value);
+            if ($this->urlencode) {
+                $uri->rawurlencode();
+            }
+            if ($this->specialChar) {
+                $uri->encode($this->specialCharFlag);
+            }
+            return $uri->get();
+        });
+
+        return $this->value;
+    }
+
+    /**
+     * urldecode
+     * @param  callable|null $callback Access encode value with callable and build upon
+     * @return string|array
+     */
+    public function urldecode(?callable $callback = null): string|array
     {
         if (is_array($this->value)) {
-            $this->value = Arr::value($this->value)->walk(function ($value) use ($callback, $flag) {
+
+            $this->value = Arr::value($this->value)->walk(function ($value) use ($callback) {
+                $value = Str::value((string)$value)->rawurldecode()->get();
                 if (!is_null($callback)) {
                     $value = $callback($value);
                 }
-                $uri = Str::value((string)$value)->encode($flag);
-                if ($this->urlencode) {
-                    $uri->rawurlencode();
-                }
-                return $uri->get();
+                return $value;
+
             })->get();
         } else {
+            $this->value = Str::value($this->value)->rawurldecode()->get();
             if (!is_null($callback)) {
                 $this->value = $callback($this->value);
             }
-            $this->value = Str::value($this->value)->encode($flag)->get();
         }
-
-        return $this;
+        return $this->value;
     }
 
     /**
@@ -75,6 +109,6 @@ final class Encode extends FormatAbstract implements FormatInterface
      */
     public function xss(?callable $callback = null): self
     {
-        return $this->encode($callback);
+        return $this->specialChar(true)->encode($callback);
     }
 }

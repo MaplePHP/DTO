@@ -48,34 +48,6 @@ class Traverse extends DynamicDataAbstract
     }
 
     /**
-     * Traverse factory
-     * If you want
-     * @return self
-     */
-    public function __call($method, $args)
-    {
-        $this->row = ($this->{$method} ?? null);
-        $this->raw = $this->row;
-
-        if (count($args) > 0) {
-            $name = ucfirst($args[0]);
-            $className = "MaplePHP\\DTO\\Format\\{$name}";
-            if (!class_exists($className)) {
-                throw new \Exception("The DTO Format class do not exist!", 1);
-            }
-            $reflect = new \ReflectionClass($className);
-            $instance = $reflect->newInstanceWithoutConstructor();
-            return $instance->value($this->row);
-        }
-
-        if (is_array($this->row) || is_object($this->row)) {
-            return $this::value($this->row, $this->raw);
-        }
-
-        return self::value($this->row);
-    }
-
-    /**
      * Get raw
      * @return mixed
      */
@@ -84,24 +56,16 @@ class Traverse extends DynamicDataAbstract
         return $this->raw;
     }
 
+
     /**
-     * Callable factory
-     * @psalm-suppress InvalidFunctionCall Psalm do not understand that $call is callable
-     * @return mixed
+     * Json decode value
+     * @return self
      */
-    /*
-    public function fetchFactory(): mixed
+    public function jsonDecode(): self
     {
-        return function ($arr, $row, $_unusedKey, $index) {
-            $data = array_values($this->raw);
-            $call = (isset($data[$index])) ? $data[$index] : null;
-            if (is_callable($call)) {
-                return $call($arr, $row);
-            }
-            return false;
-        };
+        $this->row = json_decode($this->row);
+        return $this::value($this->row);
     }
-     */
     
     /**
      * Access incremental array
@@ -113,13 +77,13 @@ class Traverse extends DynamicDataAbstract
         $index = 0;
         $new = array();
 
-        if (is_null($this->raw)) {
-            $this->raw = $this->data;
+        if (is_null($this->row)) {
+            $this->row = $this->data;
         }
 
-        foreach ($this->raw as $key => $row) {
+        foreach ($this->row as $key => $row) {
             if (!is_null($callback)) {
-                if (($get = $callback($this::value($this->raw), $row, $key, $index)) !== false) {
+                if (($get = $callback($this::value($this->row), $row, $key, $index)) !== false) {
                     $new[$key] = $get;
                 }
             } else {
@@ -141,7 +105,6 @@ class Traverse extends DynamicDataAbstract
         $this->row = $new;
         return $this;
     }
-
 
     /**
      * Chech if current traverse data is equal to val
@@ -195,5 +158,33 @@ class Traverse extends DynamicDataAbstract
             $this->row = sprintf($add, $this->row);
         }
         return $this;
+    }
+
+    /**
+     * Traverse factory
+     * If you want
+     * @return self
+     */
+    public function __call($method, $args)
+    {
+        $this->row = ($this->{$method} ?? null);
+        $this->raw = $this->row;
+
+        if (count($args) > 0) {
+            $name = ucfirst($args[0]);
+            $className = "MaplePHP\\DTO\\Format\\{$name}";
+            if (!class_exists($className)) {
+                throw new \Exception("The DTO Format class do not exist!", 1);
+            }
+            $reflect = new \ReflectionClass($className);
+            $instance = $reflect->newInstanceWithoutConstructor();
+            return $instance->value($this->row);
+        }
+
+        if (is_array($this->row) || is_object($this->row)) {
+            return $this::value($this->row, $this->raw);
+        }
+
+        return self::value($this->row);
     }
 }
