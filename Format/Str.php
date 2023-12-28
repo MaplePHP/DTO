@@ -420,6 +420,19 @@ final class Str extends FormatAbstract implements FormatInterface
         }
         return ($this->value !== "false" && strlen($this->value));
     }
+    
+    /**
+     * Compare value to value 
+     * @param  string|int|float|bool|null $compare
+     * @return bool
+     */
+    public function compare(string|int|float|bool|null $compare): bool
+    {
+        if(is_numeric($this->value)) {
+            return ((float)$this->value > 0);
+        }
+        return ($this->value === $compare);
+    }
 
     /**
      * To int value
