@@ -10,6 +10,8 @@
 namespace MaplePHP\DTO;
 
 use MaplePHP\DTO\Format;
+use ReflectionClass;
+use InvalidArgumentException;
 
 class Traverse extends DynamicDataAbstract
 {
@@ -54,6 +56,47 @@ class Traverse extends DynamicDataAbstract
     public function getRaw()
     {
         return $this->raw;
+    }
+    
+    /**
+     * Add a data to new object column/name
+     * @param string $columnName The new column name
+     * @param mixed  $value      The added value
+     */
+    public function add(string $columnName, mixed $value): self
+    {
+        $this->{$columnName} = $value;
+        return $this;
+    }
+
+    /**
+     * Combine multiple objects at the same level
+     * @param  string $columnName The new column name
+     * @param  array  $columns    Columns to be combine
+     * @param  string $sep        Comibining seperator (default is a space)
+     * @return self
+     */
+    public function combine(...$spread): self
+    {
+        $mixedA = isset($spread[0]) ? $spread[0] : null;
+        $mixedB = isset($spread[1]) ? $spread[1] : null;
+        $columns = (is_array($mixedA)) ? $mixedA : $mixedB;
+        $columnName = (is_string($mixedA)) ? $mixedA : null;
+        $sep = (isset($spread[2]) && is_string($spread[2]) ? $spread[2] : ((is_string($mixedB)) ? $mixedB : " "));
+
+        $new = array();
+        foreach($columns as $colKey) {
+            $new[] = (string)$this->{$colKey};
+        }
+
+        $value = implode($sep, $new);
+        if(!is_null($columnName)) {
+            $this->{$columnName} = $value;
+        } else {
+            $this->row = $value;
+        }
+        
+        return $this;
     }
 
 
@@ -161,6 +204,23 @@ class Traverse extends DynamicDataAbstract
     }
 
     /**
+     * Access and return format class object
+     * @param  string $dtoClassName The DTO format class name
+     * @return object
+     */
+    public function format(string $dtoClassName): object
+    {
+        $name = ucfirst($dtoClassName);
+        $className = "MaplePHP\\DTO\\Format\\{$name}";
+        if (!class_exists($className)) {
+            throw new InvalidArgumentException("The DTO Format class do not exist!", 1);
+        }
+        $reflect = new ReflectionClass($className);
+        $instance = $reflect->newInstanceWithoutConstructor();
+        return $instance->value($this->row);
+    }
+
+    /**
      * Traverse factory
      * If you want
      * @return self
@@ -171,14 +231,7 @@ class Traverse extends DynamicDataAbstract
         $this->raw = $this->row;
 
         if (count($args) > 0) {
-            $name = ucfirst($args[0]);
-            $className = "MaplePHP\\DTO\\Format\\{$name}";
-            if (!class_exists($className)) {
-                throw new \Exception("The DTO Format class do not exist!", 1);
-            }
-            $reflect = new \ReflectionClass($className);
-            $instance = $reflect->newInstanceWithoutConstructor();
-            return $instance->value($this->row);
+            return $this->format($args[0]);
         }
 
         if (is_array($this->row) || is_object($this->row)) {
