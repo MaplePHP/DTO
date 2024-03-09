@@ -136,13 +136,26 @@ final class Str extends FormatAbstract implements FormatInterface
     }
 
     /**
-     * Clears soft breaks
+     * Clears soft breaks incl.:
+     * line breaks (\n), carriage returns (\r), form feed (\f), and vertical tab (\v).
      * @return self
      */
     public function clearBreaks(): self
     {
+
         $this->value = preg_replace('/(\v|\s)+/', ' ', $this->strVal());
-        return $this;
+        return $this->trim();
+    }
+
+    /**
+     * Clear all white spaces characters incl.: 
+     * spaces, tabs, newline characters, carriage returns, and form feed characters
+     * @return self
+     */
+    public function clearWhitespace(): self
+    {
+        $this->value = preg_replace('/\s+/', ' ', $this->strVal());
+        return $this->trim();
     }
 
     /**
