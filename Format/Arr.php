@@ -57,6 +57,22 @@ final class Arr extends FormatAbstract implements FormatInterface
         return $this;
     }
 
+    /**
+     * Will explode an array item value and then merge it into array in same hierky
+     * @param string $separator
+     * @param array $array
+     * @return array
+     */
+    public function arrayItemExpMerge(string $separator): self
+    {
+        $new = array();
+        foreach ($this->value as $item) {
+            $exp = explode($separator, $item);
+            $new = array_merge($new, $exp);
+        }
+        $this->value = $new;
+        return $this;
+    }
 
     public function shift(?Str &$shiftedValue = null): self
     {
