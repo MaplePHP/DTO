@@ -23,7 +23,7 @@ $obj = Traverse::value(["firstname" => "<em>daniel</em>", "lastname" => "doe", "
 
 #### Traversing the data
 ```php
-echo $obj->feed()->t1()->firstname();
+echo $obj->feed->t1->firstname;
 // <em>john 1</em>
 ```
 

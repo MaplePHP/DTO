@@ -13,7 +13,7 @@ namespace MaplePHP\DTO\Format;
 final class Arr extends FormatAbstract implements FormatInterface
 {
     /**
-     * Input is mixed data type in the interface becouse I do not know the type before the class
+     * Input is mixed data type in the interface becouse I do not know the type before
      * The class constructor MUST handle the input validation
      * @param array $value
      */

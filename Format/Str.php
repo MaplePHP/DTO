@@ -10,13 +10,14 @@
 namespace MaplePHP\DTO\Format;
 
 use InvalidArgumentException;
+use MaplePHP\DTO\MB;
 
 final class Str extends FormatAbstract implements FormatInterface
 {
     //protected $value;
 
     /**
-     * Input is mixed data type in the interface becouse I do not know the type before the class
+     * Input is mixed data type in the interface because I do not know the type before
      * The class constructor MUST handle the input validation
      * @param string $value
      */
@@ -25,7 +26,7 @@ final class Str extends FormatAbstract implements FormatInterface
         if (is_array($value) || is_object($value)) {
             throw new InvalidArgumentException("Is expecting a string or a convertable string value.", 1);
         }
-        $this->value = (string)$value;
+        parent::__construct((string)$value);
     }
 
     /**
@@ -35,8 +36,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public static function value(mixed $value): FormatInterface
     {
-        $inst = new static((string)$value);
-        return $inst;
+        return new Str((string)$value);
     }
 
 
@@ -51,16 +51,18 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * Excerpt/shorten down text/string
-     * @param  integer $length total length
-     * @param  string  $ending When break text add a ending (...)
+     * @param integer $length total length
+     * @param string $ending When break text add an ending (...)
      * @return self
+     * @throws \ErrorException
      */
-    public function excerpt($length = 40, $ending = "..."): self
+    public function excerpt(int $length = 40, string $ending = "..."): self
     {
         $this->stripTags()->entityDecode();
         $this->value = str_replace(array("'", '"', "”"), array("", "", ""), $this->strVal());
-        $strlen = strlen($this->strVal());
-        $this->value = trim(mb_substr($this->strVal(), 0, $length));
+        $mb = new MB($this->value);
+        $strlen = $mb->strlen();
+        $this->value = trim($mb->substr(0, $length));
         if ($strlen > $length) {
             $this->value .= $ending;
         }
@@ -78,7 +80,7 @@ final class Str extends FormatAbstract implements FormatInterface
     }
 
     /**
-     * Make sure string allways end with a trailing slash (will only add slash if it does not exist)
+     * Make sure string always end with a trailing slash (will only add slash if it does not exist)
      * @return self
      */
     public function trailingSlash(): self
@@ -100,12 +102,10 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * Cleans GET/POST data (XSS protection)
-     * In most cases I want to encode dubble and single quotes but when it comes to
-     * escaping value in DB the i rather escape quoutes the mysql way
      * @param  int $flag ENT_QUOTES|ENT_SUBSTITUTE|ENT_HTML401|null
      * @return self
      */
-    public function specialchars(int $flag = ENT_QUOTES): self
+    public function specialChars(int $flag = ENT_QUOTES): self
     {
         $this->value = htmlspecialchars($this->strVal(), $flag, 'UTF-8');
         return $this;
@@ -113,8 +113,6 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * Cleans GET/POST data (XSS protection)
-     * In most cases I want to encode dubble and single quotes but when it comes to
-     * escaping value in DB the i rather escape quoutes the mysql way
      * @param  int $flag ENT_QUOTES|ENT_SUBSTITUTE|ENT_HTML401|null
      * @return self
      */
@@ -179,7 +177,7 @@ final class Str extends FormatAbstract implements FormatInterface
     }
 
     /**
-     * strtolower
+     * String to lower
      * @return self
      */
     public function toLower(): self
@@ -189,7 +187,7 @@ final class Str extends FormatAbstract implements FormatInterface
     }
 
     /**
-     * strtoupper
+     * String to upper
      * @return self
      */
     public function toUpper(): self
@@ -199,10 +197,10 @@ final class Str extends FormatAbstract implements FormatInterface
     }
 
     /**
-     * ucfirst
+     * Uppercase first
      * @return self
      */
-    public function ucfirst(): self
+    public function ucFirst(): self
     {
         $this->value = ucfirst($this->strVal());
         return $this;
@@ -255,13 +253,13 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function formatSlug(): self
     {
-        $this->clearBreaks()->trim()->replaceSpecialChar()->trimSpaces()->replaceSpaces("-")->tolower();
+        $this->clearBreaks()->trim()->replaceSpecialChar()->trimSpaces()->replaceSpaces()->tolower();
         $this->value = preg_replace("/[^a-z0-9\s-]/", "", $this->value);
         return $this;
     }
 
     /**
-     * Replaces special characters to it's counter part to "A" or "O"
+     * Replaces special characters to its counterpart to "A" or "O"
      * @return self
      */
     public function replaceSpecialChar(): self
@@ -281,7 +279,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * Url decode
      * @return self
      */
-    public function urldecode(): self
+    public function urlDecode(): self
     {
         $this->value = urldecode($this->strVal());
         return $this;
@@ -289,11 +287,11 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * Url encode (with string replace if you want)
-     * @param  array $find     Search values
-     * @param  array $replace  Replace values
+     * @param array|null $find Search values
+     * @param array|null $replace Replace values
      * @return self
      */
-    public function urlencode(?array $find = null, ?array $replace = null): self
+    public function urlEncode(?array $find = null, ?array $replace = null): self
     {
         $this->value = urlencode($this->strVal());
         if (!is_null($find) && !is_null($replace)) {
@@ -306,7 +304,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * Raw url decode
      * @return self
      */
-    public function rawurldecode(): self
+    public function rawUrlDecode(): self
     {
         $this->value = rawurldecode($this->strVal());
         return $this;
@@ -314,11 +312,11 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * Raw url encode (with string replace if you want)
-     * @param  array $find     Search values
-     * @param  array $replace  Replace values
+     * @param array|null $find Search values
+     * @param array|null $replace Replace values
      * @return self
      */
-    public function rawurlencode(?array $find = null, ?array $replace = null): self
+    public function rawUrlEncode(?array $find = null, ?array $replace = null): self
     {
         $this->value = rawurlencode($this->strVal());
         if (!is_null($find) && !is_null($replace)) {
@@ -329,11 +327,11 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * String replace
-     * @param  array $find     Search values
-     * @param  array $replace  Replace values
+     * @param array $find     Search values
+     * @param array $replace  Replace values
      * @return self
      */
-    public function replace($find, $replace): self
+    public function replace(array $find, array $replace): self
     {
         $this->value = str_replace($find, $replace, $this->strVal());
         if(!is_string($this->value)) {
@@ -344,11 +342,11 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * Decode then encode url (with string replace if you want)
-     * @param  array $find     Search values
-     * @param  array $replace  Replace values
+     * @param array|null $find Search values
+     * @param array|null $replace Replace values
      * @return self
      */
-    public function toggleUrlencode(?array $find = null, ?array $replace = null): self
+    public function toggleUrlEncode(?array $find = null, ?array $replace = null): self
     {
         return $this->urldecode()->rawurlencode($find, $replace);
     }
@@ -364,7 +362,7 @@ final class Str extends FormatAbstract implements FormatInterface
     }
 
     /**
-     * Will convert all camlecase words to array and return array instance
+     * Will convert all camelcase words to array and return array instance
      * @return Arr
      */
     public function camelCaseToArr(): Arr
