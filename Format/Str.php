@@ -29,6 +29,12 @@ final class Str extends FormatAbstract implements FormatInterface
         parent::__construct((string)$value);
     }
 
+    public static function test(): self
+    {
+        $value = ucfirst("dwq wqdw wdqdw dqw dwq");
+        return new self($value);
+    }
+
     /**
      * Init format by adding data to modify/format/traverse
      * @param  mixed $value
@@ -108,6 +114,17 @@ final class Str extends FormatAbstract implements FormatInterface
     public function specialChars(int $flag = ENT_QUOTES): self
     {
         $this->value = htmlspecialchars($this->strVal(), $flag, 'UTF-8');
+        return $this;
+    }
+
+    /**
+     * Remove any character that is not a letter, number, underscore, or dash
+     * Can be used to sanitize SQL identifiers that should be enclosed in backticks
+     * @return self
+     */
+    function sanitizeIdentifiers(): self
+    {
+        $this->value = preg_replace('/[^a-zA-Z0-9_-]/', '', $this->value);
         return $this;
     }
 

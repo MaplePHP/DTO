@@ -13,14 +13,21 @@ use BadMethodCallException;
 use MaplePHP\DTO\Format\Str;
 use MaplePHP\Validate\Inp;
 use ReflectionClass;
-use InvalidArgumentException;
 use ReflectionException;
 use stdClass;
 
+/**
+ * @method arr()
+ * @method clock()
+ * @method dom()
+ * @method encode()
+ * @method local()
+ * @method num()
+ * @method str()
+ */
 class Traverse extends DynamicDataAbstract
 {
-    protected $row; // Use row to access current instance (access inst/object)
-    protected $raw; // Use raw to access current instance data (access array)
+    protected mixed $raw = null; // Use raw to access current instance data (access array)
     protected $data = null;
 
     /**
@@ -30,10 +37,20 @@ class Traverse extends DynamicDataAbstract
      */
     public function __get($key)
     {
-        if(isset($this->data->{$key}) || isset($this->data[$key])) {
-            return $this::value($this->data[$key]);
+        if(isset($this->data->{$key})) {
+            $data = $this->data->{$key};
+            if(is_object($data) && !($data instanceof DynamicDataAbstract)) {
+                return $data;
+            }
+            return $this::value($data);
         }
-        return null;
+
+        if(isset($this->raw[$key]) || isset($this->raw->{$key})) {
+            return $this::value($this->raw[$key] ?? $this->raw->{$key});
+        }
+
+        $this->raw = null;
+        return $this;
     }
 
     /**
@@ -47,14 +64,22 @@ class Traverse extends DynamicDataAbstract
     {
         $inst = clone $this;
         $data = Str::value($method)->camelCaseToArr()->get();
+        //$data = [$method];
         $expectedClass = array_shift($data);
+        $formatClassInst = $this->format($expectedClass, $this->raw);
         $expectedMethod = implode('', $data);
+        if(!$expectedMethod) {
+            return $formatClassInst;
+        }
         $expectedMethod = lcfirst($expectedMethod);
-        $formatClassInst = $this->format($expectedClass, $this->row);
-        if(!method_exists($formatClassInst, $expectedMethod)) {
+
+        if(!method_exists($formatClassInst, $expectedMethod) &&
+            ($formatClassInst === "Collection" && !function_exists($expectedMethod))) {
             throw new BadMethodCallException("The DTO method \"$expectedMethod\" does not exist!", 1);
         }
-        $inst->row = $formatClassInst->{$expectedMethod}(...$args)->get();
+
+        $select = $formatClassInst->{$expectedMethod}(...$args);
+        $inst->raw = (method_exists($select, "get")) ? $select->get() : $select;
         return $inst;
     }
 
@@ -65,7 +90,7 @@ class Traverse extends DynamicDataAbstract
      */
     public function get(?string $fallback = null): mixed
     {
-        return (!is_null($this->row) ? $this->row : $fallback);
+        return ($this->raw ?? $fallback);
     }
 
     /**
@@ -88,11 +113,18 @@ class Traverse extends DynamicDataAbstract
         return $this;
     }
 
+    /**
+     * Validate current item and set to fallback (default: null) if not valid
+     * @param string $method
+     * @param array $args
+     * @param mixed|null $fallback
+     * @return $this
+     */
     public function valid(string $method, array $args, mixed $fallback = null): self
     {
         $inp = Inp::value($this->raw);
         if(!$inp->{$method}(...$args)) {
-            $this->raw = $this->row = $fallback;
+            $this->raw = $fallback;
         }
         return $this;
     }
@@ -103,8 +135,34 @@ class Traverse extends DynamicDataAbstract
      */
     public function jsonDecode(): self
     {
-        $this->row = json_decode($this->row);
-        return $this::value($this->row);
+        $this->raw = json_decode($this->raw);
+        return $this::value($this->raw);
+    }
+
+    /**
+     * Convert collection into an array
+     * @param callable|null $callback
+     * @return array
+     */
+    public function toArray(?callable $callback = null): array
+    {
+        $index = 0;
+        $new = array();
+        $inst = clone $this;
+
+        if (is_null($inst->raw)) {
+            $inst->raw = $inst->data;
+        }
+
+        foreach ($inst->raw as $key => $row) {
+            if (is_callable($callback) &&
+                (($get = $callback($row, $key, $index)) !== false)) {
+                $row = $get;
+            }
+            $new[$key] = $row;
+            $index++;
+        }
+        return $new;
     }
 
     /**
@@ -118,17 +176,17 @@ class Traverse extends DynamicDataAbstract
         $new = array();
         $inst = clone $this;
 
-        if (is_null($inst->row)) {
-            $inst->row = $inst->data;
+        if (is_null($inst->raw)) {
+            $inst->raw = $inst->data;
         }
 
-        foreach ($inst->row as $key => $row) {
+        foreach ($inst->raw as $key => $row) {
             if (!is_null($callback)) {
-                if (($get = $callback($inst::value($inst->row), $row, $key, $index)) !== false) {
+                if (($get = $callback($inst::value($inst->raw), $row, $key, $index)) !== false) {
                     $new[$key] = $get;
                 }
             } else {
-                if (is_array($row) || (is_object($row) && ($row instanceof stdClass))) {
+                if (is_array($row) || ($row instanceof stdClass)) {
                     // Incremental -> object
                     $value = $inst::value($row);
                 } elseif (is_object($row)) {
@@ -137,24 +195,23 @@ class Traverse extends DynamicDataAbstract
                     // Incremental -> value
                     $value = Format\Str::value($row);
                 }
-
                 $new[$key] = $value;
             }
             $index++;
         }
 
-        $inst->row = $new;
-        return $inst->row;
+        $inst->raw = $new;
+        return $inst->raw;
     }
 
     /**
-     * Chech if current traverse data is equal to val
+     * Check if current traverse data is equal to val
      * @param  string $isVal
      * @return bool
      */
     public function equalTo(string $isVal): bool
     {
-        return ($this->row === $isVal);
+        return ($this->raw === $isVal);
     }
 
     /**
@@ -172,7 +229,7 @@ class Traverse extends DynamicDataAbstract
      */
     public function isset(): mixed
     {
-        return (isset($this->raw)) ? $this->row : false;
+        return (isset($this->raw)) ? $this->raw : false;
     }
 
     /**
@@ -182,8 +239,8 @@ class Traverse extends DynamicDataAbstract
      */
     public function fallback(mixed $fallback): self
     {
-        if (!$this->row) {
-            $this->row = $fallback;
+        if (!$this->raw) {
+            $this->raw = $fallback;
         }
         return $this;
     }
@@ -193,10 +250,10 @@ class Traverse extends DynamicDataAbstract
      * @param  string $add
      * @return self
      */
-    public function sprint(string $add)
+    public function sprint(string $add): self
     {
         if (!is_null($this->raw)) {
-            $this->row = sprintf($add, $this->row);
+            $this->raw = sprintf($add, $this->raw);
         }
         return $this;
     }
@@ -211,10 +268,11 @@ class Traverse extends DynamicDataAbstract
     protected function format(string $dtoClassName, mixed $value): object
     {
         $name = ucfirst($dtoClassName);
-        $className = "MaplePHP\\DTO\\Format\\{$name}";
+        $className = "MaplePHP\\DTO\\Format\\$name";
         if (!class_exists($className)) {
             throw new BadMethodCallException("The DTO class \"$dtoClassName\" does not exist!", 1);
         }
+
         $reflect = new ReflectionClass($className);
         $instance = $reflect->newInstanceWithoutConstructor();
         return $instance->value($value);
@@ -223,20 +281,17 @@ class Traverse extends DynamicDataAbstract
     /**
      * Init instance
      * @param mixed $data
-     * @param null $raw
      * @return self
      */
-    public static function value(mixed $data, $raw = null): self
+    public static function value(mixed $data): self
     {
         $inst = new self();
-        $inst->raw = $raw;
         if (is_array($data) || is_object($data)) {
             foreach ($data as $k => $v) {
-                $inst->raw = $inst->data[$k] = $inst->{$k} = $v;
+                $inst->{$k} = $v;
             }
-        } else {
-            $inst->raw = $inst->row = $data;
         }
+        $inst->raw = $data;
         return $inst;
     }
 }

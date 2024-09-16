@@ -11,7 +11,7 @@ namespace MaplePHP\DTO;
 
 abstract class DynamicDataAbstract
 {
-    private $data;
+    protected $data = null;
 
     abstract public function get();
 

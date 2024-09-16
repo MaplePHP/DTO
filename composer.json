@@ -1,6 +1,7 @@
 {
     "name": "maplephp/dto",
     "type": "library",
+    "version": "v2.0.0",
     "description": "DTO library in PHP provides benefits such as encapsulating data, enforcing immutability and facilitating data transformation.",
     "keywords": ["dto", "traversing", "objects", "data transformation", "immutability"],
     "homepage": "https://wazabii.se",

@@ -30,7 +30,7 @@ echo $obj->feed->t1->firstname;
 #### Traversing the feed
 ```php
 
-foreach($obj->feed()->fetch()->get() as $row) {
+foreach($obj->feed->fetch() as $row) {
 	echo $row->firstname."<br>";
 }
 // <em>john 1</em>
@@ -43,11 +43,12 @@ You can access some Handler to make your life easier:
 
 #### Traversing and modify string
 ```php
-echo $obj->feed()->t1()->firstname("Str")->stripTags()->ucfirst()
-// John 1
-
+echo $obj->feed->t1->firstname->strStripTags()->strUcFirst()
+// Same as
+// echo $obj->feed->t1->firstname->str()->stripTags()->ucFirst()
+// Result: John 1
 foreach($obj->feed()->fetch()->get() as $row) {
-	echo $row->firstname("Str")->stripTags()->ucfirst()."<br>";
+	echo $row->firstname->strStripTags()->strUcFirst()."<br>";
 }
 // John 1
 // Jane 2
@@ -55,13 +56,13 @@ foreach($obj->feed()->fetch()->get() as $row) {
 
 ## Examples
 ```php
-echo $obj->firstname("Str")->stripTags()->ucfirst()."<br>";
+echo $obj->firstname->strStripTags()->strUcFirst()."<br>";
 // Daniel
 
-echo $obj->price("Num")->toFilesize()."<br>";
+echo $obj->price->numToFilesize()."<br>";
 // 1.95 kb
 
-echo $obj->price("Num")->round(2)->currency("SEK", 2)."<br>";
+echo $obj->price->numRound(2)->numCurrency("SEK", 2)."<br>";
 // 1 999,99 kr
 
 echo $obj->date("DateTime")->format("y/m/d, \k\l. H:i")."<br>";

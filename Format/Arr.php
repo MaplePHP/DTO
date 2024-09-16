@@ -13,13 +13,16 @@ namespace MaplePHP\DTO\Format;
 final class Arr extends FormatAbstract implements FormatInterface
 {
     /**
-     * Input is mixed data type in the interface becouse I do not know the type before
+     * Input is mixed data type in the interface because I do not know the type before
      * The class constructor MUST handle the input validation
-     * @param array $value
+     * @param string $value
      */
-    public function __construct(array $value)
+    public function __construct(mixed $value)
     {
-        $this->value = $value;
+        if (!is_array($value)) {
+            throw new \InvalidArgumentException("Is expecting a string or a convertable string value.", 1);
+        }
+        parent::__construct((array)$value);
     }
 
     /**
@@ -35,10 +38,9 @@ final class Arr extends FormatAbstract implements FormatInterface
 
     /**
      * Unset array
-     * @param  keys Keys that you want to unset (@unset("username", "password", "email", ....))
-     * @return self
+     * @return $this
      */
-    public function unset()
+    public function unset(): self
     {
         $args = func_get_args();
         foreach ($args as $v) {
@@ -51,7 +53,7 @@ final class Arr extends FormatAbstract implements FormatInterface
      * Get array keys
      * @return self
      */
-    public function arrayKeys()
+    public function arrayKeys(): self
     {
         $this->value = array_keys($this->value);
         return $this;
@@ -60,8 +62,7 @@ final class Arr extends FormatAbstract implements FormatInterface
     /**
      * Will explode an array item value and then merge it into array in same hierky
      * @param string $separator
-     * @param array $array
-     * @return array
+     * @return self
      */
     public function arrayItemExpMerge(string $separator): self
     {
@@ -89,15 +90,20 @@ final class Arr extends FormatAbstract implements FormatInterface
     }
 
     /**
-     * Extract all array items with arrat key prefix ("prefix_"name)
+     * Extract all array items with array key prefix ("prefix_"name)
      * @param  string $search  wildcard prefix
      * @return self
      */
     public function wildcardSearch(string $search): self
     {
-        $search = str_replace('\*', '.*?', preg_quote($search, '/'));
-        $result = preg_grep('/^' . $search . '$/i', array_keys($this->value));
-        $this->value = array_intersect_key($this->value, array_flip($result));
+        $regex = "/^" . str_replace(['\*', '\?'], ['.*', '.'], preg_quote($search, '/')) . "$/";
+        $matches = [];
+        foreach ($this->value as $element) {
+            if (preg_match($regex, $element)) {
+                $matches[] = $element;
+            }
+        }
+        $this->value = $matches;
         return $this;
     }
 

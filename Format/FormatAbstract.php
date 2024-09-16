@@ -9,7 +9,9 @@
 
 namespace MaplePHP\DTO\Format;
 
+use InvalidArgumentException;
 use ReflectionClass;
+use ReflectionException;
 
 abstract class FormatAbstract
 {
@@ -65,7 +67,7 @@ abstract class FormatAbstract
      * @param  string $add
      * @return self
      */
-    public function sprint(string $add)
+    public function sprint(string $add): static
     {
         if (!is_null($this->value)) {
             $this->value = sprintf($add, $this->value);
@@ -75,13 +77,14 @@ abstract class FormatAbstract
 
     /**
      * Access and return format class object
-     * @param  string $dtoClassName The DTO format class name
+     * @param string $dtoClassName The DTO format class name
      * @return object
+     * @throws ReflectionException
      */
-    public function format(string $dtoClassName): object
+    public function dto(string $dtoClassName): object
     {
         $name = ucfirst($dtoClassName);
-        $className = "MaplePHP\\DTO\\Format\\{$name}";
+        $className = "MaplePHP\\DTO\\Format\\$name";
         if (!class_exists($className)) {
             throw new InvalidArgumentException("The DTO Format class do not exist!", 1);
         }

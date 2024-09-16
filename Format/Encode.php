@@ -5,19 +5,20 @@ namespace MaplePHP\DTO\Format;
 final class Encode extends FormatAbstract implements FormatInterface
 {
     //protected $value;
-    protected $jsonEncode = true;
-    protected $specialChar = true;
-    protected $specialCharFlag = ENT_NOQUOTES;
-    protected $urlencode = false;
+    protected bool $jsonEncode = true;
+    protected bool $specialChar = true;
+    protected int $specialCharFlag = ENT_NOQUOTES;
+    protected bool $urlencode = false;
+    protected bool $sanitizeIdentifiers = false;
 
     /**
-     * Input is mixed data type in the interface becouse I do not know the type before the class
-     * The class constructor MUST handle the input validation
+     * Input is mixed data type in the interface because I do not know the type before
+     * the Class constructor MUST handle the input validation
      * @param array|string $value
      */
     public function __construct(array|string $value)
     {
-        $this->value = $value;
+        parent::__construct($value);
     }
 
     /**
@@ -27,13 +28,24 @@ final class Encode extends FormatAbstract implements FormatInterface
      */
     public static function value(mixed $value): FormatInterface
     {
-        $inst = new static($value);
-        return $inst;
+        return new self($value);
+    }
+
+    /**
+     * Remove any character that is not a letter, number, underscore, or dash
+     * Can be used to sanitize SQL identifiers that should be enclosed in backticks
+     * @param  bool $sanitizeIdentifiers
+     * @return self
+     */
+    public function sanitizeIdentifiers(bool $sanitizeIdentifiers): self
+    {
+        $this->sanitizeIdentifiers = $sanitizeIdentifiers;
+        return $this;
     }
 
     /**
      * Url encode flag
-     * @param  bool $urlencode
+     * @param bool $encode
      * @return self
      */
     public function urlEncode(bool $encode): self
@@ -44,11 +56,11 @@ final class Encode extends FormatAbstract implements FormatInterface
 
     /**
      * Special Char encode
-     * @param  bool $urlencode
-     * @param  int  $flag ENT_QUOTES|ENT_SUBSTITUTE|ENT_HTML401
+     * @param bool $encode
+     * @param int $flag ENT_QUOTES|ENT_SUBSTITUTE|ENT_HTML401
      * @return self
      */
-    public function specialChar(bool $encode, $flag = ENT_NOQUOTES): self
+    public function specialChar(bool $encode, int $flag = ENT_NOQUOTES): self
     {
         $this->specialChar = $encode;
         $this->specialCharFlag = $flag;
@@ -57,16 +69,18 @@ final class Encode extends FormatAbstract implements FormatInterface
 
     /**
      * Encode values
-     * @param  callable|null $callback Access encode value with callable and build upon
      * @return string|array
      */
-    public function encode(?callable $callback = null): string|array
+    public function encode(): string|array
     {
-        // Allways url decode first
+        // Always url decode first
         $this->value = $this->urldecode(function($value) {
             $uri = Str::value((string)$value);
             if ($this->urlencode) {
                 $uri->rawurlencode();
+            }
+            if ($this->sanitizeIdentifiers) {
+                $uri->sanitizeIdentifiers();
             }
             if ($this->specialChar) {
                 $uri->encode($this->specialCharFlag);
@@ -78,14 +92,13 @@ final class Encode extends FormatAbstract implements FormatInterface
     }
 
     /**
-     * urldecode
+     * Url decode
      * @param  callable|null $callback Access encode value with callable and build upon
      * @return string|array
      */
     public function urldecode(?callable $callback = null): string|array
     {
         if (is_array($this->value)) {
-
             $this->value = Arr::value($this->value)->walk(function ($value) use ($callback) {
                 $value = Str::value((string)$value)->rawurldecode()->get();
                 if (!is_null($callback)) {
@@ -94,6 +107,7 @@ final class Encode extends FormatAbstract implements FormatInterface
                 return $value;
 
             })->get();
+
         } else {
             $this->value = Str::value($this->value)->rawurldecode()->get();
             if (!is_null($callback)) {
@@ -105,10 +119,11 @@ final class Encode extends FormatAbstract implements FormatInterface
 
     /**
      * XXS Protect the result
-     * @return self
+     * @param callable|null $callback
+     * @return array|string
      */
-    public function xss(?callable $callback = null): self
+    public function xss(?callable $callback = null): array|string
     {
-        return $this->specialChar(true)->encode($callback);
+        return $this->specialChar(true)->encode();
     }
 }
