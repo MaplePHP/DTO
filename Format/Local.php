@@ -16,10 +16,10 @@ final class Local
 {
     protected static $prefix;
     protected static $dir;
-    protected static $data = array();
+    protected static $data = [];
 
     protected $value;
-    protected $sprint = array();
+    protected $sprint = [];
 
     /**
      * Init format by adding data to modify/format/traverse
@@ -97,7 +97,7 @@ final class Local
         }
 
         if (is_array($key)) {
-            $out = array();
+            $out = [];
             foreach ($key as $k) {
                 $out[] = $this->getValue($k);
             }

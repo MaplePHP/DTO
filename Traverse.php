@@ -30,6 +30,22 @@ class Traverse extends DynamicDataAbstract
     protected mixed $raw = null; // Use raw to access current instance data (access array)
     protected $data = null;
 
+    public function __construct(mixed $data = null)
+    {
+        parent::__construct();
+        $this->build($data);
+    }
+
+    /**
+     * With new object
+     * @param mixed $data
+     * @return $this
+     */
+    public function with(mixed $data): self
+    {
+        return new self($data);
+    }
+
     /**
      * Object traverser
      * @param $key
@@ -147,7 +163,7 @@ class Traverse extends DynamicDataAbstract
     public function toArray(?callable $callback = null): array
     {
         $index = 0;
-        $new = array();
+        $new = [];
         $inst = clone $this;
 
         if (is_null($inst->raw)) {
@@ -173,7 +189,7 @@ class Traverse extends DynamicDataAbstract
     public function fetch(?callable $callback = null): array|object|null
     {
         $index = 0;
-        $new = array();
+        $new = [];
         $inst = clone $this;
 
         if (is_null($inst->raw)) {
@@ -279,19 +295,28 @@ class Traverse extends DynamicDataAbstract
     }
 
     /**
+     * Build the object
+     * @param mixed $data
+     * @return $this
+     */
+    protected function build(mixed $data): self
+    {
+        if (is_array($data) || is_object($data)) {
+            foreach ($data as $k => $v) {
+                $this->{$k} = $v;
+            }
+        }
+        $this->raw = $data;
+        return $this;
+    }
+
+    /**
      * Init instance
      * @param mixed $data
      * @return self
      */
     public static function value(mixed $data): self
     {
-        $inst = new self();
-        if (is_array($data) || is_object($data)) {
-            foreach ($data as $k => $v) {
-                $inst->{$k} = $v;
-            }
-        }
-        $inst->raw = $data;
-        return $inst;
+        return new self($data);
     }
 }

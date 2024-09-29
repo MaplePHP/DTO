@@ -38,7 +38,7 @@ class DateTime extends MainDateTime implements FormatInterface
     ];
 
     private $lang;
-    private $translations = array();
+    private $translations = [];
 
 
     /**

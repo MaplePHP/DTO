@@ -66,7 +66,7 @@ final class Arr extends FormatAbstract implements FormatInterface
      */
     public function arrayItemExpMerge(string $separator): self
     {
-        $new = array();
+        $new = [];
         foreach ($this->value as $item) {
             $exp = explode($separator, $item);
             $new = array_merge($new, $exp);

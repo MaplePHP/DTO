@@ -6,10 +6,12 @@
  *
  * The polyfill map files comes from Symfony but the library itself has been completely re-built
  */
+
 namespace MaplePHP\DTO;
 
 use ErrorException;
 use ValueError;
+
 use function strlen;
 
 class Iconv
@@ -45,7 +47,7 @@ class Iconv
      * Get value
      * @return string|false
      */
-    function getValue(): string|false
+    public function getValue(): string|false
     {
         return $this->value;
     }
@@ -92,7 +94,7 @@ class Iconv
                     throw new ErrorException('iconv_strlen(): Wrong encoding, conversion from "' . $fromEncoding . '"');
                 }
 
-            } else if ('utf-8' === $toEncoding) {
+            } elseif ('utf-8' === $toEncoding) {
                 // UTF-8 validation
                 $inst->value = $inst->getSanitizedUTF8String($inst->value);
             }
@@ -126,7 +128,7 @@ class Iconv
      * @return int|false
      * @throws ErrorException
      */
-    function strlen(?string $encoding = null): int|false
+    public function strlen(?string $encoding = null): int|false
     {
         $inst = $this->setEncoding($encoding);
         if(function_exists("iconv_strlen") && !$inst->disableVanilla) {
@@ -165,8 +167,8 @@ class Iconv
                 $inst = $inst->encode("utf-8", $inst->encoding);
             }
             $inc = 0;
-            $inst->loop($inst->value, function($character, $charCount) use (&$value, &$inc, $start, $length)  {
-                if(($charCount+1) > $start) {
+            $inst->loop($inst->value, function ($character, $charCount) use (&$value, &$inc, $start, $length) {
+                if(($charCount + 1) > $start) {
                     $value .= $character;
                     $inc++;
                     if($inc >= $length) {
@@ -192,7 +194,7 @@ class Iconv
      * @return false|int
      * @throws ErrorException
      */
-    function strpos(string $needle, int $offset = 0, ?string $encoding = null): false|int
+    public function strpos(string $needle, int $offset = 0, ?string $encoding = null): false|int
     {
 
         $inst = $this->setEncoding($encoding);
@@ -203,7 +205,7 @@ class Iconv
             return iconv_strpos($inst->value, $needle, $offset, $inst->encoding);
         }
         if(is_string($encoding)) {
-             $inst = $inst->encode("utf-8", $inst->encoding);
+            $inst = $inst->encode("utf-8", $inst->encoding);
         }
         $needleInst = new self($needle);
         if(is_string($encoding)) {
@@ -215,17 +217,22 @@ class Iconv
             $offset = ($inst->strlen() + $offset);
         }
 
-        $inst->loop($inst->value, function(string $character, int $charCount) use (
-                &$inc, &$total, &$completed,
-                $needleLength, $needleInst, $offset, $encoding
-            ) {
+        $inst->loop($inst->value, function (string $character, int $charCount) use (
+            &$inc,
+            &$total,
+            &$completed,
+            $needleLength,
+            $needleInst,
+            $offset,
+            $encoding
+        ) {
 
-            if(($charCount+1) > $offset) {
+            if(($charCount + 1) > $offset) {
                 $char = (string)$needleInst->substr($inc, 1);
                 if($character === $char) {
                     $inc++;
                     if($inc === $needleLength) {
-                        $completed = ($charCount+1)-$inc;
+                        $completed = ($charCount + 1) - $inc;
                         if(!$this->strposFollowThrough) {
                             return $completed;
                         }
@@ -253,7 +260,7 @@ class Iconv
      * @return false|int
      * @throws ErrorException
      */
-    function strrpos(string $needle, ?string $encoding = null): false|int
+    public function strrpos(string $needle, ?string $encoding = null): false|int
     {
         $inst = $this->setEncoding($encoding);
         $inst = $inst->strposFollowThrough(true);

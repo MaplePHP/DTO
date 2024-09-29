@@ -33,7 +33,7 @@ final class Collection extends FormatAbstract implements FormatInterface
 
         } else {
             $copy = $this->value->getArrayCopy();
-            $this->value = call_user_func_array($func, array_merge(array($copy), $argv));
+            $this->value = call_user_func_array($func, array_merge([$copy], $argv));
 
         }
 

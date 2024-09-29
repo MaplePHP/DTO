@@ -39,7 +39,7 @@ class MB
      * Get value
      * @return string|false
      */
-    function getValue(): string|false
+    public function getValue(): string|false
     {
         return $this->value;
     }
@@ -121,7 +121,7 @@ class MB
      * @return false|int
      * @throws ErrorException
      */
-    function strpos(string $needle, int $offset = 0, ?string $encoding = null): false|int
+    public function strpos(string $needle, int $offset = 0, ?string $encoding = null): false|int
     {
         if(function_exists('mb_strpos') && !$this->disableVanilla) {
             return mb_strpos($this->value, $needle, $offset, $encoding);
@@ -137,7 +137,7 @@ class MB
      * @return false|int
      * @throws ErrorException
      */
-    function strrpos(string $needle, ?string $encoding = null): false|int
+    public function strrpos(string $needle, ?string $encoding = null): false|int
     {
         if(function_exists('mb_strrpos') && !$this->disableVanilla) {
             return mb_strrpos($this->value, $needle, 0, $encoding);

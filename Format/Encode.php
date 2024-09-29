@@ -74,7 +74,7 @@ final class Encode extends FormatAbstract implements FormatInterface
     public function encode(): string|array
     {
         // Always url decode first
-        $this->value = $this->urldecode(function($value) {
+        $this->value = $this->urldecode(function ($value) {
             $uri = Str::value((string)$value);
             if ($this->urlencode) {
                 $uri->rawurlencode();

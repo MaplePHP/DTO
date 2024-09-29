@@ -108,7 +108,7 @@ final class Num extends FormatAbstract implements FormatInterface
         $this->float();
         $precision = 2;
         $base = log($this->value) / log(1024);
-        $suffixes = array('', ' kb', ' mb', ' g', ' t');
+        $suffixes = ['', ' kb', ' mb', ' g', ' t'];
         $baseFloor = (int)floor($base);
         $suffix = (isset($suffixes[$baseFloor])) ? $suffixes[$baseFloor] : "";
         $this->value = round(pow(1024, $base - $baseFloor), $precision) . $suffix;

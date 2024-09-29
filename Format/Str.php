@@ -9,6 +9,7 @@
 
 namespace MaplePHP\DTO\Format;
 
+use ErrorException;
 use InvalidArgumentException;
 use MaplePHP\DTO\MB;
 
@@ -27,12 +28,6 @@ final class Str extends FormatAbstract implements FormatInterface
             throw new InvalidArgumentException("Is expecting a string or a convertable string value.", 1);
         }
         parent::__construct((string)$value);
-    }
-
-    public static function test(): self
-    {
-        $value = ucfirst("dwq wqdw wdqdw dqw dwq");
-        return new self($value);
     }
 
     /**
@@ -60,12 +55,12 @@ final class Str extends FormatAbstract implements FormatInterface
      * @param integer $length total length
      * @param string $ending When break text add an ending (...)
      * @return self
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public function excerpt(int $length = 40, string $ending = "..."): self
     {
         $this->stripTags()->entityDecode();
-        $this->value = str_replace(array("'", '"', "”"), array("", "", ""), $this->strVal());
+        $this->value = str_replace(["'", '"', "”"], ["", "", ""], $this->strVal());
         $mb = new MB($this->value);
         $strlen = $mb->strlen();
         $this->value = trim($mb->substr(0, $length));
@@ -122,7 +117,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * Can be used to sanitize SQL identifiers that should be enclosed in backticks
      * @return self
      */
-    function sanitizeIdentifiers(): self
+    public function sanitizeIdentifiers(): self
     {
         $this->value = preg_replace('/[^a-zA-Z0-9_-]/', '', $this->value);
         return $this;
@@ -163,7 +158,7 @@ final class Str extends FormatAbstract implements FormatInterface
     }
 
     /**
-     * Clear all white spaces characters incl.: 
+     * Clear all white spaces characters incl.:
      * spaces, tabs, newline characters, carriage returns, and form feed characters
      * @return self
      */
@@ -281,12 +276,12 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function replaceSpecialChar(): self
     {
-        $pattern = array('é','è','ë','ê','É','È','Ë','Ê','á','à','ä','â','å','Á','À','Ä','Â','Å',
+        $pattern = ['é','è','ë','ê','É','È','Ë','Ê','á','à','ä','â','å','Á','À','Ä','Â','Å',
             'ó','ò','ö','ô','Ó','Ò','Ö','Ô','í','ì','ï','î','Í','Ì','Ï','Î','ú','ù','ü','û','Ú',
-            'Ù','Ü','Û','ý','ÿ','Ý','ø','Ø','œ','Œ','Æ','ç','Ç');
-        $replace = array('e','e','e','e','E','E','E','E','a','a','a','a','a','A','A','A','A','A',
+            'Ù','Ü','Û','ý','ÿ','Ý','ø','Ø','œ','Œ','Æ','ç','Ç'];
+        $replace = ['e','e','e','e','E','E','E','E','a','a','a','a','a','A','A','A','A','A',
             'o','o','o','o','O','O','O','O','i','i','i','I','I','I','I','I','u','u','u','u','U',
-            'U','U','U','y','y','Y','o','O','a','A','A','c','C');
+            'U','U','U','y','y','Y','o','O','a','A','A','c','C'];
         $this->value = str_replace($pattern, $replace, $this->strVal());
 
         return $this;
@@ -367,7 +362,7 @@ final class Str extends FormatAbstract implements FormatInterface
     {
         return $this->urldecode()->rawurlencode($find, $replace);
     }
-    
+
     /**
      * Explode return array instance
      * @param  non-empty-string $delimiter
@@ -448,9 +443,9 @@ final class Str extends FormatAbstract implements FormatInterface
         }
         return ($this->value !== "false" && strlen($this->value));
     }
-    
+
     /**
-     * Compare value to value 
+     * Compare value to value
      * @param  string|int|float|bool|null $compare
      * @return bool
      */
