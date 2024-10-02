@@ -17,14 +17,14 @@ final class Local
     protected static $prefix;
     protected static $dir;
     protected static $data = [];
-
     protected $value;
     protected $sprint = [];
 
     /**
      * Init format by adding data to modify/format/traverse
-     * @param  mixed  $data
+     * @param mixed $data
      * @return self
+     * @throws Exception
      */
     public static function value(mixed $data)
     {

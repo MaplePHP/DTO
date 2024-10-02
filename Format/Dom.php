@@ -10,7 +10,6 @@
 namespace MaplePHP\DTO\Format;
 
 use MaplePHP\Output\Dom\Document;
-use MaplePHP\DTO\Format\FormatInterface;
 use InvalidArgumentException;
 
 final class Dom extends FormatAbstract
@@ -20,8 +19,7 @@ final class Dom extends FormatAbstract
     protected $str;
 
     /**
-     * Input is mixed data type in the interface becouse I do not know the type before the class
-     * The class constructor MUST handle the input validation
+     * Input is mixed data type in the interface becouse I do not know the type before the class     *  constructor MUST handle the input validation
      * @param string $value
      */
     public function __construct(mixed $value)
@@ -29,7 +27,7 @@ final class Dom extends FormatAbstract
         if (is_array($value) || is_object($value)) {
             throw new InvalidArgumentException("Is expecting a string or a convertable string value.", 1);
         }
-        $this->value = (string)$value;
+        parent::__construct($value);
     }
 
     /**

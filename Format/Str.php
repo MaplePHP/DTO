@@ -15,8 +15,6 @@ use MaplePHP\DTO\MB;
 
 final class Str extends FormatAbstract implements FormatInterface
 {
-    //protected $value;
-
     /**
      * Input is mixed data type in the interface because I do not know the type before
      * The class constructor MUST handle the input validation

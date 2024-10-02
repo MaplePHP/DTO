@@ -10,6 +10,8 @@
 
 namespace MaplePHP\DTO\Format;
 
+use NumberFormatter;
+
 final class Num extends FormatAbstract implements FormatInterface
 {
     private static $numFormatter;
@@ -22,14 +24,17 @@ final class Num extends FormatAbstract implements FormatInterface
      */
     public static function value(mixed $value): FormatInterface
     {
-        $inst = new static($value);
-        return $inst;
+        return new static($value);
     }
 
-    public static function numFormatter()
+    /**
+     * Add number format for currency
+     * @return NumberFormatter
+     */
+    public static function numFormatter(): NumberFormatter
     {
         if (is_null(self::$numFormatter)) {
-            self::$numFormatter = new \NumberFormatter("sv_SE", \NumberFormatter::CURRENCY);
+            self::$numFormatter = new NumberFormatter("sv_SE", NumberFormatter::CURRENCY);
         }
         return self::$numFormatter;
     }
@@ -148,7 +153,7 @@ final class Num extends FormatAbstract implements FormatInterface
     }
 
     /**
-     * Convert number to a currence (e.g. 1000 = 1.000,00 kr)
+     * Convert number to a currency (e.g. 1000 = 1.000,00 kr)
      * @param  string      $currency SEK, EUR
      * @param  int|integer $decimals
      * @return FormatInterface
@@ -157,7 +162,6 @@ final class Num extends FormatAbstract implements FormatInterface
     {
         self::numFormatter()->setAttribute(self::$numFormatter::ROUNDING_MODE, $decimals);
         self::numFormatter()->setAttribute(self::$numFormatter::FRACTION_DIGITS, $decimals);
-
         // Traverse back to string
         return Str::value(self::numFormatter()->formatCurrency($this->float()->get(), $currency));
     }

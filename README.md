@@ -1,97 +1,150 @@
 
+# MaplePHP - Data Transfer Object (DTO)
 
+The MaplePHP DTO library simplifies working with structured data in PHP by wrapping it into objects. This allows easy traversal and transformation through a chainable interface, ensuring consistent, safe data handling and reducing the risk of direct data manipulation.
 
-# MaplePHP - DTO
-Using a DTO library in PHP provides benefits such as encapsulating data, enforcing immutability, validating data, facilitating data transformation, maintaining API compatibility, reducing coupling, improving code readability, and simplifying testing.
+- **Encapsulation**: Encapsulates data within objects.
+- **Immutability**: Ensures data integrity by preventing accidental modification.
+- **Validation**: Facilitates data validation, ensuring the data conforms to specific types or formats.
+- **Data Transformation**: Easily modify and format data using built-in methods.
+- **Low Coupling**: Promotes separation of concerns, reducing dependencies between different parts of your code.
+- **Improved Readability**: Makes code cleaner and easier to understand.
+- **Simplified Testing**: DTOs are easier to test, as they contain only data and transformation logic.
 
+---
 
+**Note:** MaplePHP DTO also includes polyfill classes for Multibyte String and Iconv support.
 
-
+---
 
 ## Usage
-The easiest way is to always start from the **Traverse** class and this will give you the most control.
+
+The simplest way to work with the library is to start with the `Traverse` class, which provides powerful control over your data.
 
 ```php
 use MaplePHP\DTO\Traverse;
 
-$obj = Traverse::value(["firstname" => "<em>daniel</em>", "lastname" => "doe", "slug" => "Lorem ipsum åäö", "price" => "1999.99", "date" => "2023-08-21 14:35:12", "feed" => [
-		"t1" => ["firstname" => "<em>john 1</em>", "lastname" => "doe 1"],
-		"t2" => ["firstname" => "<em>jane 2</em>", "lastname" => "doe 2"]
-	]
+$obj = Traverse::value([
+    "firstname" => "<em>daniel</em>",
+    "lastname" => "doe",
+    "slug" => "Lorem ipsum åäö",
+    "price" => "1999.99",
+    "date" => "2023-08-21 14:35:12",
+    "feed" => [
+        "t1" => ["firstname" => "<em>john 1</em>", "lastname" => "doe 1"],
+        "t2" => ["firstname" => "<em>jane 2</em>", "lastname" => "doe 2"]
+    ]
 ]);
 ```
 
-#### Traversing the data
+### Accessing Nested Data
+Each key in the array is accessible as an object property, and you can continue to drill down into nested arrays, maintaining consistency and safety.
+
 ```php
 echo $obj->feed->t1->firstname;
-// <em>john 1</em>
+// Output: <em>john 1</em>
 ```
 
-#### Traversing the feed
-```php
+### Iterating Through Arrays
 
+```php
 foreach($obj->feed->fetch() as $row) {
-	echo $row->firstname."<br>";
+    echo $row->firstname;
 }
+// Output:
 // <em>john 1</em>
 // <em>jane 2</em>
 ```
 
-### Handlers 
-You can access some Handler to make your life easier:
-**Str, Uri, Num, DateTime, Arr, ...see Format dir for more**
+---
 
-#### Traversing and modify string
+## Built-in Data Handlers
+
+MaplePHP DTO comes with powerful handlers for common data transformations. These handlers make it easy to manipulate strings, numbers, URIs, arrays, dates, and more.
+
+### String Handling Example
+
+You can chain methods for string manipulation:
+
 ```php
-echo $obj->feed->t1->firstname->strStripTags()->strUcFirst()
-// Same as
-// echo $obj->feed->t1->firstname->str()->stripTags()->ucFirst()
-// Result: John 1
-foreach($obj->feed()->fetch()->get() as $row) {
-	echo $row->firstname->strStripTags()->strUcFirst()."<br>";
+echo $obj->feed->t1->firstname->strStripTags()->strUcFirst();
+// Equivalent to:
+// echo $obj->feed->t1->firstname->str()->stripTags()->ucFirst();
+// Output: John 1
+```
+
+You can also apply transformations when iterating over an array:
+
+```php
+foreach($obj->feed->fetch() as $row) {
+    echo $row->firstname->strStripTags()->strUcFirst();
 }
+// Output:
 // John 1
 // Jane 2
 ```
 
-## Examples
+---
+
+## More Examples
+
+Here are more examples of using the DTO library’s built-in handlers for different types of data:
+
+### String Manipulation
+
 ```php
-echo $obj->firstname->strStripTags()->strUcFirst()."<br>";
-// Daniel
-
-echo $obj->price->numToFilesize()."<br>";
-// 1.95 kb
-
-echo $obj->price->numRound(2)->numCurrency("SEK", 2)."<br>";
-// 1 999,99 kr
-
-echo $obj->date("DateTime")->format("y/m/d, \k\l. H:i")."<br>";
-// 23/08/21, kl. 14:35
+echo $obj->firstname->strStripTags()->strUcFirst();
+// Output: Daniel
 ```
 
-## How it works
+### Number Formatting
 
-### Traverse
-When you pass array and object data to the Traverse object it will make it possible for you to easily traverse the array/object. you can then use one of the Handlers to modify the data when you have traversed to the right position.
 ```php
-use MaplePHP\DTO\Traverse;
-$obj = Traverse::value([MIXED_DATA]);
-$obj->arrayKey1()->arrayKey2("HANDLER")->modifyFunction1->modifyFunction2();
+echo $obj->price->numToFilesize();
+// Output: 1.95 kb
+
+echo $obj->price->numRound(2)->numCurrency("SEK", 2);
+// Output: 1 999,99 kr
 ```
 
-### Format handlers
-You can also just access the handlers directly to modify data quickly. 
-```php
-use MaplePHP\DTO\Format;
+### Date Formatting
 
-Format\Str::value([STRING]);
-Format\Num::value([NUMBER]);
-Format\Arr::value([ARRAY]);
-Format\DateTime::value([STRING]);
-```
-#### Example
 ```php
-echo Format\Str::value("lorem")->ucfirst();
-// Lorem
+echo $obj->date->clockFormat("y/m/d, H:i");
+// Output: 23/08/21, 14:35
 ```
 
+---
+
+**Note:** This guide is a work in progress, with more content to be added soon.
+
+---
+
+## How It Works
+
+The **MaplePHP DTO** library operates by wrapping data into objects that allow easy traversal and transformation using a chainable API. This structure allows for consistent and safe data handling, minimizing direct data manipulation risks.
+
+Here’s how the key components of the library work:
+
+### 1. **Traverse Class**
+
+At the core of the library is the `Traverse` class. This class allows you to wrap an associative array (or any data structure) into an object, making each element of the array accessible as an object property.
+
+- **Key-to-Property Mapping**: Each key in the array becomes an object property, and its value is transformed into a nested `Traverse` object if it's an array.
+- **Lazy Loading**: The values are only accessed when needed, which allows you to traverse large data structures efficiently.
+
+### 2. **Handlers for Data Types**
+
+MaplePHP DTO uses specific handlers (such as `Str`, `Num`, `DateTime`, `Uri`, etc.) to manage different data types. These handlers provide methods to transform and validate the data.
+
+- **String Handling**: The `Str` handler enables string-related operations, such as stripping tags, formatting case, and more.
+- **Number Handling**: The `Num` handler allows numerical operations like rounding, formatting as currency, and converting to file sizes.
+- **Date and Time Handling**: The `DateTime` handler provides methods for formatting and manipulating dates and times.
+
+### 3. **Immutability**
+
+When transformations are applied (e.g., `strUcFirst()` or `numRound()`), the library ensures immutability by returning a new `Traverse` instance with the modified data. This prevents accidental mutations of the original data.
+
+### 4. **Fetch Method for Arrays**
+
+The `fetch()` method simplifies working with arrays. Instead of manually looping through the array, you can use `fetch()` to iterate over the elements and apply transformations to each one.
