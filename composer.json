@@ -31,5 +31,8 @@
       "MaplePHP\\DTO\\": ""
     }
   },
-  "minimum-stability": "dev"
+  "minimum-stability": "dev",
+  "require-dev": {
+    "maplephp/unitary": "dev-main"
+  }
 }

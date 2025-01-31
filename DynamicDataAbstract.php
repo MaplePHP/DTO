@@ -23,7 +23,16 @@ abstract class DynamicDataAbstract
     public function __toString(): string
     {
         $val = $this->get();
-        return (is_string($val) ? $val : "");
+        if (is_object($val)) {
+            return serialize($val);
+        }
+        if (is_array($val)) {
+            return json_encode($val);
+        }
+        if (is_resource($this->value)) {
+            return get_resource_type($val);
+        }
+        return $val;
     }
 
     public function __set($key, $value)
@@ -39,5 +48,17 @@ abstract class DynamicDataAbstract
     public function getData(): mixed
     {
         return $this->data;
+    }
+
+    /**
+     * Used to get a readable value
+     * @return string
+     * @throws ErrorException
+     */
+    public function toString(): string
+    {
+        
+
+        return "(unknown type)";
     }
 }

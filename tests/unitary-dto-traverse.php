@@ -4,7 +4,7 @@ use MaplePHP\DTO\Traverse;
 $unit = new MaplePHP\Unitary\Unit();
 
 // Begin by adding a test case
-$unit->case("MaplePHP Request URI path test", function() {
+$unit->case("MaplePHP DTO test", function() {
 
     $obj = Traverse::value([
         "firstname" => "<em>daniel</em>",
@@ -13,10 +13,40 @@ $unit->case("MaplePHP Request URI path test", function() {
         "price" => "1999.99",
         "date" => "2023-08-21 14:35:12",
         "feed" => [
-            "t1" => ["firstname" => "<em>john 1</em>", "lastname" => "doe 1"],
-            "t2" => ["firstname" => "<em>jane 2</em>", "lastname" => "doe 2"]
+            "t1" => ["firstname" => "<em>john 1</em>", "lastname" => "doe-1", 'salary' => 40000, "status" => 1, ['test' => 1]],
+            "t2" => ["firstname" => "<em>jane 2</em>", "lastname" => "doe-2", 'salary' => 20000, "status" => 0, ['test' => 2]],
         ]
     ]);
+
+
+  
+    $map = $obj->feed->map(function($row) {
+        return $row->lastname;
+    });
+
+    $this->add($map->toArray(), function($value) {
+        return $this->equal("doe-1doe-2");
+    }, "Map returned wrong value");
+
+ 
+    $filter = $obj->feed->filter(function($row) {
+        return ($row->status->get() === 1);
+    });
+
+    $this->add($filter->count(), function($value) {
+        return $this->equal(1);
+    }, "Filter returned wrong value");
+
+
+    $reduse = $obj->feed->reduce(function($carry, $item) {
+        return ($carry += $item->salary->get());
+    });
+
+    $this->add($reduse->get(), function($value) {
+        return $this->equal(60000);
+    }, "Reduse returned wrong value");
+
+
 
     // Then add tests to your case:
     // Test 1: Access the validation instance inside the add closure

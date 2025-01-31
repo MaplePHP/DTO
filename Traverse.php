@@ -170,11 +170,21 @@ class Traverse extends DynamicDataAbstract
             $inst->raw = $inst->data;
         }
 
+        if(!is_object($inst->raw) && !is_array($inst->raw)) {
+            $inst->raw = [$inst->raw];
+        }
+
         foreach ($inst->raw as $key => $row) {
+
             if (is_callable($callback) &&
                 (($get = $callback($row, $key, $index)) !== false)) {
                 $row = $get;
             }
+
+            if($row instanceof self) {
+                $row = $row->get();
+            }
+
             $new[$key] = $row;
             $index++;
         }
@@ -209,7 +219,7 @@ class Traverse extends DynamicDataAbstract
                     $value = $row;
                 } else {
                     // Incremental -> value
-                    $value = Format\Str::value($row);
+                    $value = !is_null($row) ? Format\Str::value($row) : null;
                 }
                 $new[$key] = $value;
             }
@@ -271,6 +281,48 @@ class Traverse extends DynamicDataAbstract
         if (!is_null($this->raw)) {
             $this->raw = sprintf($add, $this->raw);
         }
+        return $this;
+    }
+
+    /**
+     * Applies the callback to the elements of the given arrays
+     * https://www.php.net/manual/en/function.array-map.php
+     * @param  callable $callback  A callable to run for each element in each array. 
+     * @param  array    $array    Supplementary variable list of array arguments
+     * @return self
+     */
+    public function map(callable $callback, array ...$array): self
+    {
+        $this->raw = array_map($callback, $this->fetch(), ...$array);
+        return $this;
+    }
+
+    /**
+     * Filters elements of an array using a callback function
+     * https://www.php.net/manual/en/function.array-filter.php
+     * @param  callable|null $callback   The callback function to use
+     *                                   If no callback is supplied, all empty entries of array will be 
+     *                                   removed. See empty() for how PHP defines empty in this case. 
+     * @param  int|integer   $mode       Flag determining what arguments are sent to callback: 
+     * @return self
+     */
+    public function filter(?callable $callback = null, int $mode = 0): self
+    {
+        $data = is_null($callback) ? $this->raw : $this->fetch();
+        $this->raw = array_filter($data, $callback, $mode);
+        return $this;
+    }
+
+    /**
+     * Iteratively reduce the array to a single value using a callback function
+     * https://www.php.net/manual/en/function.array-reduce.php
+     * @param  callable   $callback
+     * @param  mixed|null $initial
+     * @return self
+     */
+    public function reduce(callable $callback, mixed $initial = null): self
+    {
+        $this->raw = array_reduce($this->fetch(), $callback, $initial);
         return $this;
     }
 
