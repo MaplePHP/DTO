@@ -8,7 +8,6 @@ use MaplePHP\DTO\TraverseInterface;
 
 trait ArrayUtilities
 {
-
     /**
      * Applies the callback to the elements of the given arrays
      * https://www.php.net/manual/en/function.array-map.php
@@ -138,6 +137,38 @@ trait ArrayUtilities
     public function prepend(array|TraverseInterface $combine): self
     {
         return $this->merge($combine, true);
+    }
+
+    /**
+     * Remove a portion of the array and replace it with something else
+     * https://www.php.net/manual/en/function.array-splice.php
+     *
+     * @param int $offset
+     * @param int|null $length
+     * @param mixed $replacement
+     * @param mixed|null $splicedResults
+     * @return ArrayUtilities|Traverse
+     */
+    public function splice(
+        int $offset, ?int $length, mixed $replacement = [], mixed &$splicedResults = null
+    ): self {
+        $splicedResults = array_splice($this->raw, $offset, $length, $replacement);
+        $splicedResults = new self($splicedResults);
+        return $this;
+    }
+
+    /**
+     * Extract a slice of the array
+     * https://www.php.net/manual/en/function.array-slice.php
+     *
+     * @param int $offset
+     * @param int|null $length
+     * @param bool $preserveKeys
+     * @return ArrayUtilities|Traverse
+     */
+    public function slice(int $offset, ?int $length, bool $preserveKeys = false): self {
+        $this->raw = array_slice($this->raw, $offset, $length, $preserveKeys);
+        return $this;
     }
 
     /**
@@ -551,14 +582,13 @@ trait ArrayUtilities
      * A helper function to handle collect args
      *
      * @param array|TraverseInterface $collect
-     * @return array|TraverseInterface
+     * @return array
      */
-    protected function handleCollectArg(array|TraverseInterface $collect): array|TraverseInterface
+    protected function handleCollectArg(array|TraverseInterface $collect): array
     {
         if ($collect instanceof TraverseInterface) {
             $collect = $collect->toArray();
         }
         return $collect;
     }
-
 }

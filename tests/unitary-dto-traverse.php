@@ -208,6 +208,18 @@ $unit->case("MaplePHP DTO test", callback: function () {
         'equal' => 'fish'
     ], 'Last returned wrong value');
 
+    $this->add($obj->shopList->splice(1, 2, splicedResults: $result)->count(), [
+        'equal' => 5
+    ], 'Splice returned wrong value');
+
+    $this->add($result->count(), [
+        'equal' => 2
+    ], 'Spliced Results returned wrong value');
+
+    $this->add($obj->shopList->slice(1, 2)->count(), [
+        'equal' => 2
+    ], 'Splice returned wrong value');
+
     $this->add($obj->shopList->prepend(['prepend'])->first(), [
         'equal' => 'prepend'
     ], 'Prepend returned wrong value');

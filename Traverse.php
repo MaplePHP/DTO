@@ -220,14 +220,16 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
         return $this;
     }
 
+
     /**
-     * Json decode value
+     * Returns the JSON representation of a value
+     * https://www.php.net/manual/en/function.json-encode.php
+     *
      * @return self
      */
-    public function jsonDecode(): self
+    public function toJson(mixed $value, int $flags = 0, int $depth = 512): mixed
     {
-        $this->raw = json_decode($this->raw);
-        return $this::value($this->raw);
+        return json_encode($value, $flags, $depth);
     }
 
     /**
