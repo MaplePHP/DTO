@@ -29,7 +29,10 @@
   "autoload": {
     "psr-4": {
       "MaplePHP\\DTO\\": ""
-    }
+    },
+    "files": [
+      "helpers.php"
+    ]
   },
   "minimum-stability": "dev",
   "require-dev": {

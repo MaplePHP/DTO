@@ -10,11 +10,15 @@
 namespace MaplePHP\DTO;
 
 use BadMethodCallException;
+use ErrorException;
 use MaplePHP\DTO\Format\Str;
 use MaplePHP\Validate\Inp;
 use ReflectionClass;
 use ReflectionException;
 use stdClass;
+
+use function MaplePHP\DTO\helpers\debug_dump;
+use function MaplePHP\DTO\helpers\traversArrFromStr;
 
 /**
  * @method arr()
@@ -24,16 +28,28 @@ use stdClass;
  * @method local()
  * @method num()
  * @method str()
+ * @mixin Str
  */
-class Traverse extends DynamicDataAbstract
+class Traverse extends DynamicDataAbstract implements TraverseInterface
 {
+    use Traits\ArrayUtilities;
+
     protected mixed $raw = null; // Use raw to access current instance data (access array)
-    protected $data = null;
 
     public function __construct(mixed $data = null)
     {
         parent::__construct();
         $this->build($data);
+    }
+
+    /**
+     * Init instance
+     * @param mixed $data
+     * @return self
+     */
+    public static function value(mixed $data): self
+    {
+        return new self($data);
     }
 
     /**
@@ -53,8 +69,8 @@ class Traverse extends DynamicDataAbstract
      */
     public function __get($key)
     {
-        if(isset($this->data->{$key})) {
-            $data = $this->data->{$key};
+        if(isset($this->getData()->{$key})) {
+            $data = $this->getData()->{$key};
             if(is_object($data) && !($data instanceof DynamicDataAbstract)) {
                 return $data;
             }
@@ -110,12 +126,55 @@ class Traverse extends DynamicDataAbstract
     }
 
     /**
-     * Get raw
+     * Will return array item at index/key
+     * https://www.php.net/manual/en/function.shuffle.php
+     *
+     * @param int|float|string $key
+     * @return mixed    Will return false if key is missing
+     */
+    public function eq(int|float|string $key): mixed
+    {
+        if (is_string($key) && str_contains($key, ".")) {
+            return traversArrFromStr($this->toArray(), $key);
+        }
+        return ($this->raw[$key] ?? false);
+    }
+
+    /**
+     * Get first item in collection
      * @return mixed
      */
-    public function getRaw(): mixed
+    public function first(): mixed
     {
-        return $this->raw;
+        if(!is_array($this->raw)) {
+            return (string)$this->raw;
+        }
+        return reset($this->raw);
+    }
+
+    /**
+     * Get last item in collection
+     * @return mixed
+     */
+    public function last(): mixed
+    {
+        if(!is_array($this->raw)) {
+            return (string)$this->raw;
+        }
+        return end($this->raw);
+    }
+
+    /**
+     * Searches the array for a given value and returns the first corresponding key if successful
+     * https://www.php.net/manual/en/function.array-search.php
+     *
+     * @param mixed $needle
+     * @param bool $strict
+     * @return string|int|false
+     */
+    public function search(mixed $needle, bool $strict = false): string|int|false
+    {
+        return array_search($needle, $this->raw, $strict);
     }
 
     /**
@@ -133,13 +192,29 @@ class Traverse extends DynamicDataAbstract
      * Validate current item and set to fallback (default: null) if not valid
      * @param string $method
      * @param array $args
-     * @param mixed|null $fallback
-     * @return $this
+     * @return bool
+     * @throws ErrorException|BadMethodCallException
      */
-    public function valid(string $method, array $args, mixed $fallback = null): self
+    public function valid(string $method, array $args = []): bool
     {
         $inp = Inp::value($this->raw);
-        if(!$inp->{$method}(...$args)) {
+        if(!method_exists($inp, $method)) {
+            throw new BadMethodCallException("The DTO valid method \"$method\" does not exist!", 1);
+        }
+        return $inp->{$method}(...$args);
+    }
+
+    /**
+     * Same as value validate but will also continue
+     * @param string $method
+     * @param array $args
+     * @param mixed|null $fallback
+     * @return $this
+     * @throws ErrorException
+     */
+    public function validAndTravers(string $method, array $args, mixed $fallback = null): self
+    {
+        if(!$this->valid($method, $args)) {
             $this->raw = $fallback;
         }
         return $this;
@@ -167,7 +242,7 @@ class Traverse extends DynamicDataAbstract
         $inst = clone $this;
 
         if (is_null($inst->raw)) {
-            $inst->raw = $inst->data;
+            $inst->raw = $inst->getData();
         }
 
         if(!is_object($inst->raw) && !is_array($inst->raw)) {
@@ -175,20 +250,22 @@ class Traverse extends DynamicDataAbstract
         }
 
         foreach ($inst->raw as $key => $row) {
-
             if (is_callable($callback) &&
                 (($get = $callback($row, $key, $index)) !== false)) {
                 $row = $get;
             }
-
             if($row instanceof self) {
                 $row = $row->get();
             }
-
             $new[$key] = $row;
             $index++;
         }
         return $new;
+    }
+
+    public function each(callable $callback)
+    {
+        return $this->fetch($callback);
     }
 
     /**
@@ -203,14 +280,17 @@ class Traverse extends DynamicDataAbstract
         $inst = clone $this;
 
         if (is_null($inst->raw)) {
-            $inst->raw = $inst->data;
+            $inst->raw = $inst->getData();
         }
 
         foreach ($inst->raw as $key => $row) {
             if (!is_null($callback)) {
-                if (($get = $callback($inst::value($inst->raw), $row, $key, $index)) !== false) {
+                if (($get = $callback($inst::value($row), $key, $row, $index)) !== false) {
                     $new[$key] = $get;
+                } else {
+                    break;
                 }
+
             } else {
                 if (is_array($row) || ($row instanceof stdClass)) {
                     // Incremental -> object
@@ -230,18 +310,20 @@ class Traverse extends DynamicDataAbstract
         return $inst->raw;
     }
 
+
     /**
-     * Check if current traverse data is equal to val
-     * @param  string $isVal
-     * @return bool
+     * Dump collection into a human-readable array dump
+     *
+     * @return void
      */
-    public function equalTo(string $isVal): bool
+    public function dump(): void
     {
-        return ($this->raw === $isVal);
+        debug_dump($this->toArray(), "Traverse");
     }
 
     /**
      * Count if row is array. Can be used to validate before @fetch method
+     *
      * @return int
      */
     public function count(): int
@@ -285,48 +367,6 @@ class Traverse extends DynamicDataAbstract
     }
 
     /**
-     * Applies the callback to the elements of the given arrays
-     * https://www.php.net/manual/en/function.array-map.php
-     * @param  callable $callback  A callable to run for each element in each array. 
-     * @param  array    $array    Supplementary variable list of array arguments
-     * @return self
-     */
-    public function map(callable $callback, array ...$array): self
-    {
-        $this->raw = array_map($callback, $this->fetch(), ...$array);
-        return $this;
-    }
-
-    /**
-     * Filters elements of an array using a callback function
-     * https://www.php.net/manual/en/function.array-filter.php
-     * @param  callable|null $callback   The callback function to use
-     *                                   If no callback is supplied, all empty entries of array will be 
-     *                                   removed. See empty() for how PHP defines empty in this case. 
-     * @param  int|integer   $mode       Flag determining what arguments are sent to callback: 
-     * @return self
-     */
-    public function filter(?callable $callback = null, int $mode = 0): self
-    {
-        $data = is_null($callback) ? $this->raw : $this->fetch();
-        $this->raw = array_filter($data, $callback, $mode);
-        return $this;
-    }
-
-    /**
-     * Iteratively reduce the array to a single value using a callback function
-     * https://www.php.net/manual/en/function.array-reduce.php
-     * @param  callable   $callback
-     * @param  mixed|null $initial
-     * @return self
-     */
-    public function reduce(callable $callback, mixed $initial = null): self
-    {
-        $this->raw = array_reduce($this->fetch(), $callback, $initial);
-        return $this;
-    }
-
-    /**
      * Access and return format class object
      * @param string $dtoClassName The DTO format class name
      * @param mixed $value
@@ -363,12 +403,21 @@ class Traverse extends DynamicDataAbstract
     }
 
     /**
-     * Init instance
-     * @param mixed $data
-     * @return self
+     * MOVE TO A CALCULATION LIBRARY
      */
-    public static function value(mixed $data): self
+
+    /**
+     * Calculate the sum of values in an array
+     * https://www.php.net/manual/en/function.array-sum.php
+     *
+     * @return float|int
+     */
+    public function sum(): float|int
     {
-        return new self($data);
+        $arr = $this->raw;
+        if(!is_array($arr)) {
+            $arr = $this->toArray();
+        }
+        return array_sum($arr);
     }
 }

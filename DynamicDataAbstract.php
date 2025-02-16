@@ -11,7 +11,7 @@ namespace MaplePHP\DTO;
 
 abstract class DynamicDataAbstract
 {
-    protected $data = null;
+    private object $data;
 
     abstract public function get();
 
@@ -32,7 +32,7 @@ abstract class DynamicDataAbstract
         if (is_resource($this->value)) {
             return get_resource_type($val);
         }
-        return $val;
+        return (string)$val;
     }
 
     public function __set($key, $value)
@@ -57,8 +57,6 @@ abstract class DynamicDataAbstract
      */
     public function toString(): string
     {
-        
-
         return "(unknown type)";
     }
 }
