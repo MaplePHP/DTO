@@ -44,6 +44,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
 
     /**
      * Init instance
+     *
      * @param mixed $data
      * @return self
      */
@@ -54,6 +55,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
 
     /**
      * With new object
+     *
      * @param mixed $data
      * @return $this
      */
@@ -64,6 +66,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
 
     /**
      * Object traverser
+     *
      * @param $key
      * @return Traverse|null
      */
@@ -87,6 +90,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
 
     /**
      * Immutable formating class
+     *
      * @param $method
      * @param $args
      * @return self
@@ -142,6 +146,8 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
 
     /**
      * Get first item in collection
+     * https://www.php.net/manual/en/function.reset.php
+     *
      * @return mixed
      */
     public function first(): mixed
@@ -154,6 +160,8 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
 
     /**
      * Get last item in collection
+     * https://www.php.net/manual/en/function.end.php
+     *
      * @return mixed
      */
     public function last(): mixed
@@ -178,14 +186,18 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
     }
 
     /**
-     * Add a data to new object column/name
-     * @param string $columnName The new column name
-     * @param mixed  $value      The added value
+     * Will add item to object and method chain
+     *
+     * @param string $key  The object key name
+     * @param mixed $value The object item value
+     * @return self
      */
-    public function add(string $columnName, mixed $value): self
+    public function add(string $key, mixed $value): self
     {
-        $this->{$columnName} = $value;
-        return $this;
+        $inst = clone $this;
+        $inst->addToObject($key, $value);
+        $inst->raw = $inst->getData()->{$key};
+        return $inst;
     }
 
     /**
@@ -205,14 +217,16 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
     }
 
     /**
-     * Same as value validate but will also continue
+     * Same as value validate but will method chain.
+     * If invalid then the value will be set to "null" OR whatever you set the fallback
+     *
      * @param string $method
      * @param array $args
      * @param mixed|null $fallback
      * @return $this
      * @throws ErrorException
      */
-    public function validAndTravers(string $method, array $args, mixed $fallback = null): self
+    public function validChaining(string $method, array $args, mixed $fallback = null): self
     {
         if(!$this->valid($method, $args)) {
             $this->raw = $fallback;

@@ -42,11 +42,13 @@ interface TraverseInterface
     public function with(mixed $data): self;
 
     /**
-     * Add a data to new object column/name
-     * @param string $columnName The new column name
-     * @param mixed  $value      The added value
+     * Will add item to object and method chain
+     *
+     * @param string $key  The object key name
+     * @param mixed $value The object item value
+     * @return self
      */
-    public function add(string $columnName, mixed $value): self;
+    public function add(string $key, mixed $value): self;
 
     /**
      * Get/return result

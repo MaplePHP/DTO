@@ -28,9 +28,23 @@ $unit->case("MaplePHP DTO test", callback: function () {
         'randList' => ['lorem', 'ipsum', 'dolor', 'sit', 'lorem', 'amet', 'sum'],
     ]);
 
-     $this->add($obj->shopList->keys()->eq(1), [
+
+
+    $this->add($obj
+        ->add('qwddqwq', ['Hello'])
+        ->merge(['World'])
+        ->implode("-")
+        ->strToLower()->get(), [
+            'equal' => 'hello-world',
+        ],
+        "Add returned wrong string value");
+
+
+    $this->add($obj->shopList->keys()->eq(1), [
         'equal' => 1,
     ], "Keys returned wrong key value");
+
+
 
     $this->add($obj->shopList->next()->next()->key()->get(), [
         'equal' => 2,

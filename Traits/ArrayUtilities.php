@@ -18,8 +18,9 @@ trait ArrayUtilities
      */
     public function map(callable $callback, array ...$array): self
     {
-        $this->raw = array_map($callback, $this->fetch(), ...$array);
-        return $this;
+        $inst = clone $this;
+        $inst->raw = array_map($callback, $inst->fetch(), ...$array);
+        return $inst;
     }
 
     /**
@@ -34,9 +35,10 @@ trait ArrayUtilities
      */
     public function filter(?callable $callback = null, int $mode = 0): self
     {
-        $data = is_null($callback) ? $this->raw : $this->fetch();
-        $this->raw = array_filter($data, $callback, $mode);
-        return $this;
+        $inst = clone $this;
+        $data = is_null($callback) ? $inst->raw : $inst->fetch();
+        $inst->raw = array_filter($data, $callback, $mode);
+        return $inst;
     }
 
     /**
@@ -49,8 +51,9 @@ trait ArrayUtilities
      */
     public function reduce(callable $callback, mixed $initial = null): self
     {
-        $this->raw = array_reduce($this->fetch(), $callback, $initial);
-        return $this;
+        $inst = clone $this;
+        $inst->raw = array_reduce($inst->fetch(), $callback, $initial);
+        return $inst;
     }
 
     /**
@@ -63,8 +66,9 @@ trait ArrayUtilities
      */
     public function chunk(int $length, bool $preserveKeys = false): self
     {
-        $this->raw = array_chunk($this->fetch(), $length, $preserveKeys);
-        return $this;
+        $inst = clone $this;
+        $inst->raw = array_chunk($inst->fetch(), $length, $preserveKeys);
+        return $inst;
     }
 
     /**
@@ -75,18 +79,19 @@ trait ArrayUtilities
      */
     public function flatten(bool $preserveKeys = false): self
     {
+        $inst = clone $this;
         $result = [];
-        $array = $this->toArray();
-        array_walk_recursive($array, function ($item, $key) use (&$result, $preserveKeys) {
-            $item = $this->with($item);
+        $array = $inst->toArray();
+        array_walk_recursive($array, function ($item, $key) use (&$result, $inst, $preserveKeys) {
+            $item = $inst->with($item);
             if ($preserveKeys) {
                 $result[$key] = $item;
             } else {
                 $result[] = $item;
             }
         });
-        $this->raw = $result;
-        return $this;
+        $inst->raw = $result;
+        return $inst;
     }
 
     /**
@@ -108,13 +113,14 @@ trait ArrayUtilities
      */
     public function merge(array|TraverseInterface $combine, bool $before = false): self
     {
-        $combine = $this->handleCollectArg($combine);
+        $inst = clone $this;
+        $combine = $inst->handleCollectArg($combine);
         if ($before) {
-            $this->raw = array_merge($combine, $this->raw);
+            $inst->raw = array_merge($combine, $inst->raw);
         } else {
-            $this->raw = array_merge($this->raw, $combine);
+            $inst->raw = array_merge($inst->raw, $combine);
         }
-        return $this;
+        return $inst;
     }
 
     /**
@@ -152,9 +158,10 @@ trait ArrayUtilities
     public function splice(
         int $offset, ?int $length, mixed $replacement = [], mixed &$splicedResults = null
     ): self {
-        $splicedResults = array_splice($this->raw, $offset, $length, $replacement);
+        $inst = clone $this;
+        $splicedResults = array_splice($inst->raw, $offset, $length, $replacement);
         $splicedResults = new self($splicedResults);
-        return $this;
+        return $inst;
     }
 
     /**
@@ -166,9 +173,11 @@ trait ArrayUtilities
      * @param bool $preserveKeys
      * @return ArrayUtilities|Traverse
      */
-    public function slice(int $offset, ?int $length, bool $preserveKeys = false): self {
-        $this->raw = array_slice($this->raw, $offset, $length, $preserveKeys);
-        return $this;
+    public function slice(int $offset, ?int $length, bool $preserveKeys = false): self
+    {
+        $inst = clone $this;
+        $inst->raw = array_slice($inst->raw, $offset, $length, $preserveKeys);
+        return $inst;
     }
 
     /**
@@ -180,9 +189,10 @@ trait ArrayUtilities
      */
     public function diff(array|TraverseInterface $array): self
     {
-        $array = $this->handleCollectArg($array);
-        $this->raw = array_diff($this->raw, $array);
-        return $this;
+        $inst = clone $this;
+        $array = $inst->handleCollectArg($array);
+        $inst->raw = array_diff($inst->raw, $array);
+        return $inst;
     }
 
     /**
@@ -194,9 +204,10 @@ trait ArrayUtilities
      */
     public function diffAssoc(array|TraverseInterface $array): self
     {
-        $array = $this->handleCollectArg($array);
-        $this->raw = array_diff_assoc($this->raw, $array);
-        return $this;
+        $inst = clone $this;
+        $array = $inst->handleCollectArg($array);
+        $inst->raw = array_diff_assoc($inst->raw, $array);
+        return $inst;
     }
 
     /**
@@ -208,9 +219,10 @@ trait ArrayUtilities
      */
     public function diffKey(array|TraverseInterface $array): self
     {
-        $array = $this->handleCollectArg($array);
-        $this->raw = array_diff_key($this->raw, $array);
-        return $this;
+        $inst = clone $this;
+        $array = $inst->handleCollectArg($array);
+        $inst->raw = array_diff_key($inst->raw, $array);
+        return $inst;
     }
 
     /**
@@ -222,8 +234,9 @@ trait ArrayUtilities
      */
     public function unique(int $flags = SORT_STRING): self
     {
-        $this->raw = array_unique($this->raw, $flags);
-        return $this;
+        $inst = clone $this;
+        $inst->raw = array_unique($inst->raw, $flags);
+        return $inst;
     }
 
 
@@ -234,8 +247,9 @@ trait ArrayUtilities
      */
     public function duplicates(): self
     {
-        $this->raw = array_unique(array_diff_assoc($this->raw, array_unique($this->raw)));
-        return $this;
+        $inst = clone $this;
+        $inst->raw = array_unique(array_diff_assoc($inst->raw, array_unique($inst->raw)));
+        return $inst;
     }
 
     /**
@@ -246,8 +260,9 @@ trait ArrayUtilities
      */
     public function flip(): self
     {
-        $this->raw = array_flip($this->raw);
-        return $this;
+        $inst = clone $this;
+        $inst->raw = array_flip($inst->raw);
+        return $inst;
     }
 
     /**
@@ -259,12 +274,13 @@ trait ArrayUtilities
      */
     public function unset(string|array ...$keySpread): self
     {
-        $inst = new self($keySpread);
-        $flatten = $inst->flatten()->toArray();
+        $inst = clone $this;
+        $newInst = new self($keySpread);
+        $flatten = $newInst->flatten()->toArray();
         foreach ($flatten as $key) {
-            unset($this->raw[$key]);
+            unset($inst->raw[$key]);
         }
-        return $this;
+        return $inst;
     }
 
     /**
@@ -277,8 +293,9 @@ trait ArrayUtilities
      */
     public function column(int|string|null $columnKey, int|string|null $indexKey = null): self
     {
-        $this->raw = array_column($this->raw, $columnKey, $indexKey);
-        return $this;
+        $inst = clone $this;
+        $inst->raw = array_column($inst->raw, $columnKey, $indexKey);
+        return $inst;
     }
 
     /**
@@ -298,8 +315,9 @@ trait ArrayUtilities
      */
     public function shift(mixed &$value = null): self
     {
-        $value = array_shift($this->raw);
-        return $this;
+        $inst = clone $this;
+        $value = array_shift($inst->raw);
+        return $inst;
     }
 
     /**
@@ -311,8 +329,9 @@ trait ArrayUtilities
      */
     public function pop(mixed &$value = null): self
     {
-        $value = array_pop($this->raw);
-        return $this;
+        $inst = clone $this;
+        $value = array_pop($inst->raw);
+        return $inst;
     }
 
     /**
@@ -324,8 +343,9 @@ trait ArrayUtilities
      */
     public function unshift(mixed ...$value): self
     {
-        array_unshift($this->raw, ...$value);
-        return $this;
+        $inst = clone $this;
+        array_unshift($inst->raw, ...$value);
+        return $inst;
     }
 
     /**
@@ -337,8 +357,9 @@ trait ArrayUtilities
      */
     public function push(mixed ...$value): self
     {
-        array_push($this->raw, ...$value);
-        return $this;
+        $inst = clone $this;
+        array_push($inst->raw, ...$value);
+        return $inst;
     }
 
     /**
@@ -351,8 +372,9 @@ trait ArrayUtilities
      */
     public function pad(int $length, mixed $value): self
     {
-        $this->raw = array_pad($this->raw, $length, $value);
-        return $this;
+        $inst = clone $this;
+        $inst->raw = array_pad($inst->raw, $length, $value);
+        return $inst;
     }
 
     /**
@@ -366,8 +388,9 @@ trait ArrayUtilities
      */
     public function fill(int $startIndex, int $count, mixed $value): self
     {
-        $this->raw = array_fill($startIndex, $count, $value);
-        return $this;
+        $inst = clone $this;
+        $inst->raw = array_fill($startIndex, $count, $value);
+        return $inst;
     }
 
     /**
@@ -381,8 +404,9 @@ trait ArrayUtilities
      */
     public function range(string|int|float $start, string|int|float $end, int|float $step = 1): self
     {
-        $this->raw = range($start, $end, $step);
-        return $this;
+        $inst = clone $this;
+        $inst->raw = range($start, $end, $step);
+        return $inst;
     }
 
     /**
@@ -393,8 +417,9 @@ trait ArrayUtilities
      */
     public function shuffle(): self
     {
-        shuffle($this->raw);
-        return $this;
+        $inst = clone $this;
+        shuffle($inst->raw);
+        return $inst;
     }
 
     /**
@@ -406,8 +431,9 @@ trait ArrayUtilities
      */
     public function rand(int $num = 1): self
     {
-        $this->raw = array_rand($this->raw, $num);
-        return $this;
+        $inst = clone $this;
+        $inst->raw = array_rand($inst->raw, $num);
+        return $inst;
     }
 
     /**
@@ -419,8 +445,9 @@ trait ArrayUtilities
      */
     public function replace(array ...$replacements): self
     {
-        $this->raw = array_replace($this->raw, ...$replacements);
-        return $this;
+        $inst = clone $this;
+        $inst->raw = array_replace($inst->raw, ...$replacements);
+        return $inst;
     }
 
     /**
@@ -432,8 +459,9 @@ trait ArrayUtilities
      */
     public function replaceRecursive(array ...$replacements): self
     {
-        $this->raw = array_replace_recursive($this->raw, ...$replacements);
-        return $this;
+        $inst = clone $this;
+        $inst->raw = array_replace_recursive($inst->raw, ...$replacements);
+        return $inst;
     }
 
     /**
@@ -445,8 +473,9 @@ trait ArrayUtilities
      */
     public function reverse(bool $preserveKeys = false): self
     {
-        $this->raw = array_reverse($this->raw, $preserveKeys);
-        return $this;
+        $inst = clone $this;
+        $inst->raw = array_reverse($inst->raw, $preserveKeys);
+        return $inst;
     }
 
     /**
@@ -504,10 +533,11 @@ trait ArrayUtilities
      */
     public function walk(Closure $call, mixed $arg = null): self
     {
-        $this->raw = $this->toArray();
-        $call = Closure::bind($call, $this);
-        array_walk($this->raw, $call, $arg);
-        return $this;
+        $inst = clone $this;
+        $inst->raw = $inst->toArray();
+        $call = Closure::bind($call, $inst);
+        array_walk($inst->raw, $call, $arg);
+        return $inst;
     }
 
     /**
@@ -520,10 +550,11 @@ trait ArrayUtilities
      */
     public function walkRecursive(Closure $call, mixed $arg = null): self
     {
-        $this->raw = $this->toArray();
-        $call = Closure::bind($call, $this);
-        array_walk_recursive($this->raw, $call, $arg);
-        return $this;
+        $inst = clone $this;
+        $inst->raw = $inst->toArray();
+        $call = Closure::bind($call, $inst);
+        array_walk_recursive($inst->raw, $call, $arg);
+        return $inst;
     }
 
     /**
@@ -532,8 +563,9 @@ trait ArrayUtilities
      */
     public function next(): self
     {
-        next($this->raw);
-        return $this;
+        $inst = clone $this;
+        next($inst->raw);
+        return $inst;
     }
 
     /**
@@ -542,8 +574,9 @@ trait ArrayUtilities
      */
     public function prev(): self
     {
-        prev($this->raw);
-        return $this;
+        $inst = clone $this;
+        prev($inst->raw);
+        return $inst;
     }
 
     /**
@@ -554,12 +587,13 @@ trait ArrayUtilities
      */
     public function key(): self
     {
-        $arr = $this->raw;
+        $inst = clone $this;
+        $arr = $inst->raw;
         if (!is_array($arr)) {
-            $arr = $this->toArray();
+            $arr = $inst->toArray();
         }
-        $this->raw = key($arr);
-        return $this;
+        $inst->raw = key($arr);
+        return $inst;
     }
 
     /**
@@ -570,12 +604,27 @@ trait ArrayUtilities
      */
     public function keys(): self
     {
-        $arr = $this->raw;
+        $inst = clone $this;
+        $arr = $inst->raw;
         if (!is_array($arr)) {
-            $arr = $this->toArray();
+            $arr = $inst->toArray();
         }
-        $this->raw = array_keys($arr);
-        return $this;
+        $inst->raw = array_keys($arr);
+        return $inst;
+    }
+
+    /**
+     * Join array elements with a string
+     * https://www.php.net/implode
+     *
+     * @param array|string $separator
+     * @return Traverse|ArrayUtilities
+     */
+    public function implode(array|string $separator = ""): self
+    {
+        $inst = clone $this;
+        $inst->raw = implode($separator, $inst->raw);
+        return $inst;
     }
 
     /**
