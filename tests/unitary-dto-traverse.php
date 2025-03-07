@@ -6,7 +6,6 @@ $unit = new MaplePHP\Unitary\Unit();
 
 // Begin by adding a test case
 $unit->case("MaplePHP DTO test", callback: function () {
-
     $obj = Traverse::value([
         "firstname" => "<em>daniel</em>",
         "lastname" => "doe",

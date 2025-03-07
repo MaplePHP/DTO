@@ -30,6 +30,17 @@ final class Clock extends FormatAbstract implements FormatInterface
     }
 
     /**
+     * Add translation
+     *
+     * @param string $langCode
+     * @return $this
+     */
+    public function setLanguage(string $langCode): self
+    {
+        return $this;
+    }
+
+    /**
      * Format date data
      * @param string $format
      * @return object

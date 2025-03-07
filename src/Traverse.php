@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @Package:    MaplePHP - The main traverse class
  * @Author:     Daniel Ronkainen
@@ -9,6 +8,8 @@
 
 namespace MaplePHP\DTO;
 
+require_once "helpers.php";
+
 use BadMethodCallException;
 use ErrorException;
 use MaplePHP\DTO\Format\Str;
@@ -16,9 +17,6 @@ use MaplePHP\Validate\Inp;
 use ReflectionClass;
 use ReflectionException;
 use stdClass;
-
-use function MaplePHP\DTO\helpers\debug_dump;
-use function MaplePHP\DTO\helpers\traversArrFromStr;
 
 /**
  * @method arr()
@@ -139,7 +137,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
     public function eq(int|float|string $key): mixed
     {
         if (is_string($key) && str_contains($key, ".")) {
-            return traversArrFromStr($this->toArray(), $key);
+            return Helpers::traversArrFromStr($this->toArray(), $key);
         }
         return ($this->raw[$key] ?? false);
     }
@@ -334,7 +332,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
      */
     public function dump(): void
     {
-        debug_dump($this->toArray(), "Traverse");
+        Helpers::debugDump($this->toArray(), "Traverse");
     }
 
     /**
