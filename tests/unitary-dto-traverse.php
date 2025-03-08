@@ -1,5 +1,6 @@
 <?php
 
+use MaplePHP\DTO\Format\Arr;
 use MaplePHP\DTO\Traverse;
 
 $unit = new MaplePHP\Unitary\Unit();
@@ -28,21 +29,19 @@ $unit->case("MaplePHP DTO test", callback: function () {
     ]);
 
 
-
     $this->add($obj
         ->add('qwddqwq', ['Hello'])
         ->merge(['World'])
         ->implode("-")
         ->strToLower()->get(), [
-            'equal' => 'hello-world',
-        ],
+        'equal' => 'hello-world',
+    ],
         "Add returned wrong string value");
 
 
     $this->add($obj->shopList->keys()->eq(1), [
         'equal' => 1,
     ], "Keys returned wrong key value");
-
 
 
     $this->add($obj->shopList->next()->next()->key()->get(), [
@@ -92,7 +91,7 @@ $unit->case("MaplePHP DTO test", callback: function () {
     ], "Walk Recursive returned wrong value");
 
     $this->add($obj->shopList->walk(function ($value, $key) {
-        if($key !== 2 && $value !== "milk") {
+        if ($key !== 2 && $value !== "milk") {
             $this->unset($key);
         }
     })->count(), [
@@ -314,5 +313,32 @@ $unit->case("MaplePHP DTO test", callback: function () {
     $this->add($obj->feed->t1->firstname->strStripTags()->strUcFirst()->get(), [
         "equal" => $obj->feed->t1->firstname->str()->stripTags()->ucFirst()->get()
     ], "Values does not match");
+
+    $this->add($obj->feed->t1->firstname->strStripTags()->strUcFirst()->get(), [
+        "equal" => $obj->feed->t1->firstname->str()->stripTags()->ucFirst()->get()
+    ], "Values does not match");
+
+    $val = Arr::value([100 => 'a', 200 => 'b', 201 => 'c', 202 => 'd', 404 => 'e', 403 => 'f'])
+        ->unset(200, 201, 202)
+        ->arrayKeys() // polyfill class used in Arr
+        ->count();
+
+    $this->add($val, [
+        "equal" => 3
+    ], "Values does not match");
+
+
+    \MaplePHP\DTO\Format\Clock::setDefaultLanguage('sv_SE');
+    $this->add($obj->date->clockFormat('FM', 'is_IS')->get(), [
+        "equal" => 'ágústágú.'
+    ], "Month translation to is_IS failed");
+
+    $this->add($obj->date->clockFormat('FM')->get(), [
+        "equal" => 'augustiaug'
+    ], "Month translation to sv_SE failed");
+
+    $this->add($obj->date->clockFormat('lD')->get(), [
+        "equal" => 'måndagmån'
+    ], "Weekday translation to sv_SE failed");
 
 });

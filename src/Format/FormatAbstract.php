@@ -15,11 +15,11 @@ use ReflectionException;
 
 abstract class FormatAbstract
 {
-    protected $value;
+    protected $raw;
 
     public function __construct(mixed $value)
     {
-        $this->value = $value;
+        $this->raw = $value;
     }
 
     /**
@@ -28,7 +28,7 @@ abstract class FormatAbstract
      */
     public function get(): mixed
     {
-        return $this->value;
+        return $this->raw;
     }
 
     /**
@@ -38,8 +38,8 @@ abstract class FormatAbstract
      */
     public function fallback(string $fallback): self
     {
-        if (!$this->value) {
-            $this->value = $fallback;
+        if (!$this->raw) {
+            $this->raw = $fallback;
         }
         return $this;
     }
@@ -69,8 +69,8 @@ abstract class FormatAbstract
      */
     public function sprint(string $add): static
     {
-        if (!is_null($this->value)) {
-            $this->value = sprintf($add, $this->value);
+        if (!is_null($this->raw)) {
+            $this->raw = sprintf($add, $this->raw);
         }
         return $this;
     }
@@ -90,6 +90,6 @@ abstract class FormatAbstract
         }
         $reflect = new ReflectionClass($className);
         $instance = $reflect->newInstanceWithoutConstructor();
-        return $instance->value($this->value);
+        return $instance->value($this->raw);
     }
 }

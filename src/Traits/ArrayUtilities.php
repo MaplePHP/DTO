@@ -2,7 +2,9 @@
 
 namespace MaplePHP\DTO\Traits;
 
+use BcMath\Number;
 use Closure;
+use MaplePHP\DTO\Format\Arr;
 use MaplePHP\DTO\Traverse;
 use MaplePHP\DTO\TraverseInterface;
 
@@ -270,9 +272,9 @@ trait ArrayUtilities
      * https://www.php.net/manual/en/function.unset.php
      *
      * @param string ...$keySpread
-     * @return Traverse|ArrayUtilities
+     * @return Arr|ArrayUtilities|Traverse
      */
-    public function unset(string|array ...$keySpread): self
+    public function unset(string|int|float|array ...$keySpread): self
     {
         $inst = clone $this;
         $newInst = new self($keySpread);
@@ -281,6 +283,23 @@ trait ArrayUtilities
             unset($inst->raw[$key]);
         }
         return $inst;
+    }
+
+    /**
+     * Will explode an array item value and then merge it into array in same hierarchy
+     *
+     * @param string $separator
+     * @return Arr|ArrayUtilities|Traverse
+     */
+    public function arrayItemExpMerge(string $separator): self
+    {
+        $new = [];
+        foreach ($this->raw as $item) {
+            $exp = explode($separator, $item);
+            $new = array_merge($new, $exp);
+        }
+        $this->raw = $new;
+        return $this;
     }
 
     /**
@@ -625,6 +644,26 @@ trait ArrayUtilities
         $inst = clone $this;
         $inst->raw = implode($separator, $inst->raw);
         return $inst;
+    }
+
+
+    /**
+     * Extract all array items with array key prefix ("prefix_"name)
+     *
+     * @param string $search wildcard prefix
+     * @return Arr|ArrayUtilities|Traverse
+     */
+    public function wildcardSearch(string $search): self
+    {
+        $regex = "/^" . str_replace(['\*', '\?'], ['.*', '.'], preg_quote($search, '/')) . "$/";
+        $matches = [];
+        foreach ($this->raw as $element) {
+            if (preg_match($regex, $element)) {
+                $matches[] = $element;
+            }
+        }
+        $this->raw = $matches;
+        return $this;
     }
 
     /**

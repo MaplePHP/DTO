@@ -74,7 +74,7 @@ final class Encode extends FormatAbstract implements FormatInterface
     public function encode(): string|array
     {
         // Always url decode first
-        $this->value = $this->urldecode(function ($value) {
+        $this->raw = $this->urldecode(function ($value) {
             $uri = Str::value((string)$value);
             if ($this->urlencode) {
                 $uri->rawurlencode();
@@ -88,7 +88,7 @@ final class Encode extends FormatAbstract implements FormatInterface
             return $uri->get();
         });
 
-        return $this->value;
+        return $this->raw;
     }
 
     /**
@@ -98,8 +98,8 @@ final class Encode extends FormatAbstract implements FormatInterface
      */
     public function urldecode(?callable $callback = null): string|array
     {
-        if (is_array($this->value)) {
-            $this->value = Arr::value($this->value)->walk(function ($value) use ($callback) {
+        if (is_array($this->raw)) {
+            $this->raw = Arr::value($this->raw)->walk(function ($value) use ($callback) {
                 $value = Str::value((string)$value)->rawurldecode()->get();
                 if (!is_null($callback)) {
                     $value = $callback($value);
@@ -109,12 +109,12 @@ final class Encode extends FormatAbstract implements FormatInterface
             })->get();
 
         } else {
-            $this->value = Str::value($this->value)->rawurldecode()->get();
+            $this->raw = Str::value($this->raw)->rawurldecode()->get();
             if (!is_null($callback)) {
-                $this->value = $callback($this->value);
+                $this->raw = $callback($this->raw);
             }
         }
-        return $this->value;
+        return $this->raw;
     }
 
     /**

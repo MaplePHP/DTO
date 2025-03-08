@@ -1,6 +1,6 @@
 <?php
 /**
- * This is a Multibyte library
+ * This is a Polyfill library for Multibyte
  * It is tho recommended to install mb on the server if is missing
  */
 

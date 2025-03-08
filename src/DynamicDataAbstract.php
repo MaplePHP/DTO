@@ -15,6 +15,9 @@ abstract class DynamicDataAbstract
 
     abstract public function get();
 
+    /**
+     * Create a dynamic object that holds a dynamic set of items
+     */
     public function __construct()
     {
         $this->data = new \stdClass();

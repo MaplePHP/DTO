@@ -45,7 +45,7 @@ final class Num extends FormatAbstract implements FormatInterface
      */
     public function float(): self
     {
-        $this->value = (float)$this->value;
+        $this->raw = (float)$this->raw;
         return $this;
     }
 
@@ -55,7 +55,7 @@ final class Num extends FormatAbstract implements FormatInterface
      */
     public function int(): self
     {
-        $this->value = (int)$this->value;
+        $this->raw = (int)$this->raw;
         return $this;
     }
 
@@ -67,7 +67,7 @@ final class Num extends FormatAbstract implements FormatInterface
     public function round(int $dec = 0): self
     {
         $this->float();
-        $this->value = round($this->value, $dec);
+        $this->raw = round($this->raw, $dec);
         return $this;
     }
 
@@ -78,7 +78,7 @@ final class Num extends FormatAbstract implements FormatInterface
     public function floor(): self
     {
         $this->float();
-        $this->value = floor($this->value);
+        $this->raw = floor($this->raw);
         return $this;
     }
 
@@ -89,7 +89,7 @@ final class Num extends FormatAbstract implements FormatInterface
     public function ceil(): self
     {
         $this->float();
-        $this->value = ceil($this->value);
+        $this->raw = ceil($this->raw);
         return $this;
     }
 
@@ -100,7 +100,7 @@ final class Num extends FormatAbstract implements FormatInterface
     public function toKb(): self
     {
         $this->float();
-        $this->value = round(($this->value / 1024), 2);
+        $this->raw = round(($this->raw / 1024), 2);
         return $this;
     }
 
@@ -112,11 +112,11 @@ final class Num extends FormatAbstract implements FormatInterface
     {
         $this->float();
         $precision = 2;
-        $base = log($this->value) / log(1024);
+        $base = log($this->raw) / log(1024);
         $suffixes = ['', ' kb', ' mb', ' g', ' t'];
         $baseFloor = (int)floor($base);
         $suffix = (isset($suffixes[$baseFloor])) ? $suffixes[$baseFloor] : "";
-        $this->value = round(pow(1024, $base - $baseFloor), $precision) . $suffix;
+        $this->raw = round(pow(1024, $base - $baseFloor), $precision) . $suffix;
         return $this;
     }
 
@@ -126,7 +126,7 @@ final class Num extends FormatAbstract implements FormatInterface
      */
     public function toBytes(): self
     {
-        $val = $this->value;
+        $val = $this->raw;
 
         preg_match('#([0-9]+)[\s]*([a-z]+)#i', $val, $matches);
         $last = isset($matches[2]) ? $matches[2] : "";
@@ -147,7 +147,7 @@ final class Num extends FormatAbstract implements FormatInterface
             case 'kb':
                 $val *= 1024;
         }
-        $this->value = $val;
+        $this->raw = $val;
 
         return $this;
     }

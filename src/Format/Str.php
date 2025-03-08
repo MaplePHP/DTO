@@ -45,7 +45,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function strVal(): string
     {
-        return (string)$this->value;
+        return (string)$this->raw;
     }
 
     /**
@@ -58,12 +58,12 @@ final class Str extends FormatAbstract implements FormatInterface
     public function excerpt(int $length = 40, string $ending = "..."): self
     {
         $this->stripTags()->entityDecode();
-        $this->value = str_replace(["'", '"', "”"], ["", "", ""], $this->strVal());
-        $mb = new MB($this->value);
+        $this->raw = str_replace(["'", '"', "”"], ["", "", ""], $this->strVal());
+        $mb = new MB($this->raw);
         $strlen = $mb->strlen();
-        $this->value = trim($mb->substr(0, $length));
+        $this->raw = trim($mb->substr(0, $length));
         if ($strlen > $length) {
-            $this->value .= $ending;
+            $this->raw .= $ending;
         }
         return $this;
     }
@@ -74,7 +74,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function nl2br(): self
     {
-        $this->value = nl2br($this->strVal());
+        $this->raw = nl2br($this->strVal());
         return $this;
     }
 
@@ -84,7 +84,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function trailingSlash(): self
     {
-        $this->value = rtrim($this->strVal(), "/") . '/';
+        $this->raw = rtrim($this->strVal(), "/") . '/';
         return $this;
     }
 
@@ -95,7 +95,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function stripTags(string $whitelist = ""): self
     {
-        $this->value = strip_tags($this->strVal(), $whitelist);
+        $this->raw = strip_tags($this->strVal(), $whitelist);
         return $this;
     }
 
@@ -106,7 +106,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function specialChars(int $flag = ENT_QUOTES): self
     {
-        $this->value = htmlspecialchars($this->strVal(), $flag, 'UTF-8');
+        $this->raw = htmlspecialchars($this->strVal(), $flag, 'UTF-8');
         return $this;
     }
 
@@ -117,7 +117,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function sanitizeIdentifiers(): self
     {
-        $this->value = preg_replace('/[^a-zA-Z0-9_-]/', '', $this->value);
+        $this->raw = preg_replace('/[^a-zA-Z0-9_-]/', '', $this->raw);
         return $this;
     }
 
@@ -139,7 +139,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function decode(?int $flag = ENT_QUOTES): self
     {
-        $this->value = htmlspecialchars_decode($this->strVal(), $flag);
+        $this->raw = htmlspecialchars_decode($this->strVal(), $flag);
         return $this;
     }
 
@@ -151,7 +151,7 @@ final class Str extends FormatAbstract implements FormatInterface
     public function clearBreaks(): self
     {
 
-        $this->value = preg_replace('/(\v|\s)+/', ' ', $this->strVal());
+        $this->raw = preg_replace('/(\v|\s)+/', ' ', $this->strVal());
         return $this->trim();
     }
 
@@ -162,7 +162,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function clearWhitespace(): self
     {
-        $this->value = preg_replace('/\s+/', ' ', $this->strVal());
+        $this->raw = preg_replace('/\s+/', ' ', $this->strVal());
         return $this->trim();
     }
 
@@ -172,7 +172,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function entityDecode(): self
     {
-        $this->value = html_entity_decode($this->strVal());
+        $this->raw = html_entity_decode($this->strVal());
         return $this;
     }
 
@@ -182,7 +182,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function trim(): self
     {
-        $this->value = trim($this->strVal());
+        $this->raw = trim($this->strVal());
         return $this;
     }
 
@@ -192,7 +192,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function toLower(): self
     {
-        $this->value = strtolower($this->strVal());
+        $this->raw = strtolower($this->strVal());
         return $this;
     }
 
@@ -202,7 +202,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function toUpper(): self
     {
-        $this->value = strtoupper($this->strVal());
+        $this->raw = strtoupper($this->strVal());
         return $this;
     }
 
@@ -212,7 +212,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function ucFirst(): self
     {
-        $this->value = ucfirst($this->strVal());
+        $this->raw = ucfirst($this->strVal());
         return $this;
     }
 
@@ -222,7 +222,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function leadingZero(): self
     {
-        $this->value = str_pad($this->strVal(), 2, '0', STR_PAD_LEFT);
+        $this->raw = str_pad($this->strVal(), 2, '0', STR_PAD_LEFT);
         return $this;
     }
 
@@ -233,7 +233,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function replaceSpaces(string $replaceWith = "-"): self
     {
-        $this->value = preg_replace("/\s/", $replaceWith, $this->strVal());
+        $this->raw = preg_replace("/\s/", $replaceWith, $this->strVal());
         return $this;
     }
 
@@ -253,7 +253,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function trimSpaces(): self
     {
-        $this->value = preg_replace("/[\s-]+/", " ", $this->strVal());
+        $this->raw = preg_replace("/[\s-]+/", " ", $this->strVal());
         return $this;
     }
 
@@ -264,7 +264,7 @@ final class Str extends FormatAbstract implements FormatInterface
     public function formatSlug(): self
     {
         $this->clearBreaks()->trim()->replaceSpecialChar()->trimSpaces()->replaceSpaces()->tolower();
-        $this->value = preg_replace("/[^a-z0-9\s-]/", "", $this->value);
+        $this->raw = preg_replace("/[^a-z0-9\s-]/", "", $this->raw);
         return $this;
     }
 
@@ -280,7 +280,7 @@ final class Str extends FormatAbstract implements FormatInterface
         $replace = ['e','e','e','e','E','E','E','E','a','a','a','a','a','A','A','A','A','A',
             'o','o','o','o','O','O','O','O','i','i','i','I','I','I','I','I','u','u','u','u','U',
             'U','U','U','y','y','Y','o','O','a','A','A','c','C'];
-        $this->value = str_replace($pattern, $replace, $this->strVal());
+        $this->raw = str_replace($pattern, $replace, $this->strVal());
 
         return $this;
     }
@@ -291,7 +291,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function urlDecode(): self
     {
-        $this->value = urldecode($this->strVal());
+        $this->raw = urldecode($this->strVal());
         return $this;
     }
 
@@ -303,7 +303,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function urlEncode(?array $find = null, ?array $replace = null): self
     {
-        $this->value = urlencode($this->strVal());
+        $this->raw = urlencode($this->strVal());
         if (!is_null($find) && !is_null($replace)) {
             $this->replace($find, $replace);
         }
@@ -316,7 +316,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function rawUrlDecode(): self
     {
-        $this->value = rawurldecode($this->strVal());
+        $this->raw = rawurldecode($this->strVal());
         return $this;
     }
 
@@ -328,7 +328,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function rawUrlEncode(?array $find = null, ?array $replace = null): self
     {
-        $this->value = rawurlencode($this->strVal());
+        $this->raw = rawurlencode($this->strVal());
         if (!is_null($find) && !is_null($replace)) {
             $this->replace($find, $replace);
         }
@@ -343,8 +343,8 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function replace(array $find, array $replace): self
     {
-        $this->value = str_replace($find, $replace, $this->strVal());
-        if(!is_string($this->value)) {
+        $this->raw = str_replace($find, $replace, $this->strVal());
+        if(!is_string($this->raw)) {
             throw new InvalidArgumentException("The value has to be an string value!", 1);
         }
         return $this;
@@ -368,7 +368,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function explode(string $delimiter): Arr
     {
-        return Arr::value(explode($delimiter, $this->value));
+        return Arr::value(explode($delimiter, $this->raw));
     }
 
     /**
@@ -379,7 +379,7 @@ final class Str extends FormatAbstract implements FormatInterface
     {
         return Arr::value(preg_split(
             '#([A-Z][^A-Z]*)#',
-            $this->value,
+            $this->raw,
             0,
             PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY
         ));
@@ -392,7 +392,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function extractPath(): self
     {
-        $this->value = (string)parse_url($this->value, PHP_URL_PATH);
+        $this->raw = (string)parse_url($this->raw, PHP_URL_PATH);
         return $this;
     }
 
@@ -402,7 +402,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function dirname(): self
     {
-        $this->value = dirname($this->value);
+        $this->raw = dirname($this->raw);
         return $this;
     }
 
@@ -412,7 +412,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function trimTrailingSlash(): self
     {
-        $this->value = ltrim($this->value, '/');
+        $this->raw = ltrim($this->raw, '/');
         return $this;
     }
 
@@ -422,10 +422,10 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function xxs(): self
     {
-        if (is_null($this->value)) {
-            $this->value = null;
+        if (is_null($this->raw)) {
+            $this->raw = null;
         } else {
-            $this->value = Str::value($this->value)->specialchars()->get();
+            $this->raw = Str::value($this->raw)->specialchars()->get();
         }
         return $this;
     }
@@ -436,10 +436,10 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function toBool(): bool
     {
-        if(is_numeric($this->value)) {
-            return ((float)$this->value > 0);
+        if(is_numeric($this->raw)) {
+            return ((float)$this->raw > 0);
         }
-        return ($this->value !== "false" && strlen($this->value));
+        return ($this->raw !== "false" && strlen($this->raw));
     }
 
     /**
@@ -449,10 +449,10 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function compare(string|int|float|bool|null $compare): bool
     {
-        if(is_numeric($this->value)) {
-            return ((float)$this->value > 0);
+        if(is_numeric($this->raw)) {
+            return ((float)$this->raw > 0);
         }
-        return ($this->value === $compare);
+        return ($this->raw === $compare);
     }
 
     /**
@@ -461,7 +461,7 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function toInt(): int
     {
-        return (int)$this->value;
+        return (int)$this->raw;
     }
 
     /**
@@ -470,6 +470,6 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public function toFloat(): float
     {
-        return (float)$this->value;
+        return (float)$this->raw;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * This is an iconv polyfill library
+ * This is a Polyfill library for iconv
  * It is tho recommended to install iconv on the server rather than using the polyfill
  * but in cases this is not possible then this library will save you in a clinch
  *

@@ -6,6 +6,9 @@ use ReflectionClass;
 
 class Helpers {
 
+    /**
+     * @throws \ReflectionException
+     */
     static function debugDump($var, $label = null): void
     {
         if (is_object($var)) {
@@ -17,19 +20,19 @@ class Helpers {
                 $propName = $property->getName();
                 $propValue = $property->getValue($var);
                 echo "    #$propName: ";
-                self::print_formatted_value($propValue, 2);
+                self::printFormattedValue($propValue, 2);
             }
             echo "}\n";
         } elseif (is_array($var)) {
             echo "$label {\n";
-            self::print_formatted_value($var, 1);
+            self::printFormattedValue($var, 1);
             echo "}\n";
         } else {
             var_dump($var);
         }
     }
 
-    static function print_formatted_value($value, $indent = 0): void
+    static function printFormattedValue($value, $indent = 0): void
     {
         $spacingS = $spacingA = str_repeat("    ", $indent);
         $spacingB = str_repeat("    ", $indent+1);
@@ -40,7 +43,7 @@ class Helpers {
             echo "{$spacingS}array:" . count($value) . " [\n";
             foreach ($value as $key => $val) {
                 echo "{$spacingB}{$key} => ";
-                self::print_formatted_value($val, $indent + 1);
+                self::printFormattedValue($val, $indent + 1);
             }
             echo "{$spacingA}]\n";
 

@@ -59,10 +59,10 @@ final class Dom extends FormatAbstract
      */
     public function create(string $tag): object
     {
-        if (is_array($this->value)) {
-            $arr = $this->value;
-            $this->value = (isset($arr['value'])) ? $arr['value'] : "";
-            $this->str = Str::value($this->value);
+        if (is_array($this->raw)) {
+            $arr = $this->raw;
+            $this->raw = (isset($arr['value'])) ? $arr['value'] : "";
+            $this->str = Str::value($this->raw);
 
             $attr = ($arr['attr'] ?? []);
             $elem = $this->dom->create($tag, $this->str)->hideEmptyTag(true);
@@ -72,7 +72,7 @@ final class Dom extends FormatAbstract
             return $elem;
         }
 
-        $this->str = Str::value($this->value);
+        $this->str = Str::value($this->raw);
         return $this->dom->create($tag, $this->str)->hideEmptyTag(true);
     }
 }

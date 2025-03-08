@@ -200,6 +200,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
 
     /**
      * Validate current item and set to fallback (default: null) if not valid
+     *
      * @param string $method
      * @param array $args
      * @return bool
@@ -235,6 +236,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
 
     /**
      * Returns the JSON representation of a value
+     *
      * https://www.php.net/manual/en/function.json-encode.php
      *
      * @return self
@@ -246,6 +248,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
 
     /**
      * Convert collection into an array
+     *
      * @param callable|null $callback
      * @return array
      */
@@ -277,13 +280,9 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
         return $new;
     }
 
-    public function each(callable $callback)
-    {
-        return $this->fetch($callback);
-    }
-
     /**
      * Immutable: Access incremental array
+     *
      * @param callable|null $callback Access array row in the callbacks argument
      * @return array|object|null
      */
@@ -324,11 +323,22 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
         return $inst->raw;
     }
 
+    /**
+     * Alias name to fetch
+     *
+     * @param callable $callback
+     * @return array|object|null
+     */
+    public function each(callable $callback): array|object|null
+    {
+        return $this->fetch($callback);
+    }
 
     /**
      * Dump collection into a human-readable array dump
      *
      * @return void
+     * @throws ReflectionException
      */
     public function dump(): void
     {
@@ -347,6 +357,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
 
     /**
      * Isset
+     *
      * @return mixed
      */
     public function isset(): mixed
@@ -356,6 +367,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
 
     /**
      * Create a fallback value if value is Empty/Null/0/false
+     *
      * @param  string $fallback
      * @return self
      */
@@ -369,6 +381,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
 
     /**
      * Sprint over values
+     *
      * @param  string $add
      * @return self
      */
@@ -382,6 +395,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
 
     /**
      * Access and return format class object
+     *
      * @param string $dtoClassName The DTO format class name
      * @param mixed $value
      * @return object
@@ -402,6 +416,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
 
     /**
      * Build the object
+     *
      * @param mixed $data
      * @return $this
      */
