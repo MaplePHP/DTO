@@ -15,11 +15,9 @@ The MaplePHP DTO library simplifies working with structured data in PHP by wrapp
 
 **Note:** MaplePHP DTO also includes polyfill classes for Multibyte String and Iconv support.
 
----
+## **1. Creating a DTO Object**
 
-## Usage
-
-The simplest way to work with the library is to start with the `Traverse` class, which provides powerful control over your data.
+The simplest way to start using **MaplePHP DTO** is with the `Traverse` class:
 
 ```php
 use MaplePHP\DTO\Traverse;
@@ -27,56 +25,43 @@ use MaplePHP\DTO\Traverse;
 $obj = Traverse::value([
     "firstname" => "<em>daniel</em>",
     "lastname" => "doe",
-    "slug" => "Lorem ipsum åäö",
     "price" => "1999.99",
     "date" => "2023-08-21 14:35:12",
     "feed" => [
-        "t1" => ["firstname" => "<em>john 1</em>", "lastname" => "doe 1"],
-        "t2" => ["firstname" => "<em>jane 2</em>", "lastname" => "doe 2"]
+        "t1" => ["firstname" => "<em>john 1</em>", "lastname" => "doe-1", 'salary' => 40000],
+        "t2" => ["firstname" => "<em>jane 2</em>", "lastname" => "doe-2", 'salary' => 20000]
     ]
 ]);
 ```
 
-### Accessing Nested Data
-Each key in the array is accessible as an object property, and you can continue to drill down into nested arrays, maintaining consistency and safety.
+Now, `$obj` behaves like an object where you can access its properties directly.
+
+---
+
+## **2. Accessing Data**
+
+### **Direct Property Access**
 
 ```php
-echo $obj->feed->t1->firstname;
-// Output: <em>john 1</em>
+echo $obj->firstname;
+// Output: <em>daniel</em>
 ```
 
-### Iterating Through Arrays
+### **Safe Fallback for Missing Values**
 
 ```php
-foreach($obj->feed->fetch() as $row) {
-    echo $row->firstname;
-}
-// Output:
-// <em>john 1</em>
-// <em>jane 2</em>
+echo $obj->feed->t1->doNotExist->fallback('lorem')->strUcFirst();
+// Output: Lorem
 ```
 
 ---
 
-## Built-in Data Handlers
+## **3. Working with Collections**
 
-MaplePHP DTO comes with powerful handlers for common data transformations. These handlers make it easy to manipulate strings, numbers, URIs, arrays, dates, and more.
-
-### String Handling Example
-
-You can chain methods for string manipulation:
+### **Iterating Over Arrays**
 
 ```php
-echo $obj->feed->t1->firstname->strStripTags()->strUcFirst();
-// Equivalent to:
-// echo $obj->feed->t1->firstname->str()->stripTags()->ucFirst();
-// Output: John 1
-```
-
-You can also apply transformations when iterating over an array:
-
-```php
-foreach($obj->feed->fetch() as $row) {
+foreach ($obj->feed->fetch() as $row) {
     echo $row->firstname->strStripTags()->strUcFirst();
 }
 // Output:
@@ -84,67 +69,225 @@ foreach($obj->feed->fetch() as $row) {
 // Jane 2
 ```
 
+### **Filtering Data (`filter`)**
+
+Filters an array based on a callback function.
+
+```php
+$filtered = $obj->feed->filter(fn($row) => $row->salary->get() > 30000);
+echo $filtered->count();
+// Output: 1
+```
+
+### **Finding Specific Values**
+
+```php
+echo $obj->shopList->search('cheese');
+// Output: 3
+```
+
+```php
+echo $obj->feed->pluck('lastname')->toArray()[1];
+// Output: doe-2
+```
+
 ---
 
-## More Examples
+## **4. Transforming Collections**
 
-Here are more examples of using the DTO library’s built-in handlers for different types of data:
+### **Mapping (`map`)**
 
-### String Manipulation
+Applies a function to each element.
+
+```php
+$mapped = $obj->shopList->map(fn($item) => strtoupper($item));
+print_r($mapped->toArray());
+```
+**Output:**
+```php
+['SOAP', 'TOOTHBRUSH', 'MILK', 'CHEESE', 'POTATOES', 'BEEF', 'FISH']
+```
+
+### **Reducing (`reduce`)**
+
+Combines values into a single result.
+
+```php
+$sum = $obj->feed->reduce(fn($carry, $item) => $carry + $item->salary->get(), 0);
+echo $sum;
+// Output: 60000
+```
+
+### **Sorting (`reverse`, `shuffle`)**
+
+```php
+echo $obj->shopList->reverse()->eq(0);
+// Output: fish
+```
+
+```php
+echo $obj->shopList->shuffle()->eq(0); // Random Output
+```
+
+### **Chunking and Slicing (`chunk`, `slice`, `splice`)**
+
+```php
+echo $obj->shopList->chunk(3)->count();
+// Output: 3
+```
+
+```php
+echo $obj->shopList->slice(1, 2)->count();
+// Output: 2
+```
+
+```php
+$spliced = $obj->shopList->splice(1, 2, ['replaced'])->toArray();
+print_r($spliced);
+```
+**Output:**
+```php
+['soap', 'replaced', 'potatoes', 'beef', 'fish']
+```
+
+---
+
+## **5. Modifying Collections**
+
+### **Adding and Removing Items**
+
+```php
+echo $obj->shopList->push('barbie')->count();
+// Output: 8
+```
+
+```php
+echo $obj->shopList->pop($value)->count();
+echo $value;
+// Output: fish
+```
+
+```php
+echo $obj->shopList->shift($value)->count();
+echo $value;
+// Output: soap
+```
+
+---
+
+## **6. Advanced Traversal & Recursion**
+
+### **Walking Through Nested Structures (`walk`, `walkRecursive`)**
+
+```php
+$value = "";
+$obj->feed->walkRecursive(function ($val) use (&$value) {
+    $value .= strip_tags(str_replace(" ", "", $val));
+});
+echo $value;
+// Output: john1doe-1400001jane2doe-2200002
+```
+
+### **Flattening Data (`flatten`, `flattenWithKeys`)**
+
+```php
+$flatten = $obj->feed->flatten()->map(fn($row) => $row->strToUpper())->toArray();
+```
+
+---
+
+## **7. String, Number, and Date Handling**
+
+### **String Manipulations**
 
 ```php
 echo $obj->firstname->strStripTags()->strUcFirst();
 // Output: Daniel
 ```
 
-### Number Formatting
+### **Number Formatting**
 
 ```php
 echo $obj->price->numToFilesize();
 // Output: 1.95 kb
+```
 
+```php
 echo $obj->price->numRound(2)->numCurrency("SEK", 2);
 // Output: 1 999,99 kr
 ```
 
-### Date Formatting
+### **Date Handling**
 
 ```php
 echo $obj->date->clockFormat("y/m/d, H:i");
 // Output: 23/08/21, 14:35
 ```
 
+```php
+\MaplePHP\DTO\Format\Clock::setDefaultLanguage('sv_SE');
+echo $obj->date->clockFormat('d M');
+// Output: 21 augusti
+```
+
 ---
 
-**Note:** This guide is a work in progress, with more content to be added soon.
+## **8. Array Utility Methods**
 
----
+### **Merging and Replacing Arrays**
 
-## How It Works
+```php
+$merged = $obj->shopList->merge(['eggs', 'bread']);
+print_r($merged->toArray());
+```
+**Output:**
+```php
+['soap', 'toothbrush', 'milk', 'cheese', 'potatoes', 'beef', 'fish', 'eggs', 'bread']
+```
 
-The **MaplePHP DTO** library operates by wrapping data into objects that allow easy traversal and transformation using a chainable API. This structure allows for consistent and safe data handling, minimizing direct data manipulation risks.
+```php
+$replaced = $obj->shopList->replaceRecursive([0 => 'soap_bar']);
+print_r($replaced->toArray());
+```
+**Output:**
+```php
+['soap_bar', 'toothbrush', 'milk', 'cheese', 'potatoes', 'beef', 'fish']
+```
 
-Here’s how the key components of the library work:
+### **Computing Differences (`diff`, `diffAssoc`, `diffKey`)**
 
-### 1. **Traverse Class**
+```php
+$diff = $obj->shopList->diff(['milk', 'cheese']);
+print_r($diff->toArray());
+```
+**Output:**
+```php
+['soap', 'toothbrush', 'potatoes', 'beef', 'fish']
+```
 
-At the core of the library is the `Traverse` class. This class allows you to wrap an associative array (or any data structure) into an object, making each element of the array accessible as an object property.
+```php
+$diffAssoc = $obj->shopList->diffAssoc(['soap', 'toothbrush']);
+print_r($diffAssoc->toArray());
+```
+**Output:**
+```php
+['milk', 'cheese', 'potatoes', 'beef', 'fish']
+```
 
-- **Key-to-Property Mapping**: Each key in the array becomes an object property, and its value is transformed into a nested `Traverse` object if it's an array.
-- **Lazy Loading**: The values are only accessed when needed, which allows you to traverse large data structures efficiently.
+### **Extracting Keys (`keys`, `pluck`)**
 
-### 2. **Handlers for Data Types**
+```php
+print_r($obj->shopList->keys()->toArray());
+```
+**Output:**
+```php
+[0, 1, 2, 3, 4, 5, 6]
+```
 
-MaplePHP DTO uses specific handlers (such as `Str`, `Num`, `DateTime`, `Uri`, etc.) to manage different data types. These handlers provide methods to transform and validate the data.
-
-- **String Handling**: The `Str` handler enables string-related operations, such as stripping tags, formatting case, and more.
-- **Number Handling**: The `Num` handler allows numerical operations like rounding, formatting as currency, and converting to file sizes.
-- **Date and Time Handling**: The `DateTime` handler provides methods for formatting and manipulating dates and times.
-
-### 3. **Immutability**
-
-When transformations are applied (e.g., `strUcFirst()` or `numRound()`), the library ensures immutability by returning a new `Traverse` instance with the modified data. This prevents accidental mutations of the original data.
-
-### 4. **Fetch Method for Arrays**
-
-The `fetch()` method simplifies working with arrays. Instead of manually looping through the array, you can use `fetch()` to iterate over the elements and apply transformations to each one.
+```php
+print_r($obj->feed->pluck('lastname')->toArray());
+```
+**Output:**
+```php
+['doe-1', 'doe-2']
+```

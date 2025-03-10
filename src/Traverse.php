@@ -8,10 +8,9 @@
 
 namespace MaplePHP\DTO;
 
-require_once "helpers.php";
-
 use BadMethodCallException;
 use ErrorException;
+use MaplePHP\DTO\Format\FormatInterface;
 use MaplePHP\DTO\Format\Str;
 use MaplePHP\Validate\Inp;
 use ReflectionClass;
@@ -19,20 +18,24 @@ use ReflectionException;
 use stdClass;
 
 /**
- * @method arr()
- * @method clock()
- * @method dom()
- * @method encode()
- * @method local()
- * @method num()
- * @method str()
- * @mixin Str
+ * @method \MaplePHP\DTO\Format\Str str()
+ * @method \MaplePHP\DTO\Format\Arr arr()
+ * @method \MaplePHP\DTO\Format\Num num()
+ * @method \MaplePHP\DTO\Format\Clock clock()
+ * @method \MaplePHP\DTO\Format\Dom dom()
+ * @method \MaplePHP\DTO\Format\Encode encode()
+ * @method \MaplePHP\DTO\Format\Local local()
+ * @mixin \MaplePHP\DTO\Format\Clock
  */
 class Traverse extends DynamicDataAbstract implements TraverseInterface
 {
     use Traits\ArrayUtilities;
 
-    protected mixed $raw = null; // Use raw to access current instance data (access array)
+    protected mixed $raw = null;
+
+    static private $heplers = [
+      'Str', 'Arr', 'Num', 'Clock', 'Dom', 'Encode', 'Local'
+    ];
 
     public function __construct(mixed $data = null)
     {
@@ -49,6 +52,27 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
     public static function value(mixed $data): self
     {
         return new self($data);
+    }
+
+    /**
+     * Add custom Helpers
+     *
+     * @param FormatInterface $helper
+     * @return void
+     */
+    public function addHelper(FormatInterface $helper): void
+    {
+        self::$heplers[] = $helper;
+    }
+
+    /**
+     * List all supported Helpers classes
+     *
+     * @return string[]
+     */
+    static public function listAllHelpers(): array
+    {
+        return self::$heplers;
     }
 
     /**
@@ -405,7 +429,13 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
     {
         $name = ucfirst($dtoClassName);
         $className = "MaplePHP\\DTO\\Format\\$name";
-        if (!class_exists($className)) {
+
+        if(!in_array($name, self::$heplers)) {
+            throw new BadMethodCallException("The DTO class \"$dtoClassName\" is not a Helper class! " .
+                "You can add helper class with 'addHelper' if you wish.", 1);
+        }
+
+        if (!class_exists($className) || !in_array($name, self::$heplers)) {
             throw new BadMethodCallException("The DTO class \"$dtoClassName\" does not exist!", 1);
         }
 

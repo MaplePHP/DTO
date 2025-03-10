@@ -318,6 +318,10 @@ $unit->case("MaplePHP DTO test", callback: function () {
         "equal" => $obj->feed->t1->firstname->str()->stripTags()->ucFirst()->get()
     ], "Values does not match");
 
+    $this->add($obj->feed->t1->doNotExist->fallback('lorem')->strUcFirst()->get(), [
+        "equal" => 'Lorem'
+    ], "Values does not match");
+
     $val = Arr::value([100 => 'a', 200 => 'b', 201 => 'c', 202 => 'd', 404 => 'e', 403 => 'f'])
         ->unset(200, 201, 202)
         ->arrayKeys() // polyfill class used in Arr
@@ -327,11 +331,7 @@ $unit->case("MaplePHP DTO test", callback: function () {
         "equal" => 3
     ], "Values does not match");
 
-
     \MaplePHP\DTO\Format\Clock::setDefaultLanguage('sv_SE');
-    $this->add($obj->date->clockFormat('FM', 'is_IS')->get(), [
-        "equal" => 'ágústágú.'
-    ], "Month translation to is_IS failed");
 
     $this->add($obj->date->clockFormat('FM')->get(), [
         "equal" => 'augustiaug'
@@ -341,4 +341,11 @@ $unit->case("MaplePHP DTO test", callback: function () {
         "equal" => 'måndagmån'
     ], "Weekday translation to sv_SE failed");
 
+    $this->add($obj->date->clockFormat('FM', 'is_IS')->get(), [
+        "equal" => 'ágústágú.'
+    ], "Month translation to is_IS failed");
+
+    $this->add($obj->date->clock()->setLocale('is_IS')->format('FM'), [
+        "equal" => 'ágústágú.'
+    ], "Month translation to is_IS failed");
 });

@@ -87,7 +87,7 @@ final class Clock extends FormatAbstract implements FormatInterface
     // Alias to setDefaultLanguage
     static public function setDefaultLocale(string $localeCode): void
     {
-        self::setDefaultLocale($localeCode);
+        self::setDefaultLanguage($localeCode);
     }
 
     /**
