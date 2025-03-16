@@ -153,14 +153,14 @@ final class Str extends FormatAbstract implements FormatInterface
     }
 
     /**
-     * Checks if a string ends with a given substring
+     * Checks if a string contains a given substring
      *
      * @param string $needle
      * @return bool
      */
-    public function endsWith(string $needle): bool
+    public function contains(string $needle): bool
     {
-        return str_ends_with($this->raw, $needle);
+        return str_contains($this->raw, $needle);
     }
 
     /**
@@ -172,6 +172,17 @@ final class Str extends FormatAbstract implements FormatInterface
     public function startsWith(string $needle): bool
     {
         return str_starts_with($this->raw, $needle);
+    }
+
+    /**
+     * Checks if a string ends with a given substring
+     *
+     * @param string $needle
+     * @return bool
+     */
+    public function endsWith(string $needle): bool
+    {
+        return str_ends_with($this->raw, $needle);
     }
     
     // Return self -->
@@ -313,7 +324,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * @param bool $double_encode
      * @return self
      */
-    public function entityEncode(int $flags = ENT_QUOTES|ENT_SUBSTITUTE, ?string $encoding, bool $double_encode = true): self
+    public function entityEncode(int $flags = ENT_QUOTES|ENT_SUBSTITUTE, ?string $encoding = null, bool $double_encode = true): self
     {
         $this->raw = htmlentities($this->strVal(), $flags, $encoding, $double_encode);
         return $this;
@@ -326,7 +337,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * @param string|null $encoding
      * @return self
      */
-    public function entityDecode(int $flags = ENT_QUOTES|ENT_SUBSTITUTE, ?string $encoding): self
+    public function entityDecode(int $flags = ENT_QUOTES|ENT_SUBSTITUTE, ?string $encoding = null): self
     {
         $this->raw = html_entity_decode($this->strVal(), $flags, $encoding);
         return $this;

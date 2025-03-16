@@ -29,10 +29,10 @@ $unit->case("MaplePHP DTO test", callback: function () {
         "equal" => 'doe'
     ], "toLower: Failed");
 
-    $this->add($obj->content->str()->excerpt(50, "...")->get(), [
-        "equal" => 'doe'
-    ], "toLower: Failed");
-
+    $this->add($obj->content->str()->excerpt(50, "---")->get(), [
+        "length" => [53, 53],
+        "endsWith" => ['---'],
+    ], "excerpt: Failed");
 
 
 });
