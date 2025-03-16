@@ -96,7 +96,7 @@ class MB
      *
      * @param int $start
      * @param int|null $length
-     * @param string|null $encoding
+     * @param string|null $encoding (e.g. UTF-8)
      * @return self
      * @throws ErrorException
      */

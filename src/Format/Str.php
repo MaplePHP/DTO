@@ -49,19 +49,150 @@ final class Str extends FormatAbstract implements FormatInterface
     }
 
     /**
+     * Find the position of the first occurrence of a substring in the string.
+     * This method uses multibyte functionality and provides a polyfill if your environment lacks support.
+     *
+     * @param string $needle The substring to search for.
+     * @param int $offset The position in the string to start searching.
+     * @param string|null $encoding The character encoding to use (e.g., 'UTF-8'). Default is null.
+     * @return false|int Returns the position of the first occurrence of the substring, or false if it is not found.
+     * @throws ErrorException
+     */
+    public function position(string $needle, int $offset = 0, ?string $encoding = null): false|int
+    {
+        $mb = new MB($this->raw);
+        return $mb->strpos($needle, $offset, $encoding);
+    }
+
+    /**
+     * Find position of last occurrence of string in a string
+     * This method uses multibyte functionality and provides a polyfill if your environment lacks support.
+     *
+     * @param string $needle
+     * @param int $offset
+     * @param string|null $encoding (Example: 'UTF-8')
+     * @return false|int
+     * @throws ErrorException
+     */
+    public function positionLast(string $needle, int $offset = 0, ?string $encoding = null): false|int
+    {
+        $mb = new MB($this->raw);
+        return $mb->strrpos($needle, $offset, $encoding);
+    }
+
+    /**
+     * Get string length
+     * This method uses multibyte functionality and provides a polyfill if your environment lacks support.
+     *
+     * @param string|null $encoding (Example: 'UTF-8')
+     * @return false|int
+     * @throws ErrorException
+     */
+    public function strlen(?string $encoding = null): int|false
+    {
+        $mb = new MB($this->raw);
+        return $mb->strlen($encoding);
+    }
+
+    /**
+     * To int value
+     * @return int
+     */
+    public function toInt(): int
+    {
+        return (int)$this->raw;
+    }
+
+    /**
+     * To float value
+     * @return float
+     */
+    public function toFloat(): float
+    {
+        return (float)$this->raw;
+    }
+
+    /**
+     * Return a string to bool value
+     *
+     * @return bool
+     */
+    public function toBool(): bool
+    {
+        if(is_numeric($this->raw)) {
+            return ((float)$this->raw > 0);
+        }
+        return ($this->raw !== "false" && strlen($this->raw));
+    }
+
+    /**
+     * Return a string to bool value
+     *
+     * @param bool|null $associative
+     * @param int $depth
+     * @param int $flags
+     * @return bool
+     */
+    public function jsonDecode(?bool $associative = null, int $depth = 512, int $flags = 0): bool
+    {
+        return json_decode($this->raw, $associative, $depth, $flags) !== null;
+    }
+
+    /**
+     * Compare value to value
+     *
+     * @param  string|int|float|bool|null $compare
+     * @return bool
+     */
+    public function compare(string|int|float|bool|null $compare): bool
+    {
+        if(is_numeric($this->raw)) {
+            return ((float)$this->raw > 0);
+        }
+        return ($this->raw === $compare);
+    }
+
+    /**
+     * Checks if a string ends with a given substring
+     *
+     * @param string $needle
+     * @return bool
+     */
+    public function endsWith(string $needle): bool
+    {
+        return str_ends_with($this->raw, $needle);
+    }
+
+    /**
+     * Checks if a string starts with a given substring
+     *
+     * @param string $needle
+     * @return bool
+     */
+    public function startsWith(string $needle): bool
+    {
+        return str_starts_with($this->raw, $needle);
+    }
+    
+    // Return self -->
+
+    /**
      * Excerpt/shorten down text/string
+     * This method uses multibyte functionality and provides a polyfill if your environment lacks support.
+     * 
      * @param integer $length total length
      * @param string $ending When break text add an ending (...)
+     * @param string|null $encoding
      * @return self
      * @throws ErrorException
      */
-    public function excerpt(int $length = 40, string $ending = "..."): self
+    public function excerpt(int $length = 40, string $ending = "...", ?string $encoding = null): self
     {
         $this->stripTags()->entityDecode();
         $this->raw = str_replace(["'", '"', "”"], ["", "", ""], $this->strVal());
         $mb = new MB($this->raw);
-        $strlen = $mb->strlen();
-        $this->raw = trim($mb->substr(0, $length));
+        $strlen = $mb->strlen($encoding);
+        $this->raw = trim($mb->substr(0, $length, $encoding));
         if ($strlen > $length) {
             $this->raw .= $ending;
         }
@@ -70,6 +201,7 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * Convert new line to html <br>
+     * 
      * @return self
      */
     public function nl2br(): self
@@ -80,6 +212,7 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * Make sure string always end with a trailing slash (will only add slash if it does not exist)
+     * 
      * @return self
      */
     public function trailingSlash(): self
@@ -90,6 +223,7 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * Strip html tags from string
+     * 
      * @param  string $whitelist "<em><strong>"
      * @return self
      */
@@ -101,6 +235,7 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * Cleans GET/POST data (XSS protection)
+     * 
      * @param  int $flag ENT_QUOTES|ENT_SUBSTITUTE|ENT_HTML401|null
      * @return self
      */
@@ -113,6 +248,7 @@ final class Str extends FormatAbstract implements FormatInterface
     /**
      * Remove any character that is not a letter, number, underscore, or dash
      * Can be used to sanitize SQL identifiers that should be enclosed in backticks
+     * 
      * @return self
      */
     public function sanitizeIdentifiers(): self
@@ -123,6 +259,7 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * Cleans GET/POST data (XSS protection)
+     * 
      * @param  int $flag ENT_QUOTES|ENT_SUBSTITUTE|ENT_HTML401|null
      * @return self
      */
@@ -134,6 +271,7 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * Decode html special characters
+     * 
      * @param  ?int $flag ENT_QUOTES|ENT_SUBSTITUTE|ENT_HTML401|null
      * @return self
      */
@@ -146,11 +284,11 @@ final class Str extends FormatAbstract implements FormatInterface
     /**
      * Clears soft breaks incl.:
      * line breaks (\n), carriage returns (\r), form feed (\f), and vertical tab (\v).
+     * 
      * @return self
      */
     public function clearBreaks(): self
     {
-
         $this->raw = preg_replace('/(\v|\s)+/', ' ', $this->strVal());
         return $this->trim();
     }
@@ -158,6 +296,7 @@ final class Str extends FormatAbstract implements FormatInterface
     /**
      * Clear all white spaces characters incl.:
      * spaces, tabs, newline characters, carriage returns, and form feed characters
+     * 
      * @return self
      */
     public function clearWhitespace(): self
@@ -167,27 +306,47 @@ final class Str extends FormatAbstract implements FormatInterface
     }
 
     /**
-     * Entity Decode
+     * Entity encode
+     * 
+     * @param int $flags
+     * @param string|null $encoding
+     * @param bool $double_encode
      * @return self
      */
-    public function entityDecode(): self
+    public function entityEncode(int $flags = ENT_QUOTES|ENT_SUBSTITUTE, ?string $encoding, bool $double_encode = true): self
     {
-        $this->raw = html_entity_decode($this->strVal());
+        $this->raw = htmlentities($this->strVal(), $flags, $encoding, $double_encode);
         return $this;
     }
 
     /**
-     * Trim
+     * Entity Decode
+     * 
+     * @param int $flags
+     * @param string|null $encoding
      * @return self
      */
-    public function trim(): self
+    public function entityDecode(int $flags = ENT_QUOTES|ENT_SUBSTITUTE, ?string $encoding): self
     {
-        $this->raw = trim($this->strVal());
+        $this->raw = html_entity_decode($this->strVal(), $flags, $encoding);
+        return $this;
+    }
+
+    /**
+     * Trim the string, removing specified characters from the beginning and end.
+     *
+     * @param string $characters Characters to be trimmed (default: " \n\r\t\v\0").
+     * @return self
+     */
+    public function trim(string $characters = " \n\r\t\v\0"): self
+    {
+        $this->raw = trim($this->strVal(), $characters);
         return $this;
     }
 
     /**
      * String to lower
+     * 
      * @return self
      */
     public function toLower(): self
@@ -198,6 +357,7 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * String to upper
+     * 
      * @return self
      */
     public function toUpper(): self
@@ -208,6 +368,7 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * Uppercase first
+     * 
      * @return self
      */
     public function ucFirst(): self
@@ -217,17 +378,32 @@ final class Str extends FormatAbstract implements FormatInterface
     }
 
     /**
-     * Add leading zero to string
+     * Pad a string to a certain length with another string
+     *
+     * @param int $length
+     * @param string $padString
+     * @param int $padType
      * @return self
      */
-    public function leadingZero(): self
+    public function pad(int $length, string $padString = " ", int $padType = STR_PAD_RIGHT): self
     {
-        $this->raw = str_pad($this->strVal(), 2, '0', STR_PAD_LEFT);
+        $this->raw = str_pad($this->strVal(), $length, $padString, $padType);
         return $this;
     }
 
     /**
+     * Pad string with leading zero
+     *
+     * @return self
+     */
+    public function leadingZero(): self
+    {
+        return $this->pad(2, '0', STR_PAD_LEFT);
+    }
+
+    /**
      * Replace spaces
+     * 
      * @param  string $replaceWith
      * @return self
      */
@@ -239,6 +415,7 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * Remove unwanted characters from string/mail and make it consistent
+     * 
      * @return self
      */
     public function formatEmail(): self
@@ -246,9 +423,9 @@ final class Str extends FormatAbstract implements FormatInterface
         return $this->trim()->replaceSpecialChar()->toLower();
     }
 
-
     /**
      * Replace multiple space between words with a single space
+     * 
      * @return self
      */
     public function trimSpaces(): self
@@ -312,6 +489,7 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * Raw url decode
+     * 
      * @return self
      */
     public function rawUrlDecode(): self
@@ -322,6 +500,7 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * Raw url encode (with string replace if you want)
+     * 
      * @param array|null $find Search values
      * @param array|null $replace Replace values
      * @return self
@@ -337,6 +516,7 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * String replace
+     * 
      * @param array $find     Search values
      * @param array $replace  Replace values
      * @return self
@@ -362,17 +542,8 @@ final class Str extends FormatAbstract implements FormatInterface
     }
 
     /**
-     * Explode return array instance
-     * @param  non-empty-string $delimiter
-     * @return Arr
-     */
-    public function explode(string $delimiter): Arr
-    {
-        return Arr::value(explode($delimiter, $this->raw));
-    }
-
-    /**
      * Will convert all camelcase words to array and return array instance
+     * 
      * @return Arr
      */
     public function camelCaseToArr(): Arr
@@ -385,9 +556,9 @@ final class Str extends FormatAbstract implements FormatInterface
         ));
     }
 
-
     /**
      * Extract path from URL
+     * 
      * @return self
      */
     public function extractPath(): self
@@ -398,6 +569,7 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * Get only dirname from path
+     * 
      * @return self
      */
     public function dirname(): self
@@ -408,6 +580,7 @@ final class Str extends FormatAbstract implements FormatInterface
 
     /**
      * Trim tailing slash
+     * 
      * @return self
      */
     public function trimTrailingSlash(): self
@@ -417,10 +590,11 @@ final class Str extends FormatAbstract implements FormatInterface
     }
 
     /**
-     * XXS protection
+     * Escape string value (protects against XSS)
+     * 
      * @return self
      */
-    public function xxs(): self
+    public function escape(): self
     {
         if (is_null($this->raw)) {
             $this->raw = null;
@@ -430,46 +604,10 @@ final class Str extends FormatAbstract implements FormatInterface
         return $this;
     }
 
-    /**
-     * To bool value
-     * @return bool
-     */
-    public function toBool(): bool
+    // Alias to 'escape'
+    public function xss(): self
     {
-        if(is_numeric($this->raw)) {
-            return ((float)$this->raw > 0);
-        }
-        return ($this->raw !== "false" && strlen($this->raw));
+        return $this->escape();
     }
-
-    /**
-     * Compare value to value
-     * @param  string|int|float|bool|null $compare
-     * @return bool
-     */
-    public function compare(string|int|float|bool|null $compare): bool
-    {
-        if(is_numeric($this->raw)) {
-            return ((float)$this->raw > 0);
-        }
-        return ($this->raw === $compare);
-    }
-
-    /**
-     * To int value
-     * @return int
-     */
-    public function toInt(): int
-    {
-        return (int)$this->raw;
-    }
-
-    /**
-     * To float value
-     * @return float
-     */
-    public function toFloat(): float
-    {
-        return (float)$this->raw;
-    }
+    
 }
