@@ -10,12 +10,12 @@
 
 namespace MaplePHP\DTO\Format;
 
-use MaplePHP\DTO\Traits\ArrayUtilities;
+use MaplePHP\DTO\Traits\CollectionUtilities;
 use MaplePHP\DTO\Traverse;
 
 final class Arr extends FormatAbstract implements FormatInterface
 {
-    use ArrayUtilities;
+    use CollectionUtilities;
 
     /**
      * This will make the collection accessible through static initiations

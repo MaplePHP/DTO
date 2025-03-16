@@ -29,11 +29,11 @@ use stdClass;
  */
 class Traverse extends DynamicDataAbstract implements TraverseInterface
 {
-    use Traits\ArrayUtilities;
+    use Traits\CollectionUtilities;
 
     protected mixed $raw = null;
 
-    static private $heplers = [
+    static private array $helpers = [
       'Str', 'Arr', 'Num', 'Clock', 'Dom', 'Encode', 'Local'
     ];
 
@@ -55,6 +55,17 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
     }
 
     /**
+     * With new "Traverse" collection
+     *
+     * @param mixed $data
+     * @return self
+     */
+    public function with(mixed $data): self
+    {
+        return new self($data);
+    }
+
+    /**
      * Add custom Helpers
      *
      * @param FormatInterface $helper
@@ -62,7 +73,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
      */
     public function addHelper(FormatInterface $helper): void
     {
-        self::$heplers[] = $helper;
+        self::$helpers[] = $helper;
     }
 
     /**
@@ -72,18 +83,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
      */
     static public function listAllHelpers(): array
     {
-        return self::$heplers;
-    }
-
-    /**
-     * With new object
-     *
-     * @param mixed $data
-     * @return $this
-     */
-    public function with(mixed $data): self
-    {
-        return new self($data);
+        return self::$helpers;
     }
 
     /**
@@ -143,68 +143,13 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
 
     /**
      * Get/return result
+     *
      * @param  string|null $fallback
      * @return mixed
      */
     public function get(?string $fallback = null): mixed
     {
         return ($this->raw ?? $fallback);
-    }
-
-    /**
-     * Will return array item at index/key
-     * https://www.php.net/manual/en/function.shuffle.php
-     *
-     * @param int|float|string $key
-     * @return mixed    Will return false if key is missing
-     */
-    public function eq(int|float|string $key): mixed
-    {
-        if (is_string($key) && str_contains($key, ".")) {
-            return Helpers::traversArrFromStr($this->toArray(), $key);
-        }
-        return ($this->raw[$key] ?? false);
-    }
-
-    /**
-     * Get first item in collection
-     * https://www.php.net/manual/en/function.reset.php
-     *
-     * @return mixed
-     */
-    public function first(): mixed
-    {
-        if(!is_array($this->raw)) {
-            return (string)$this->raw;
-        }
-        return reset($this->raw);
-    }
-
-    /**
-     * Get last item in collection
-     * https://www.php.net/manual/en/function.end.php
-     *
-     * @return mixed
-     */
-    public function last(): mixed
-    {
-        if(!is_array($this->raw)) {
-            return (string)$this->raw;
-        }
-        return end($this->raw);
-    }
-
-    /**
-     * Searches the array for a given value and returns the first corresponding key if successful
-     * https://www.php.net/manual/en/function.array-search.php
-     *
-     * @param mixed $needle
-     * @param bool $strict
-     * @return string|int|false
-     */
-    public function search(mixed $needle, bool $strict = false): string|int|false
-    {
-        return array_search($needle, $this->raw, $strict);
     }
 
     /**
@@ -234,38 +179,22 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
     {
         $inp = Inp::value($this->raw);
         if(!method_exists($inp, $method)) {
-            throw new BadMethodCallException("The DTO valid method \"$method\" does not exist!", 1);
+            throw new BadMethodCallException("The MaplePHP validation method \"$method\" does not exist!", 1);
         }
         return $inp->{$method}(...$args);
     }
-
-    /**
-     * Same as value validate but will method chain.
-     * If invalid then the value will be set to "null" OR whatever you set the fallback
-     *
-     * @param string $method
-     * @param array $args
-     * @param mixed|null $fallback
-     * @return $this
-     * @throws ErrorException
-     */
-    public function validChaining(string $method, array $args, mixed $fallback = null): self
-    {
-        if(!$this->valid($method, $args)) {
-            $this->raw = $fallback;
-        }
-        return $this;
-    }
-
 
     /**
      * Returns the JSON representation of a value
      *
      * https://www.php.net/manual/en/function.json-encode.php
      *
-     * @return self
+     * @param mixed $value
+     * @param int $flags
+     * @param int $depth
+     * @return string|false
      */
-    public function toJson(mixed $value, int $flags = 0, int $depth = 512): mixed
+    public function toJson(mixed $value, int $flags = 0, int $depth = 512): string|false
     {
         return json_encode($value, $flags, $depth);
     }
@@ -390,34 +319,6 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
     }
 
     /**
-     * Create a fallback value if value is Empty/Null/0/false
-     *
-     * @param  string $fallback
-     * @return self
-     */
-    public function fallback(mixed $fallback): self
-    {
-        if (!$this->raw) {
-            $this->raw = $fallback;
-        }
-        return $this;
-    }
-
-    /**
-     * Sprint over values
-     *
-     * @param  string $add
-     * @return self
-     */
-    public function sprint(string $add): self
-    {
-        if (!is_null($this->raw)) {
-            $this->raw = sprintf($add, $this->raw);
-        }
-        return $this;
-    }
-
-    /**
      * Access and return format class object
      *
      * @param string $dtoClassName The DTO format class name
@@ -430,12 +331,12 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
         $name = ucfirst($dtoClassName);
         $className = "MaplePHP\\DTO\\Format\\$name";
 
-        if(!in_array($name, self::$heplers)) {
+        if(!in_array($name, self::$helpers)) {
             throw new BadMethodCallException("The DTO class \"$dtoClassName\" is not a Helper class! " .
                 "You can add helper class with 'addHelper' if you wish.", 1);
         }
 
-        if (!class_exists($className) || !in_array($name, self::$heplers)) {
+        if (!class_exists($className) || !in_array($name, self::$helpers)) {
             throw new BadMethodCallException("The DTO class \"$dtoClassName\" does not exist!", 1);
         }
 
@@ -461,22 +362,4 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
         return $this;
     }
 
-    /**
-     * MOVE TO A CALCULATION LIBRARY
-     */
-
-    /**
-     * Calculate the sum of values in an array
-     * https://www.php.net/manual/en/function.array-sum.php
-     *
-     * @return float|int
-     */
-    public function sum(): float|int
-    {
-        $arr = $this->raw;
-        if(!is_array($arr)) {
-            $arr = $this->toArray();
-        }
-        return array_sum($arr);
-    }
 }

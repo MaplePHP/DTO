@@ -36,8 +36,9 @@ interface TraverseInterface
 
     /**
      * With new object
+     *
      * @param mixed $data
-     * @return $this
+     * @return self
      */
     public function with(mixed $data): self;
 

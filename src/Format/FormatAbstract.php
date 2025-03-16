@@ -63,19 +63,6 @@ abstract class FormatAbstract
     }
 
     /**
-     * Sprit
-     * @param  string $add
-     * @return self
-     */
-    public function sprint(string $add): static
-    {
-        if (!is_null($this->raw)) {
-            $this->raw = sprintf($add, $this->raw);
-        }
-        return $this;
-    }
-
-    /**
      * Access and return format class object
      * @param string $dtoClassName The DTO format class name
      * @return object

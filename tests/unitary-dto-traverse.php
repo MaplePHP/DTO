@@ -13,7 +13,7 @@ $unit->case("MaplePHP DTO test", callback: function () {
         "email" => "john.doe@gmail.com",
         "slug" => "Lorem ipsum åäö",
         "price" => "1999.99",
-        "date" => "2023-08-21 14:35:12",
+        "publish_date" => "2023-08-01 14:35:12",
         "feed" => [
             "t1" => ["firstname" => "<em>john 1</em>", "lastname" => "doe-1", 'salary' => 40000, "status" => 1, ['test' => 1]],
             "t2" => ["firstname" => "<em>jane 2</em>", "lastname" => "doe-2", 'salary' => 20000, "status" => 0, ['test' => 2]],
@@ -21,25 +21,35 @@ $unit->case("MaplePHP DTO test", callback: function () {
         "meta" => [
             "title" => 'Lorem ipsum dolor',
             "description" => '',
-            "published" => '2023-08-23 12:35:12',
+            "date_publish" => '2023-08-23 12:35:12',
+            "date_start" => '2023-09-23 12:35:12',
             "slug" => 'lorem-ipsum-dolor',
         ],
         'shopList' => ['soap', 'toothbrush', 'milk', 'cheese', 'potatoes', 'beef', 'fish'],
         'randList' => ['lorem', 'ipsum', 'dolor', 'sit', 'lorem', 'amet', 'sum'],
+        'randSumList' => [12, 77, 62, 626],
     ]);
 
 
+    $this->add($obj->meta->wildcardSearch("2023-*")->count(), [
+        'equal' => 2,
+    ], "wildcardMatch|wildcardSearch did not find 2 array item values");
+
+    $this->add($obj->meta->wildcardMatchKeys("date_*")->count(), [
+        'equal' => 2,
+    ], "wildcardMatchKeys did not find 2 array item values");
+
     $this->add($obj
-        ->add('qwddqwq', ['Hello'])
+        ->add('helloWorld', ['Hello'])
         ->merge(['World'])
         ->implode("-")
         ->strToLower()->get(), [
         'equal' => 'hello-world',
-    ],
-        "Add returned wrong string value");
+
+    ], "Add returned wrong string value");
 
 
-    $this->add($obj->shopList->keys()->eq(1), [
+    $this->add($obj->shopList->keys()->eq(1)->get(), [
         'equal' => 1,
     ], "Keys returned wrong key value");
 
@@ -50,34 +60,41 @@ $unit->case("MaplePHP DTO test", callback: function () {
 
     $this->add($obj->meta->select(['title', 'description'])->count(), [
         'equal' => 2,
-    ], "Replace returned wrong value");
+    ], "Select returned wrong value");
 
     $this->add($obj->shopList->searchMatch(['soap', 'cheese'])->count(), [
         'equal' => 2,
-    ], "Replace returned wrong value");
+    ], "SearchMatch returned wrong value");
 
     $this->add($obj->shopList->searchFilter(['soap', 'cheese'])->count(), [
         'equal' => 5,
-    ], "Replace returned wrong value");
+    ], "SearchFilter returned wrong value");
 
-    $this->add($obj->shopList->search('cheese'), [
+    $this->add($obj->shopList->search('cheese')->get(), [
         'equal' => 3,
-    ], "Replace returned wrong value");
+    ], "Search returned wrong value");
 
+    $this->add($obj->shopList->find('cheese')->strToUpper()->get(), [
+        'equal' => 'CHEESE',
+    ], "Search returned wrong value");
 
-    $this->add($obj->meta->reverse(true)->first() . $obj->meta->reverse(true)->eq('slug'), [
+    $this->add($obj->shopList->find('chewese')->get(), [
+        'isNull' => [],
+    ], "Find should return null");
+
+    $this->add($obj->meta->reverse(true)->first() . $obj->meta->reverse(true)->eq('slug')->get(), [
         'equal' => 'lorem-ipsum-dolorlorem-ipsum-dolor',
-    ], "Replace returned wrong value");
+    ], "Reverse returned wrong value");
 
-    $this->add($obj->shopList->reverse()->eq(0), [
+    $this->add($obj->shopList->reverse()->eq(0)->get(), [
         'equal' => 'fish',
-    ], "Replace returned wrong value");
+    ], "Reverse returned wrong value");
 
-    $this->add($obj->shopList->replaceRecursive(['t1' => ['firstname' => 'JANE']])->eq('t1.firstname'), [
+    $this->add($obj->shopList->replaceRecursive(['t1' => ['firstname' => 'JANE']])->eq('t1.firstname')->get(), [
         'equal' => 'JANE',
-    ], "Replace returned wrong value");
+    ], "ReplaceRecursive returned wrong value");
 
-    $this->add($obj->shopList->replace([0 => 'test'], [0 => 'test2'])->eq(0), [
+    $this->add($obj->shopList->replace([0 => 'test'], [0 => 'test2'])->eq(0)->get(), [
         'equal' => 'test2',
     ], "Replace returned wrong value");
 
@@ -97,6 +114,16 @@ $unit->case("MaplePHP DTO test", callback: function () {
     })->count(), [
         'equal' => 1,
     ], "Walk returned wrong count length");
+
+
+    $out = "";
+    $obj->shopList->walk(function ($value, $key) use(&$out) {
+        $out .= $this->eq($key)->strToUpper();
+    });
+
+    $this->add($out, [
+        'equal' => 'SOAPTOOTHBRUSHMILKCHEESEPOTATOESBEEFFISH',
+    ], "Walk returned wrong value");
 
     $this->add($obj->feed->t1->rand(4)->count(), [
         'equal' => 4,
@@ -177,7 +204,7 @@ $unit->case("MaplePHP DTO test", callback: function () {
         'length' => 10,
     ], 'Each fail from output buffer');
 
-    $this->add($obj->randList->duplicates()->first(), [
+    $this->add($obj->randList->duplicates()->first()->get(), [
         'equal' => 'lorem'
     ], 'Duplicates returned wrong value');
 
@@ -212,11 +239,15 @@ $unit->case("MaplePHP DTO test", callback: function () {
         'equal' => true
     ], 'Valid returned wrong value');
 
-    $this->add($obj->shopList->first(), [
+    $this->add($obj->email->validOrFallback('email')->strToUpper()->get(), [
+        'equal' => 'JOHN.DOE@GMAIL.COM'
+    ], 'validOrFallback returned wrong value');
+
+    $this->add($obj->shopList->first()->get(), [
         'equal' => 'soap'
     ], 'First returned wrong value');
 
-    $this->add($obj->shopList->last(), [
+    $this->add($obj->shopList->last()->get(), [
         'equal' => 'fish'
     ], 'Last returned wrong value');
 
@@ -232,11 +263,11 @@ $unit->case("MaplePHP DTO test", callback: function () {
         'equal' => 2
     ], 'Splice returned wrong value');
 
-    $this->add($obj->shopList->prepend(['prepend'])->first(), [
+    $this->add($obj->shopList->prepend(['prepend'])->first()->get(), [
         'equal' => 'prepend'
     ], 'Prepend returned wrong value');
 
-    $this->add($obj->shopList->append(['append'])->last(), [
+    $this->add($obj->shopList->append(['append'])->last()->get(), [
         'equal' => 'append'
     ], 'Append returned wrong value');
 
@@ -333,19 +364,47 @@ $unit->case("MaplePHP DTO test", callback: function () {
 
     \MaplePHP\DTO\Format\Clock::setDefaultLanguage('sv_SE');
 
-    $this->add($obj->date->clockFormat('FM')->get(), [
+    $this->add($obj->publish_date->clockFormat('FM')->get(), [
         "equal" => 'augustiaug'
     ], "Month translation to sv_SE failed");
 
-    $this->add($obj->date->clockFormat('lD')->get(), [
-        "equal" => 'måndagmån'
+    $this->add($obj->publish_date->clockFormat('lD')->get(), [
+        "equal" => 'tisdagtis'
     ], "Weekday translation to sv_SE failed");
 
-    $this->add($obj->date->clockFormat('FM', 'is_IS')->get(), [
+    $this->add($obj->publish_date->clockFormat('FM', 'is_IS')->get(), [
         "equal" => 'ágústágú.'
     ], "Month translation to is_IS failed");
 
-    $this->add($obj->date->clock()->setLocale('is_IS')->format('FM'), [
+    $this->add($obj->publish_date->clock()->setLocale('is_IS')->format('FM'), [
         "equal" => 'ágústágú.'
     ], "Month translation to is_IS failed");
+
+
+    $transformed = Traverse::value([
+        ["id" => 1, "name" => "<b>Alice</b>"],
+        ["id" => 2, "name" => "<i>bob</i>"],
+        ["id" => 3, "name" => "Charlie"]
+
+    ])->fetch(function ($user) {
+        return [
+            "id" => $user->id->get(),
+            "name" => $user->name->strStripTags()->strUcFirst()->get()
+        ];
+    });
+
+    $this->add(($transformed[1]['name'] ?? ""), [
+        "equal" => 'Bob'
+    ], "Fetch: failed to apply transformation to array");
+
+    $this->add($obj->firstname->strStripTags()->strUcFirst()->sprint('Username: %s')->get(), [
+        "equal" => 'Username: Daniel'
+    ], "sprint did return wrong value");
+
+    $this->add($obj->randSumList->sum()->get(), [
+        "equal" => 777
+    ], "sum did return wrong value");
+
+
+
 });
