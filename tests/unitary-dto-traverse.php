@@ -6,7 +6,7 @@ use MaplePHP\DTO\Traverse;
 $unit = new MaplePHP\Unitary\Unit();
 
 // Begin by adding a test case
-$unit->case("MaplePHP DTO test", callback: function () {
+$unit->case("MaplePHP DTO Travers", callback: function () {
     $obj = Traverse::value([
         "firstname" => "<em>daniel</em>",
         "lastname" => "doe",
@@ -406,5 +406,23 @@ $unit->case("MaplePHP DTO test", callback: function () {
     ], "sum did return wrong value");
 
 
+    $end = $obj->shopList->end();
+    $list = $obj
+        ->with($end)
+        ->reset()
+        ->eq($end->key()->toInt()-1)
+        ->get();
+
+    $this->add($list, [
+        "equal" => "beef"
+    ], "end and reset did return wrong value");
+
+    $this->add($obj->shopList->first()->get(), [
+        "equal" => "soap"
+    ], "first did return wrong value");
+
+    $this->add($obj->shopList->last()->get(), [
+        "equal" => "fish"
+    ], "last did return wrong value");
 
 });

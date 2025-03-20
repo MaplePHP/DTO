@@ -640,22 +640,44 @@ trait CollectionUtilities
     }
 
     /**
-     * Get first item in collection
+     * Set the internal pointer of an array to its first element
      * https://www.php.net/manual/en/function.reset.php
      *
+     * @param mixed|null $value
      * @return Arr|CollectionUtilities|Traverse
      */
-    public function reset(): self
+    public function reset(mixed &$value = null): self
     {
         $inst = clone $this;
-        $inst->raw = reset($this->raw);
+        $value = reset($inst->raw);
         return $inst;
     }
 
-    // Alias to 'reset'
+    /**
+     * Set the internal pointer of an array to its last element
+     * https://www.php.net/manual/en/function.end.php
+     *
+     * @param mixed|null $value
+     * @return Arr|CollectionUtilities|Traverse
+     */
+    public function end(mixed &$value = null): self
+    {
+        $inst = clone $this;
+        $value = end($inst->raw);
+        return $inst;
+    }
+
+    /**
+     * Get first item in collection
+     * https://www.php.net/manual/en/function.end.php
+     *
+     * @return Arr|CollectionUtilities|Traverse
+     */
     public function first(): self
     {
-        return $this->reset();
+        $inst = $this->reset($last);
+        $inst->raw = $last;
+        return $inst;
     }
 
     /**
@@ -664,17 +686,11 @@ trait CollectionUtilities
      *
      * @return Arr|CollectionUtilities|Traverse
      */
-    public function end(): self
-    {
-        $inst = clone $this;
-        $inst->raw = end($this->raw);
-        return $inst;
-    }
-
-    // Alias to 'end'
     public function last(): self
     {
-        return $this->end();
+        $inst = $this->end($last);
+        $inst->raw = $last;
+        return $inst;
     }
 
     /**

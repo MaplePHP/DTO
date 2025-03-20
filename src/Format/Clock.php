@@ -9,6 +9,10 @@
 
 namespace MaplePHP\DTO\Format;
 
+use DateTime;
+use DateTimeImmutable;
+use DateTimeInterface;
+use DateTimeZone;
 use Exception;
 use IntlDateFormatter;
 use InvalidArgumentException;
@@ -16,6 +20,9 @@ use InvalidArgumentException;
 final class Clock extends FormatAbstract implements FormatInterface
 {
     static protected ?string $defaultLocale = 'en';
+
+    static protected string|DateTimeZone|null $defaultTimezone = null;
+
     protected ?string $locale = null;
     protected array $parts = [];
 
@@ -30,8 +37,11 @@ final class Clock extends FormatAbstract implements FormatInterface
         if (is_array($value) || is_object($value)) {
             throw new InvalidArgumentException("Is expecting a string or a convertable string value.", 1);
         }
-
-        parent::__construct(new \DateTime($value));
+        $date = new DateTime($value);
+        if(!is_null(self::$defaultTimezone)) {
+            $date->setTimezone(self::$defaultTimezone);
+        }
+        parent::__construct($date);
     }
 
     /**
@@ -61,16 +71,28 @@ final class Clock extends FormatAbstract implements FormatInterface
      * @param string $localeCode
      * @return $this
      */
-    public function setLanguage(string $localeCode): self
+    public function setLocale(string $localeCode): self
     {
         $this->locale = $localeCode;
         return $this;
     }
 
-    // Alias to setLanguage
-    public function setLocale(string $localeCode): self
+    // Alias to setLocale
+    public function setLanguage(string $localeCode): self
     {
-        return $this->setLanguage($localeCode);
+        return $this->setLocale($localeCode);
+    }
+
+    /**
+     * Set default timezone
+     *
+     * @param string|DateTimeZone $timezone
+     * @return void
+     * @throws \DateInvalidTimeZoneException
+     */
+    static public function setDefaultTimezone(string|DateTimeZone $timezone): void
+    {
+        self::$defaultTimezone = $timezone instanceof DateTimeZone ? $timezone : new DateTimeZone($timezone);
     }
 
     /**
@@ -79,15 +101,15 @@ final class Clock extends FormatAbstract implements FormatInterface
      * @param string $localeCode
      * @return void
      */
-    static public function setDefaultLanguage(string $localeCode): void
+    static public function setDefaultLocale(string $localeCode): void
     {
         self::$defaultLocale = $localeCode;
     }
 
-    // Alias to setDefaultLanguage
-    static public function setDefaultLocale(string $localeCode): void
+    // Alias to setDefaultLocale
+    static public function setDefaultLanguage(string $localeCode): void
     {
-        self::setDefaultLanguage($localeCode);
+        self::setDefaultLocale($localeCode);
     }
 
     /**
@@ -138,6 +160,220 @@ final class Clock extends FormatAbstract implements FormatInterface
     }
 
     /**
+     * Get hour and minutes
+     *
+     * @return string
+     */
+    public function time(): string
+    {
+        return $this->raw->format('H:i');
+    }
+
+    /**
+     * Get seconds (with leading zeros)
+     *
+     * @return string
+     */
+    public function seconds(): string
+    {
+        return $this->raw->format('s');
+    }
+
+    /**
+     * Check if year is leap year
+     *
+     * @return bool
+     */
+    public function isLeapYear(): bool
+    {
+        return (bool)$this->raw->format('L');
+    }
+
+    /**
+     * Get ISO 8601 week number of year
+     *
+     * @return int
+     */
+    public function weekNumber(): int
+    {
+        return (int)$this->raw->format('W');
+    }
+
+    /**
+     * Get ISO 8601 formatted date (e.g., 2025-03-20T14:30:00+01:00)
+     *
+     * @return string
+     */
+    public function iso(): string
+    {
+        return $this->raw->format(DateTimeInterface::ATOM);
+    }
+
+    /**
+     * Get RFC 2822 formatted date (e.g., Thu, 20 Mar 2025 14:30:00 +0100)
+     *
+     * @return string
+     */
+    public function rfc(): string
+    {
+        return $this->raw->format(DateTime::RFC2822);
+    }
+
+    /**
+     * Get AM/PM format of time (e.g., 02:30 PM)
+     *
+     * @return string
+     */
+    public function time12Hour(): string
+    {
+        return $this->raw->format('h:i A');
+    }
+
+    /**
+     * Get difference in days from today (negative if in past, positive if future)
+     *
+     * @return int
+     * @throws \DateMalformedStringException
+     */
+    public function diffInDays(): int
+    {
+        $today = new DateTimeImmutable('today', $this->raw->getTimezone());
+        return (int)$today->diff($this->raw)->format('%r%a');
+    }
+
+    /**
+     * Check if the date is today
+     *
+     * @return bool
+     */
+    public function isToday(): bool
+    {
+        return $this->raw->format('Y-m-d') === (new DateTimeImmutable('today', $this->raw->getTimezone()))->format('Y-m-d');
+    }
+
+    /**
+     * Set the timezone
+     *
+     * @param DateTimeZone|string $timezone
+     * @return $this
+     * @throws Exception
+     */
+    public function setTimezone(DateTimeZone|string $timezone): self
+    {
+        if (!$timezone instanceof DateTimeZone) {
+            $timezone = new DateTimeZone($timezone);
+        }
+
+        $this->raw = $this->raw->setTimezone($timezone);
+
+        return $this;
+    }
+
+
+    /**
+     * Get timezone identifier (e.g., Europe/Stockholm)
+     *
+     * @return string
+     */
+    public function timezone(): string
+    {
+        return $this->raw->getTimezone()->getName();
+    }
+
+    /**
+     * Get hour and minutes
+     *
+     * @return string
+     */
+    public function timestamp(): string
+    {
+        return $this->raw->getTimestamp();
+    }
+
+    /**
+     * Get year
+     *
+     * @param bool $shorthand
+     * @return string
+     */
+    public function year(bool $shorthand = false): string
+    {
+        return $this->raw->format($shorthand ? 'y' : 'Y');
+    }
+
+    /**
+     * Get month
+     *
+     * @return string
+     */
+    public function month(): string
+    {
+        return $this->raw->format("m");
+    }
+
+    /**
+     * Get full name of month (e.g., January)
+     *
+     * @return string
+     */
+    public function monthName(): string
+    {
+        return $this->raw->format('F');
+    }
+
+    /**
+     * Get shorthand name of month (e.g., Jan)
+     *
+     * @return string
+     */
+    public function shortMonthName(): string
+    {
+        return $this->raw->format('M');
+    }
+
+
+    /**
+     * Get month
+     *
+     * @return string
+     */
+    public function day(): string
+    {
+        return $this->raw->format("d");
+    }
+
+    /**
+     * Get day of the week (numeric, 1 for Monday through 7 for Sunday)
+     *
+     * @return int
+     */
+    public function dayOfWeek(): int
+    {
+        return (int)$this->raw->format('N');
+    }
+
+    /**
+     * Get full name of the weekday (e.g., Monday)
+     *
+     * @return string
+     */
+    public function weekday(): string
+    {
+        return $this->raw->format('l');
+    }
+
+    /**
+     * Get short name of weekday (e.g., Mon)
+     *
+     * @return string
+     */
+    public function shortWeekday(): string
+    {
+        return $this->raw->format('D');
+    }
+
+
+    /**
      * Get Value
      * @return string
      */
@@ -149,11 +385,11 @@ final class Clock extends FormatAbstract implements FormatInterface
     /**
      * Return translation find array
      *
-     * @param \DateTime $date
+     * @param DateTime $date
      * @param string $locale
      * @return array
      */
-    protected function getTranslationData(\DateTime $date, string $locale): array
+    protected function getTranslationData(DateTime $date, string $locale): array
     {
 
         if($locale !== "en") {

@@ -62,6 +62,9 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
      */
     public function with(mixed $data): self
     {
+        if($data instanceof TraverseInterface) {
+            return clone $data;
+        }
         return new self($data);
     }
 
@@ -197,6 +200,43 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
     public function toJson(mixed $value, int $flags = 0, int $depth = 512): string|false
     {
         return json_encode($value, $flags, $depth);
+    }
+
+    /**
+     * Returns the int representation of the value
+     *
+     * @return int
+     */
+    public function toInt(): int
+    {
+        return (int)$this->get();
+    }
+
+    /**
+     * Returns the float representation of the value
+     *
+     * @return float
+     */
+    public function toFloat(): float
+    {
+        return (float)$this->get();
+    }
+
+    /**
+     * Returns the bool representation of the value
+     *
+     * @return bool
+     */
+    public function toBool(): bool
+    {
+        $value = $this->get();
+        if(is_bool($value)) {
+            return $value;
+        }
+        if(is_numeric($value)) {
+            return ((float)$value > 0);
+        }
+        return ($value !== "false" && strlen($value));
     }
 
     /**
@@ -358,6 +398,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
                 $this->{$k} = $v;
             }
         }
+
         $this->raw = $data;
         return $this;
     }
