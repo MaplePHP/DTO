@@ -197,9 +197,9 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
      * @param int $depth
      * @return string|false
      */
-    public function toJson(mixed $value, int $flags = 0, int $depth = 512): string|false
+    public function toJson(int $flags = 0, int $depth = 512): string|false
     {
-        return json_encode($value, $flags, $depth);
+        return json_encode($this->get(), $flags, $depth);
     }
 
     /**
