@@ -107,7 +107,7 @@ $unit->case("MaplePHP DTO Clock", callback: function () {
     ], "time12Hour: Failed");
 
     $this->add($obj->date->clock()->diffInDays(), [
-        "equal" => -668
+        "lessThan" => 0
     ], "diffInDays: Failed");
 
     $this->add($obj->date->clock()->isToday(), [

@@ -45,6 +45,16 @@ final class Clock extends FormatAbstract implements FormatInterface
     }
 
     /**
+     * Get Value
+     *
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->get();
+    }
+
+    /**
      * Init format by adding data to modify/format/traverse
      * @param mixed $value
      * @return self
@@ -68,7 +78,14 @@ final class Clock extends FormatAbstract implements FormatInterface
     /**
      * Set expected date language using locale
      *
-     * @param string $localeCode
+     * Will translate localized month and weekday names
+     *
+     * Falls back to PHP’s IntlDateFormatter if a static translation is unavailable.
+     * This depends on installed system locales, which may cause inconsistencies
+     * and be slower than static translations. However, missing locales can be
+     * installed for greater control.
+     *
+     * @param string $localeCode The locale code (e.g., 'sv_SE', 'en_US').
      * @return $this
      */
     public function setLocale(string $localeCode): self
@@ -77,10 +94,33 @@ final class Clock extends FormatAbstract implements FormatInterface
         return $this;
     }
 
-    // Alias to setLocale
-    public function setLanguage(string $localeCode): self
+    /**
+     * Set default date language using locale
+     *
+     * @param string $localeCode
+     * @return void
+     */
+    static public function setDefaultLocale(string $localeCode): void
     {
-        return $this->setLocale($localeCode);
+        self::$defaultLocale = $localeCode;
+    }
+
+    /**
+     * Set the timezone
+     *
+     * @param DateTimeZone|string $timezone
+     * @return $this
+     * @throws Exception
+     */
+    public function setTimezone(DateTimeZone|string $timezone): self
+    {
+        if (!$timezone instanceof DateTimeZone) {
+            $timezone = new DateTimeZone($timezone);
+        }
+
+        $this->raw = $this->raw->setTimezone($timezone);
+
+        return $this;
     }
 
     /**
@@ -96,20 +136,13 @@ final class Clock extends FormatAbstract implements FormatInterface
     }
 
     /**
-     * Set default date language using locale
+     * Get timezone identifier (e.g., Europe/Stockholm)
      *
-     * @param string $localeCode
-     * @return void
+     * @return string
      */
-    static public function setDefaultLocale(string $localeCode): void
+    public function timezone(): string
     {
-        self::$defaultLocale = $localeCode;
-    }
-
-    // Alias to setDefaultLocale
-    static public function setDefaultLanguage(string $localeCode): void
-    {
-        self::setDefaultLocale($localeCode);
+        return $this->raw->getTimezone()->getName();
     }
 
     /**
@@ -230,7 +263,7 @@ final class Clock extends FormatAbstract implements FormatInterface
     }
 
     /**
-     * Get difference in days from today (negative if in past, positive if future)
+     * Get difference in days from today (negative if in the past, positive if future)
      *
      * @return int
      * @throws \DateMalformedStringException
@@ -245,39 +278,11 @@ final class Clock extends FormatAbstract implements FormatInterface
      * Check if the date is today
      *
      * @return bool
+     * @throws \DateMalformedStringException
      */
     public function isToday(): bool
     {
         return $this->raw->format('Y-m-d') === (new DateTimeImmutable('today', $this->raw->getTimezone()))->format('Y-m-d');
-    }
-
-    /**
-     * Set the timezone
-     *
-     * @param DateTimeZone|string $timezone
-     * @return $this
-     * @throws Exception
-     */
-    public function setTimezone(DateTimeZone|string $timezone): self
-    {
-        if (!$timezone instanceof DateTimeZone) {
-            $timezone = new DateTimeZone($timezone);
-        }
-
-        $this->raw = $this->raw->setTimezone($timezone);
-
-        return $this;
-    }
-
-
-    /**
-     * Get timezone identifier (e.g., Europe/Stockholm)
-     *
-     * @return string
-     */
-    public function timezone(): string
-    {
-        return $this->raw->getTimezone()->getName();
     }
 
     /**
@@ -331,9 +336,8 @@ final class Clock extends FormatAbstract implements FormatInterface
         return $this->raw->format('M');
     }
 
-
     /**
-     * Get month
+     * Get day
      *
      * @return string
      */
@@ -370,16 +374,6 @@ final class Clock extends FormatAbstract implements FormatInterface
     public function shortWeekday(): string
     {
         return $this->raw->format('D');
-    }
-
-
-    /**
-     * Get Value
-     * @return string
-     */
-    public function __toString(): string
-    {
-        return $this->get();
     }
 
     /**

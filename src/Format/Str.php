@@ -480,11 +480,12 @@ final class Str extends FormatAbstract implements FormatInterface
     /**
      * Pad string with leading zero
      *
+     * @param int $length
      * @return self
      */
-    public function leadingZero(): self
+    public function leadingZero(int $length = 2): self
     {
-        return $this->pad(2, '0', STR_PAD_LEFT);
+        return $this->pad($length, '0', STR_PAD_LEFT);
     }
 
     /**

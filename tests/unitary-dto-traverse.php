@@ -362,7 +362,7 @@ $unit->case("MaplePHP DTO Travers", callback: function () {
         "equal" => 3
     ], "Values does not match");
 
-    \MaplePHP\DTO\Format\Clock::setDefaultLanguage('sv_SE');
+    \MaplePHP\DTO\Format\Clock::setDefaultLocale('sv_SE');
 
     $this->add($obj->publish_date->clockFormat('FM')->get(), [
         "equal" => 'augustiaug'

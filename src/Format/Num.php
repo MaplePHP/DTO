@@ -14,11 +14,13 @@ use NumberFormatter;
 
 final class Num extends FormatAbstract implements FormatInterface
 {
-    private static $numFormatter;
+    private static NumberFormatter $defNumInst;
 
+    private ?NumberFormatter $numInst = null;
 
     /**
      * Init format by adding data to modify/format/traverse
+     *
      * @param  mixed  $value
      * @return self
      */
@@ -28,105 +30,250 @@ final class Num extends FormatAbstract implements FormatInterface
     }
 
     /**
-     * Add number format for currency
+     * Initiate a NumberFormatter instance
+     *
+     * @param string $locale
+     * @param int $type
+     * @return void
+     */
+    public static function setDefaultLocale(string $locale, int $type = NumberFormatter::CURRENCY): void
+    {
+        self::$defNumInst = new NumberFormatter($locale, $type);
+    }
+
+    /**
+     * Initiate a NumberFormatter instance
+     *
+     * @param string $locale
+     * @param int $type
+     * @return self
+     */
+    public function setLocale(string $locale, int $type = NumberFormatter::CURRENCY): self
+    {
+        $inst = clone $this;
+        $inst->numInst = new NumberFormatter($locale, $type);
+        return $inst;
+    }
+
+    /**
+     * Get expected NumberFormatter instance
+     *
      * @return NumberFormatter
      */
-    public static function numFormatter(): NumberFormatter
+    public function getNumFormatter(): NumberFormatter
     {
-        if (is_null(self::$numFormatter)) {
-            self::$numFormatter = new NumberFormatter("sv_SE", NumberFormatter::CURRENCY);
+        if(!is_null($this->numInst)) {
+            return $this->numInst;
         }
-        return self::$numFormatter;
+        if(is_null(self::$defNumInst)) {
+            throw new \InvalidArgumentException("NumberFormatter instance not set.");
+        }
+        return self::$defNumInst;
     }
 
     /**
      * Convert to float number
+     *
      * @return self
      */
     public function float(): self
     {
-        $this->raw = (float)$this->raw;
-        return $this;
+        $inst = clone $this;
+        $inst->raw = (float)$inst->raw;
+        return $inst;
     }
 
     /**
      * Convert to integer
+     *
      * @return self
      */
     public function int(): self
     {
-        $this->raw = (int)$this->raw;
-        return $this;
+        $inst = clone $this;
+        $inst->raw = (int)$inst->raw;
+        return $inst;
     }
 
     /**
      * Round number
-     * @param  int    $dec Set decimals
+     *
+     * @param int $precision
+     * @param int $mode
      * @return self
      */
-    public function round(int $dec = 0): self
+    public function round(int $precision = 0, int $mode = PHP_ROUND_HALF_UP): self
     {
-        $this->float();
-        $this->raw = round($this->raw, $dec);
-        return $this;
+        $inst = $this->float();
+        $inst->raw = round($inst->raw, $precision, $mode);
+        return $inst;
     }
 
     /**
-     * Floor float
+     * Floor number
+     *
      * @return self
      */
     public function floor(): self
     {
-        $this->float();
-        $this->raw = floor($this->raw);
-        return $this;
+        $inst = $this->float();
+        $inst->raw = floor($inst->raw);
+        return $inst;
     }
 
     /**
-     * Ceil float
+     * Ceil number
+     *
      * @return self
      */
     public function ceil(): self
     {
-        $this->float();
-        $this->raw = ceil($this->raw);
-        return $this;
+        $inst = $this->float();
+        $inst->raw = ceil($inst->raw);
+        return $inst;
     }
 
     /**
-     * Get file size in KB
+     * Absolute value
+     *
+     * @return self
+     */
+    public function abs(): self
+    {
+        $inst = $this->float();
+        $inst->raw = abs($inst->raw);
+        return $inst;
+    }
+
+    /**
+     * Format number with thousands separator
+     *
+     * @param int $decimals
+     * @param string $decimalSeparator
+     * @param string $thousandsSeparator
+     * @return self
+     */
+    public function numberFormat(int $decimals = 0, string $decimalSeparator = '.', string $thousandsSeparator = ','): self
+    {
+        $inst = $this->float();
+        $inst->raw = number_format($inst->raw, $decimals, $decimalSeparator, $thousandsSeparator);
+        return $inst;
+    }
+
+    /**
+     * Pad number with leading zeros
+     *
+     * @param int $length
+     * @return self
+     */
+    public function leadingZero(int $length = 2): self
+    {
+        $inst = clone $this;
+        $inst->raw = Str::value($inst->raw)->leadingZero($length)->get();
+        return $inst;
+    }
+
+    /**
+     * Clamp number between min and max
+     *
+     * @param float $min
+     * @param float $max
+     * @return self
+     */
+    public function clamp(float $min, float $max): self
+    {
+        $inst = $this->float();
+        $inst->raw = max($min, min($max, $inst->raw));
+        return $inst;
+    }
+
+    /**
+     * Check if number is even
+     *
+     * @return Num
+     */
+    public function isEven(): self
+    {
+        $inst = $this->int();
+        $inst->raw = ($inst->raw % 2) === 0;
+        return $inst;
+    }
+
+    /**
+     * Check if number is even
+     *
+     * @return Num
+     */
+    public function isOdd(): self
+    {
+        $inst = $this->int();
+        $inst->raw = ($inst->raw % 2) !== 0;
+        return $inst;
+    }
+
+    /**
+     * Convert percentage string to decimal (e.g. '45%' => 0.45)
+     *
+     * @return self
+     */
+    public function percentToDecimal(): self
+    {
+        $inst = $this->float();
+        $inst->raw = $inst->raw / 100;
+        return $inst;
+    }
+
+    /**
+     * Convert decimal to percentage string (e.g. 0.45 => '45%')
+     *
+     * @param int $precision
+     * @return self
+     */
+    public function toPercent(int $precision = 2): self
+    {
+        $inst = $this->float();
+        $inst->raw = round($inst->raw * 100, $precision);
+        return $inst;
+    }
+
+    /**
+     * Get byte number or filesize in Kilobyte
+     *
      * @return self
      */
     public function toKb(): self
     {
-        $this->float();
-        $this->raw = round(($this->raw / 1024), 2);
-        return $this;
+        $inst = $this->float();
+        $inst->raw = round(($inst->raw / 1024), 2);
+        return $inst;
     }
 
     /**
-     * Formats the bytes to appropiate ending (k,M,G,T)
+     * Formats the bytes to appropriate ending (kb, mb, g or t)
+     *
      * @return self
      */
     public function toFilesize(): self
     {
-        $this->float();
+        $inst = $this->float();
         $precision = 2;
-        $base = log($this->raw) / log(1024);
+        $base = log($inst->raw) / log(1024);
         $suffixes = ['', ' kb', ' mb', ' g', ' t'];
         $baseFloor = (int)floor($base);
         $suffix = (isset($suffixes[$baseFloor])) ? $suffixes[$baseFloor] : "";
-        $this->raw = round(pow(1024, $base - $baseFloor), $precision) . $suffix;
-        return $this;
+        $inst->raw = round(pow(1024, $base - $baseFloor), $precision) . $suffix;
+        return $inst;
     }
 
     /**
      * Number to bytes
+     *
      * @return self
      */
     public function toBytes(): self
     {
-        $val = $this->raw;
+        $inst = $this->float();
+        $val = $inst->raw;
 
         preg_match('#([0-9]+)[\s]*([a-z]+)#i', $val, $matches);
         $last = isset($matches[2]) ? $matches[2] : "";
@@ -147,22 +294,60 @@ final class Num extends FormatAbstract implements FormatInterface
             case 'kb':
                 $val *= 1024;
         }
-        $this->raw = $val;
+        $inst->raw = $val;
 
-        return $this;
+        return $inst;
     }
 
     /**
-     * Convert number to a currency (e.g. 1000 = 1.000,00 kr)
-     * @param  string      $currency SEK, EUR
-     * @param  int|integer $decimals
-     * @return FormatInterface
+     * Convert number to a localized currency string
+     *
+     * @param string $currency
+     * @param int $decimals
+     * @param int $roundingMode
+     * @return self
      */
-    public function currency(string $currency, int $decimals = 2): FormatInterface
+    public function toCurrency(
+        string $currency,
+        int $decimals = 2,
+        int $roundingMode = NumberFormatter::ROUND_HALFUP
+    ): self {
+        $inst = $this->float();
+        $num = $inst->getNumFormatter();
+        $num->setAttribute(NumberFormatter::ROUNDING_MODE, $roundingMode);
+        $num->setAttribute(NumberFormatter::FRACTION_DIGITS, $decimals);
+        $inst->raw = $num->formatCurrency($inst->raw, $currency);
+        return $inst;
+    }
+
+    /**
+     * Get only the currency symbol (e.g. 'kr' for SEK)
+     *
+     * @param string $currency
+     * @return self
+     */
+    public function getCurrencySymbol(string $currency): self
     {
-        self::numFormatter()->setAttribute(self::$numFormatter::ROUNDING_MODE, $decimals);
-        self::numFormatter()->setAttribute(self::$numFormatter::FRACTION_DIGITS, $decimals);
-        // Traverse back to string
-        return Str::value(self::numFormatter()->formatCurrency($this->float()->get(), $currency));
+        $inst = clone $this;
+        $num = $this->getNumFormatter();
+        $num->setTextAttribute(NumberFormatter::CURRENCY_CODE, $currency);
+        $inst->raw = $num->getSymbol(NumberFormatter::CURRENCY_SYMBOL);
+        return $inst;
+    }
+
+    /**
+     * Format number with ISO currency prefix (e.g. SEK 1,000.00)
+     *
+     * @param string $currency
+     * @param int $decimals
+     * @return self
+     */
+    public function toCurrencyIso(string $currency, int $decimals = 2): self
+    {
+        $inst = $this->float();
+        $num = $inst->getNumFormatter();
+        $num->setAttribute(NumberFormatter::FRACTION_DIGITS, $decimals);
+        $inst->raw = $currency . ' ' . $num->format($inst->raw);
+        return $inst;
     }
 }
