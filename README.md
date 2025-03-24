@@ -9,19 +9,13 @@ DTO stands for **Darn Tidy Object**, a playful twist on the traditional Data Tra
 composer require maplephp/dto
 ```
 
-## 📦 Installation
-
-```bash
-composer require maplephp/dto
-```
-
 ## 📘 Documentation
-- [Why DTO?](http://localhost:3000/docs/intro#why-dto)
-- [Traverse Collection](http://localhost:3000/docs/traverse)
-- [Format string](http://localhost:3000/docs/format-string)
-- [Format Number](http://localhost:3000/docs/format-number)
-- [Format Clock](http://localhost:3000/docs/format-clock)
-- [Format Dom](http://localhost:3000/docs/format-dom)
+- [Why DTO?](https://maplephp.github.io/DTO/docs/intro#why-dto)
+- [Traverse Collection](https://maplephp.github.io/DTO/docs/traverse)
+- [Format string](https://maplephp.github.io/DTO/docs/format-string)
+- [Format Number](https://maplephp.github.io/DTO/docs/format-number)
+- [Format Clock](https://maplephp.github.io/DTO/docs/format-clock)
+- [Format Dom](https://maplephp.github.io/DTO/docs/format-dom)
 
 
 ## How It Works
