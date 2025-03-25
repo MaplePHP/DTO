@@ -1,6 +1,6 @@
 <?php
 /**
- * This is a Multibyte library
+ * This is a Polyfill library for Multibyte
  * It is tho recommended to install mb on the server if is missing
  */
 
@@ -96,7 +96,7 @@ class MB
      *
      * @param int $start
      * @param int|null $length
-     * @param string|null $encoding
+     * @param string|null $encoding (e.g. UTF-8)
      * @return self
      * @throws ErrorException
      */

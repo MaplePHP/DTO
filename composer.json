@@ -1,16 +1,25 @@
 {
   "name": "maplephp/dto",
   "type": "library",
-  "version": "v2.0.0",
+  "version": "v3.0.0",
   "description": "DTO library in PHP provides benefits such as encapsulating data, enforcing immutability and facilitating data transformation.",
   "keywords": [
     "dto",
-    "traversing",
-    "objects",
-    "data transformation",
-    "immutability"
+    "collection",
+    "darn-tidy-object",
+    "data-transfer-object",
+    "data-object",
+    "travsers",
+    "array",
+    "transform",
+    "immutable",
+    "utility",
+    "dom",
+    "string",
+    "number",
+    "date"
   ],
-  "homepage": "https://wazabii.se",
+  "homepage": "https://maplephp.github.io/DTO/",
   "license": "Apache-2.0",
   "authors": [
     {
@@ -28,8 +37,11 @@
   },
   "autoload": {
     "psr-4": {
-      "MaplePHP\\DTO\\": ""
+      "MaplePHP\\DTO\\": "src"
     }
   },
-  "minimum-stability": "dev"
+  "minimum-stability": "dev",
+  "require-dev": {
+    "maplephp/unitary": "dev-main"
+  }
 }

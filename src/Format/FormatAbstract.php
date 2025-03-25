@@ -15,11 +15,11 @@ use ReflectionException;
 
 abstract class FormatAbstract
 {
-    protected $value;
+    protected $raw;
 
     public function __construct(mixed $value)
     {
-        $this->value = $value;
+        $this->raw = $value;
     }
 
     /**
@@ -28,7 +28,7 @@ abstract class FormatAbstract
      */
     public function get(): mixed
     {
-        return $this->value;
+        return $this->raw;
     }
 
     /**
@@ -38,8 +38,8 @@ abstract class FormatAbstract
      */
     public function fallback(string $fallback): self
     {
-        if (!$this->value) {
-            $this->value = $fallback;
+        if (!$this->raw) {
+            $this->raw = $fallback;
         }
         return $this;
     }
@@ -63,19 +63,6 @@ abstract class FormatAbstract
     }
 
     /**
-     * Sprit
-     * @param  string $add
-     * @return self
-     */
-    public function sprint(string $add): static
-    {
-        if (!is_null($this->value)) {
-            $this->value = sprintf($add, $this->value);
-        }
-        return $this;
-    }
-
-    /**
      * Access and return format class object
      * @param string $dtoClassName The DTO format class name
      * @return object
@@ -90,6 +77,6 @@ abstract class FormatAbstract
         }
         $reflect = new ReflectionClass($className);
         $instance = $reflect->newInstanceWithoutConstructor();
-        return $instance->value($this->value);
+        return $instance->value($this->raw);
     }
 }

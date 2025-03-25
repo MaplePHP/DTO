@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @Package:    MaplePHP - The main traverse class
  * @Author:     Daniel Ronkainen
@@ -10,6 +9,8 @@
 namespace MaplePHP\DTO;
 
 use BadMethodCallException;
+use ErrorException;
+use MaplePHP\DTO\Format\FormatInterface;
 use MaplePHP\DTO\Format\Str;
 use MaplePHP\Validate\Inp;
 use ReflectionClass;
@@ -17,18 +18,24 @@ use ReflectionException;
 use stdClass;
 
 /**
- * @method arr()
- * @method clock()
- * @method dom()
- * @method encode()
- * @method local()
- * @method num()
- * @method str()
+ * @method \MaplePHP\DTO\Format\Str str()
+ * @method \MaplePHP\DTO\Format\Arr arr()
+ * @method \MaplePHP\DTO\Format\Num num()
+ * @method \MaplePHP\DTO\Format\Clock clock()
+ * @method \MaplePHP\DTO\Format\Dom dom()
+ * @method \MaplePHP\DTO\Format\Encode encode()
+ * @method \MaplePHP\DTO\Format\Local local()
+ * @mixin \MaplePHP\DTO\Format\Clock
  */
-class Traverse extends DynamicDataAbstract
+class Traverse extends DynamicDataAbstract implements TraverseInterface
 {
-    protected mixed $raw = null; // Use raw to access current instance data (access array)
-    protected $data = null;
+    use Traits\CollectionUtilities;
+
+    protected mixed $raw = null;
+
+    static private array $helpers = [
+      'Str', 'Arr', 'Num', 'Clock', 'Dom', 'Encode', 'Local'
+    ];
 
     public function __construct(mixed $data = null)
     {
@@ -37,24 +44,61 @@ class Traverse extends DynamicDataAbstract
     }
 
     /**
-     * With new object
+     * Init instance
+     *
      * @param mixed $data
-     * @return $this
+     * @return self
      */
-    public function with(mixed $data): self
+    public static function value(mixed $data): self
     {
         return new self($data);
     }
 
     /**
+     * With new "Traverse" collection
+     *
+     * @param mixed $data
+     * @return self
+     */
+    public function with(mixed $data): self
+    {
+        if($data instanceof TraverseInterface) {
+            return clone $data;
+        }
+        return new self($data);
+    }
+
+    /**
+     * Add custom Helpers
+     *
+     * @param FormatInterface $helper
+     * @return void
+     */
+    public function addHelper(FormatInterface $helper): void
+    {
+        self::$helpers[] = $helper;
+    }
+
+    /**
+     * List all supported Helpers classes
+     *
+     * @return string[]
+     */
+    static public function listAllHelpers(): array
+    {
+        return self::$helpers;
+    }
+
+    /**
      * Object traverser
+     *
      * @param $key
      * @return Traverse|null
      */
     public function __get($key)
     {
-        if(isset($this->data->{$key})) {
-            $data = $this->data->{$key};
+        if(isset($this->getData()->{$key})) {
+            $data = $this->getData()->{$key};
             if(is_object($data) && !($data instanceof DynamicDataAbstract)) {
                 return $data;
             }
@@ -71,6 +115,7 @@ class Traverse extends DynamicDataAbstract
 
     /**
      * Immutable formating class
+     *
      * @param $method
      * @param $args
      * @return self
@@ -101,6 +146,7 @@ class Traverse extends DynamicDataAbstract
 
     /**
      * Get/return result
+     *
      * @param  string|null $fallback
      * @return mixed
      */
@@ -110,53 +156,92 @@ class Traverse extends DynamicDataAbstract
     }
 
     /**
-     * Get raw
-     * @return mixed
+     * Will add item to object and method chain
+     *
+     * @param string $key  The object key name
+     * @param mixed $value The object item value
+     * @return self
      */
-    public function getRaw(): mixed
+    public function add(string $key, mixed $value): self
     {
-        return $this->raw;
-    }
-
-    /**
-     * Add a data to new object column/name
-     * @param string $columnName The new column name
-     * @param mixed  $value      The added value
-     */
-    public function add(string $columnName, mixed $value): self
-    {
-        $this->{$columnName} = $value;
-        return $this;
+        $inst = clone $this;
+        $inst->addToObject($key, $value);
+        $inst->raw = $inst->getData()->{$key};
+        return $inst;
     }
 
     /**
      * Validate current item and set to fallback (default: null) if not valid
+     *
      * @param string $method
      * @param array $args
-     * @param mixed|null $fallback
-     * @return $this
+     * @return bool
+     * @throws ErrorException|BadMethodCallException
      */
-    public function valid(string $method, array $args, mixed $fallback = null): self
+    public function valid(string $method, array $args = []): bool
     {
         $inp = Inp::value($this->raw);
-        if(!$inp->{$method}(...$args)) {
-            $this->raw = $fallback;
+        if(!method_exists($inp, $method)) {
+            throw new BadMethodCallException("The MaplePHP validation method \"$method\" does not exist!", 1);
         }
-        return $this;
+        return $inp->{$method}(...$args);
     }
 
     /**
-     * Json decode value
-     * @return self
+     * Returns the JSON representation of a value
+     *
+     * https://www.php.net/manual/en/function.json-encode.php
+     *
+     * @param mixed $value
+     * @param int $flags
+     * @param int $depth
+     * @return string|false
      */
-    public function jsonDecode(): self
+    public function toJson(int $flags = 0, int $depth = 512): string|false
     {
-        $this->raw = json_decode($this->raw);
-        return $this::value($this->raw);
+        return json_encode($this->get(), $flags, $depth);
+    }
+
+    /**
+     * Returns the int representation of the value
+     *
+     * @return int
+     */
+    public function toInt(): int
+    {
+        return (int)$this->get();
+    }
+
+    /**
+     * Returns the float representation of the value
+     *
+     * @return float
+     */
+    public function toFloat(): float
+    {
+        return (float)$this->get();
+    }
+
+    /**
+     * Returns the bool representation of the value
+     *
+     * @return bool
+     */
+    public function toBool(): bool
+    {
+        $value = $this->get();
+        if(is_bool($value)) {
+            return $value;
+        }
+        if(is_numeric($value)) {
+            return ((float)$value > 0);
+        }
+        return ($value !== "false" && strlen($value));
     }
 
     /**
      * Convert collection into an array
+     *
      * @param callable|null $callback
      * @return array
      */
@@ -167,13 +252,20 @@ class Traverse extends DynamicDataAbstract
         $inst = clone $this;
 
         if (is_null($inst->raw)) {
-            $inst->raw = $inst->data;
+            $inst->raw = $inst->getData();
+        }
+
+        if(!is_object($inst->raw) && !is_array($inst->raw)) {
+            $inst->raw = [$inst->raw];
         }
 
         foreach ($inst->raw as $key => $row) {
             if (is_callable($callback) &&
                 (($get = $callback($row, $key, $index)) !== false)) {
                 $row = $get;
+            }
+            if($row instanceof self) {
+                $row = $row->get();
             }
             $new[$key] = $row;
             $index++;
@@ -183,6 +275,7 @@ class Traverse extends DynamicDataAbstract
 
     /**
      * Immutable: Access incremental array
+     *
      * @param callable|null $callback Access array row in the callbacks argument
      * @return array|object|null
      */
@@ -193,14 +286,17 @@ class Traverse extends DynamicDataAbstract
         $inst = clone $this;
 
         if (is_null($inst->raw)) {
-            $inst->raw = $inst->data;
+            $inst->raw = $inst->getData();
         }
 
         foreach ($inst->raw as $key => $row) {
             if (!is_null($callback)) {
-                if (($get = $callback($inst::value($inst->raw), $row, $key, $index)) !== false) {
+                if (($get = $callback($inst::value($row), $key, $row, $index)) !== false) {
                     $new[$key] = $get;
+                } else {
+                    break;
                 }
+
             } else {
                 if (is_array($row) || ($row instanceof stdClass)) {
                     // Incremental -> object
@@ -209,7 +305,7 @@ class Traverse extends DynamicDataAbstract
                     $value = $row;
                 } else {
                     // Incremental -> value
-                    $value = Format\Str::value($row);
+                    $value = !is_null($row) ? Format\Str::value($row) : null;
                 }
                 $new[$key] = $value;
             }
@@ -221,17 +317,30 @@ class Traverse extends DynamicDataAbstract
     }
 
     /**
-     * Check if current traverse data is equal to val
-     * @param  string $isVal
-     * @return bool
+     * Alias name to fetch
+     *
+     * @param callable $callback
+     * @return array|object|null
      */
-    public function equalTo(string $isVal): bool
+    public function each(callable $callback): array|object|null
     {
-        return ($this->raw === $isVal);
+        return $this->fetch($callback);
+    }
+
+    /**
+     * Dump collection into a human-readable array dump
+     *
+     * @return void
+     * @throws ReflectionException
+     */
+    public function dump(): void
+    {
+        Helpers::debugDump($this->toArray(), "Traverse");
     }
 
     /**
      * Count if row is array. Can be used to validate before @fetch method
+     *
      * @return int
      */
     public function count(): int
@@ -241,6 +350,7 @@ class Traverse extends DynamicDataAbstract
 
     /**
      * Isset
+     *
      * @return mixed
      */
     public function isset(): mixed
@@ -249,33 +359,8 @@ class Traverse extends DynamicDataAbstract
     }
 
     /**
-     * Create a fallback value if value is Empty/Null/0/false
-     * @param  string $fallback
-     * @return self
-     */
-    public function fallback(mixed $fallback): self
-    {
-        if (!$this->raw) {
-            $this->raw = $fallback;
-        }
-        return $this;
-    }
-
-    /**
-     * Sprint over values
-     * @param  string $add
-     * @return self
-     */
-    public function sprint(string $add): self
-    {
-        if (!is_null($this->raw)) {
-            $this->raw = sprintf($add, $this->raw);
-        }
-        return $this;
-    }
-
-    /**
      * Access and return format class object
+     *
      * @param string $dtoClassName The DTO format class name
      * @param mixed $value
      * @return object
@@ -285,7 +370,13 @@ class Traverse extends DynamicDataAbstract
     {
         $name = ucfirst($dtoClassName);
         $className = "MaplePHP\\DTO\\Format\\$name";
-        if (!class_exists($className)) {
+
+        if(!in_array($name, self::$helpers)) {
+            throw new BadMethodCallException("The DTO class \"$dtoClassName\" is not a Helper class! " .
+                "You can add helper class with 'addHelper' if you wish.", 1);
+        }
+
+        if (!class_exists($className) || !in_array($name, self::$helpers)) {
             throw new BadMethodCallException("The DTO class \"$dtoClassName\" does not exist!", 1);
         }
 
@@ -296,6 +387,7 @@ class Traverse extends DynamicDataAbstract
 
     /**
      * Build the object
+     *
      * @param mixed $data
      * @return $this
      */
@@ -306,17 +398,9 @@ class Traverse extends DynamicDataAbstract
                 $this->{$k} = $v;
             }
         }
+
         $this->raw = $data;
         return $this;
     }
 
-    /**
-     * Init instance
-     * @param mixed $data
-     * @return self
-     */
-    public static function value(mixed $data): self
-    {
-        return new self($data);
-    }
 }
