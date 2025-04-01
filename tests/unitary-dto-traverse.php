@@ -275,7 +275,7 @@ $unit->case("MaplePHP DTO Travers", callback: function () {
         return $row->strToUpper();
     })->toArray();
 
-    $this->add($flatten, function ($arr) {
+    $this->add($flatten, function ($inst, $arr) {
         $isStr = true;
         foreach ($arr as $row) {
             if (!is_string($row)) {
@@ -328,7 +328,7 @@ $unit->case("MaplePHP DTO Travers", callback: function () {
     }, "Value should equal to 'john 1'");
 
 
-    $this->add($obj->feed->fetch(), function ($value) {
+    $this->add($obj->feed->fetch(), function ($inst, $value) {
         return ($this->isArray() && count($value) === 2);
     }, "Expect fetch to return an array");
 
@@ -424,5 +424,11 @@ $unit->case("MaplePHP DTO Travers", callback: function () {
     $this->add($obj->shopList->last()->get(), [
         "equal" => "fish"
     ], "last did return wrong value");
+
+
+    echo $this->listAllProxyMethods(\MaplePHP\DTO\Format\Str::class, "str");
+    echo $this->listAllProxyMethods(\MaplePHP\DTO\Format\Num::class, "num");
+    echo $this->listAllProxyMethods(\MaplePHP\DTO\Format\Num::class, "clock");
+    echo $this->listAllProxyMethods(\MaplePHP\DTO\Format\Num::class, "dom");
 
 });
