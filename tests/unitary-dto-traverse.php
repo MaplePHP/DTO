@@ -426,9 +426,11 @@ $unit->case("MaplePHP DTO Travers", callback: function () {
     ], "last did return wrong value");
 
 
+    /*
     echo $this->listAllProxyMethods(\MaplePHP\DTO\Format\Str::class, "str");
     echo $this->listAllProxyMethods(\MaplePHP\DTO\Format\Num::class, "num");
     echo $this->listAllProxyMethods(\MaplePHP\DTO\Format\Num::class, "clock");
     echo $this->listAllProxyMethods(\MaplePHP\DTO\Format\Num::class, "dom");
+     */
 
 });
