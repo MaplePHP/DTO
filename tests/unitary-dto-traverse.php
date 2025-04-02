@@ -275,7 +275,7 @@ $unit->case("MaplePHP DTO Travers", callback: function () {
         return $row->strToUpper();
     })->toArray();
 
-    $this->add($flatten, function ($inst, $arr) {
+    $this->add($flatten, function ($arr) {
         $isStr = true;
         foreach ($arr as $row) {
             if (!is_string($row)) {
@@ -328,7 +328,7 @@ $unit->case("MaplePHP DTO Travers", callback: function () {
     }, "Value should equal to 'john 1'");
 
 
-    $this->add($obj->feed->fetch(), function ($inst, $value) {
+    $this->add($obj->feed->fetch(), function ($value, $inst) {
         return ($this->isArray() && count($value) === 2);
     }, "Expect fetch to return an array");
 
