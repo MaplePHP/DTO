@@ -246,8 +246,13 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
             return $this::value($data);
         }
 
-        if(isset($this->raw[$key]) || isset($this->raw->{$key})) {
-            return $this::value($this->raw[$key] ?? $this->raw->{$key});
+        if (
+            (is_array($this->raw) && isset($this->raw[$key])) ||
+            (is_object($this->raw) && isset($this->raw->{$key}))
+        ) {
+            return $this::value(
+                is_array($this->raw) ? $this->raw[$key] : $this->raw->{$key}
+            );
         }
 
         $this->raw = null;
