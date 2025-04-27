@@ -32,16 +32,21 @@ class MB
      */
     public function __toString(): string
     {
-        return (string)$this->getValue();
+        return (string)$this->get();
     }
 
     /**
      * Get value
      * @return string|false
      */
-    public function getValue(): string|false
+    public function get(): string|false
     {
         return $this->value;
+    }
+
+    public function getValue(): string|false
+    {
+        return $this->get();
     }
 
     /**

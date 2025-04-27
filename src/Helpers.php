@@ -66,11 +66,12 @@ class Helpers {
         $new = $array;
         $exp = explode(".", $key);
         foreach ($exp as $index) {
-            if(!isset($new[$index])) {
+            $data = is_object($new) ? ($new->{$index} ?? null) : ($new[$index] ?? null);
+            if(is_null($data)) {
                 $new = false;
                 break;
             }
-            $new = $new[$index];
+            $new = $data;
         }
         return $new;
     }

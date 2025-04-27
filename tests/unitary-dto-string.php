@@ -1,6 +1,7 @@
 <?php
 
 use MaplePHP\DTO\Format\Arr;
+use MaplePHP\DTO\Format\Str;
 use MaplePHP\DTO\Traverse;
 
 $unit = new MaplePHP\Unitary\Unit();
@@ -22,6 +23,7 @@ $unit->case("MaplePHP DTO String", callback: function () {
         "json" => '{"name":"Alice","email":"alice@example.com","roles":["admin","editor"]}',
         "date" => "2023-08-21 14:35:12",
         "content" => "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse euismod turpis eget elit eleifend, non pulvinar enim dapibus.\n Nullam blandit vitae justo vitae viverra. Aliquam varius eu leo a euismod.",
+        "exportReadable" => "hello \n\t",
     ]);
 
     $this->add($obj->firstname->str()->stripTags()->ucFirst()->get(), [
@@ -52,6 +54,18 @@ $unit->case("MaplePHP DTO String", callback: function () {
     $this->add($obj->email->str()->strlen()->get(), [
         "equal" => 18,
     ], "strlen: Failed");
+
+    $this->add($obj->content->str()->substr(0, 5)->get(), [
+        "equal" => "Lorem",
+    ], "substr: Failed");
+
+    $this->add($obj->email->str()->getContainAfter("@")->get(), [
+        "equal" => "gmail.com",
+    ], "getContainAfter required to be true");
+
+    $this->add($obj->exportReadable->str()->exportReadableValue()->get(), [
+        "equal" => Str::value("hello \n\t")->exportReadableValue()->get(),
+    ], "exportReadableValue required to be true");
 
     $data = $obj->json->str()->jsonDecode()->get();
     $this->add($data->name ?? "", [

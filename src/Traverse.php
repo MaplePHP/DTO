@@ -19,40 +19,42 @@ use stdClass;
 
 /**
  * @method self strStrVal()
- * @method self strPosition(string $needle, int $offset, ?string $encoding)
- * @method self strPositionLast(string $needle, ?string $encoding)
- * @method self strStrlen(?string $encoding)
+ * @method self strPosition(string $needle, int $offset = '0', ?string $encoding = '')
+ * @method self strPositionLast(string $needle, ?string $encoding = '')
+ * @method self strSubstr(int $start, ?int $length = '', ?string $encoding = '')
+ * @method self strStrlen(?string $encoding = '')
  * @method self strContains(string $needle)
  * @method self strStartsWith(string $needle)
  * @method self strEndsWith(string $needle)
  * @method self strGetContains(string $needle)
+ * @method self strGetContainAfter(string $needle, int $offset = '0')
  * @method self strGetStartsWith(string $needle)
  * @method self strGetEndsWith(string $needle)
- * @method self strExcerpt(int $length, string $ending, ?string $encoding)
+ * @method self strExcerpt(int $length = '40', string $ending = '...', ?string $encoding = '')
  * @method self strNl2br()
  * @method self strAddTrailingSlash()
  * @method self strTrailingSlash()
  * @method self strTrimTrailingSlash()
- * @method self strStripTags(string $whitelist)
- * @method self strEncode(int $flag)
- * @method self strDecode(?int $flag)
- * @method self strSpecialChars(int $flag, string $encoding)
+ * @method self strStripTags(string $whitelist = '')
+ * @method self strEncode(int $flag = '3')
+ * @method self strDecode(?int $flag = '3')
+ * @method self strSpecialChars(int $flag = '3', string $encoding = 'UTF-8')
  * @method self strSanitizeIdentifiers()
  * @method self strClearBreaks()
  * @method self strNormalizeSpaces()
  * @method self strNormalizeSeparators()
- * @method self strEntityEncode(int $flags, ?string $encoding, bool $doubleEncode)
- * @method self strEntityDecode(int $flags, ?string $encoding)
- * @method self strTrim(string $characters)
- * @method self strLtrim(string $characters)
- * @method self strRtrim(string $characters)
+ * @method self strEntityEncode(int $flags = '11', ?string $encoding = '', bool $doubleEncode = '1')
+ * @method self strEntityDecode(int $flags = '11', ?string $encoding = '')
+ * @method self strTrim(string $characters = ' \n\r\t\v\0')
+ * @method self strLtrim(string $characters = ' \n\r\t\v\0')
+ * @method self strRtrim(string $characters = ' \n\r\t\v\0')
  * @method self strToLower()
  * @method self strToUpper()
  * @method self strUcFirst()
  * @method self strUcWords()
- * @method self strPad(int $length, string $padString, int $padType)
- * @method self strLeadingZero(int $length)
- * @method self strReplaceSpaces(string $replaceWith)
+ * @method self strPad(int $length, string $padString = ' ', int $padType = '1')
+ * @method self strLeadingZero(int $length = '2')
+ * @method self strReplaceSpaces(string $replaceWith = '-')
  * @method self strFormatEmail()
  * @method self strSlug()
  * @method self strFormatSlug()
@@ -79,7 +81,9 @@ use stdClass;
  * @method self strGetDirname()
  * @method self strEscape()
  * @method self strXss()
- * @method self strJsonDecode(?bool $associative, int $depth, int $flags)
+ * @method self strVarExport()
+ * @method self strExportReadableValue()
+ * @method self strJsonDecode(?bool $associative = '', int $depth = '512', int $flags = '0')
  * @method self strCompare(string|int|float|bool|null $compare)
  * @method self strGet()
  * @method self strFallback(string $fallback)
@@ -345,6 +349,16 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
     public function toJson(int $flags = 0, int $depth = 512): string|false
     {
         return json_encode($this->get(), $flags, $depth);
+    }
+
+    /**
+     * Returns the string representation of the value
+     *
+     * @return string
+     */
+    public function toString(): string
+    {
+        return (string)$this->get();
     }
 
     /**
