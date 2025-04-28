@@ -35,6 +35,9 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public static function value(mixed $value): FormatInterface
     {
+        if(is_array($value) || is_object($value)) {
+            $value = "";
+        }
         return new Str((string)$value);
     }
 

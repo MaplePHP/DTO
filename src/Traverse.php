@@ -12,7 +12,7 @@ use BadMethodCallException;
 use ErrorException;
 use MaplePHP\DTO\Format\FormatInterface;
 use MaplePHP\DTO\Format\Str;
-use MaplePHP\Validate\Inp;
+use MaplePHP\Validate\Validator;
 use ReflectionClass;
 use ReflectionException;
 use stdClass;
@@ -330,7 +330,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
      */
     public function valid(string $method, array $args = []): bool
     {
-        $inp = Inp::value($this->raw);
+        $inp = Validator::value($this->raw);
         if(!method_exists($inp, $method)) {
             throw new BadMethodCallException("The MaplePHP validation method \"$method\" does not exist!", 1);
         }
