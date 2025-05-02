@@ -152,7 +152,7 @@ final class Dom extends FormatAbstract
     {
         $this->str = Str::value($this->raw);
         $elem = $this->dom->create($this->tag, $this->str)->hideEmptyTag(true);
-        if($this->attr) {
+        if ($this->attr) {
             $elem->attrArr($this->attr);
         }
         return $elem;

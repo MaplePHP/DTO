@@ -1,14 +1,16 @@
 <?php
+
 /**
  * @Package:    MaplePHP - The main traverse class
  * @Author:     Daniel Ronkainen
  * @Licence:    Apache-2.0 license, Copyright © Daniel Ronkainen
-                Don't delete this comment, its part of the license.
+                Don't delete this comment, it's part of the license.
  */
 
 namespace MaplePHP\DTO;
 
 use BadMethodCallException;
+use Closure;
 use ErrorException;
 use MaplePHP\DTO\Format\FormatInterface;
 use MaplePHP\DTO\Format\Str;
@@ -178,7 +180,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
 
     protected mixed $raw = null;
 
-    static private array $helpers = [
+    private static array $helpers = [
       'Str', 'Arr', 'Num', 'Clock', 'Dom', 'Encode', 'Local'
     ];
 
@@ -200,14 +202,14 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
     }
 
     /**
-     * With new "Traverse" collection
+     * With a new "Traverse" collection
      *
      * @param mixed $data
      * @return self
      */
     public function with(mixed $data): self
     {
-        if($data instanceof TraverseInterface) {
+        if ($data instanceof TraverseInterface) {
             return clone $data;
         }
         return new self($data);
@@ -229,7 +231,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
      *
      * @return string[]
      */
-    static public function listAllHelpers(): array
+    public static function listAllHelpers(): array
     {
         return self::$helpers;
     }
@@ -238,13 +240,13 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
      * Object traverser
      *
      * @param $key
-     * @return Traverse|null
+     * @return Traverse
      */
-    public function __get($key)
+    public function __get($key): self
     {
-        if(isset($this->getData()->{$key})) {
+        if (isset($this->getData()->{$key})) {
             $data = $this->getData()->{$key};
-            if(is_object($data) && !($data instanceof DynamicDataAbstract)) {
+            if (is_object($data) && !($data instanceof DynamicDataAbstract)) {
                 return $data;
             }
             return $this::value($data);
@@ -279,12 +281,12 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
         $expectedClass = array_shift($data);
         $formatClassInst = $this->format($expectedClass, $this->raw);
         $expectedMethod = implode('', $data);
-        if(!$expectedMethod) {
+        if (!$expectedMethod) {
             return $formatClassInst;
         }
         $expectedMethod = lcfirst($expectedMethod);
 
-        if(!method_exists($formatClassInst, $expectedMethod) &&
+        if (!method_exists($formatClassInst, $expectedMethod) &&
             ($formatClassInst === "Collection" && !function_exists($expectedMethod))) {
             throw new BadMethodCallException("The DTO method \"$expectedMethod\" does not exist!", 1);
         }
@@ -321,7 +323,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
     }
 
     /**
-     * Validate current item and set to fallback (default: null) if not valid
+     * Validate the current item and set to fallback (default: null) if not valid
      *
      * @param string $method
      * @param array $args
@@ -331,7 +333,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
     public function valid(string $method, array $args = []): bool
     {
         $inp = Validator::value($this->raw);
-        if(!method_exists($inp, $method)) {
+        if (!method_exists($inp, $method)) {
             throw new BadMethodCallException("The MaplePHP validation method \"$method\" does not exist!", 1);
         }
         return $inp->{$method}(...$args);
@@ -389,17 +391,17 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
     public function toBool(): bool
     {
         $value = $this->get();
-        if(is_bool($value)) {
+        if (is_bool($value)) {
             return $value;
         }
-        if(is_numeric($value)) {
+        if (is_numeric($value)) {
             return ((float)$value > 0);
         }
         return ($value !== "false" && strlen($value));
     }
 
     /**
-     * Convert collection into an array
+     * Convert a collection into an array
      *
      * @param callable|null $callback
      * @return array
@@ -414,7 +416,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
             $inst->raw = $inst->getData();
         }
 
-        if(!is_object($inst->raw) && !is_array($inst->raw)) {
+        if (!is_object($inst->raw) && !is_array($inst->raw)) {
             $inst->raw = [$inst->raw];
         }
 
@@ -423,7 +425,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
                 (($get = $callback($row, $key, $index)) !== false)) {
                 $row = $get;
             }
-            if($row instanceof self) {
+            if ($row instanceof self) {
                 $row = $row->get();
             }
             $new[$key] = $row;
@@ -433,9 +435,69 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
     }
 
     /**
+     * Accepts and validates data types
+     *
+     * This method checks if the raw data type matches any of the valid data types provided.
+     * If matched, returns the raw value, otherwise throws an exception.
+     *
+     * @template T of 'array'|'object'|'bool'|'int'|'float'|'string'|'resource'|'null'|'callable'|'closure'
+     * @param array $validDataType List of valid data types to check against
+     * @psalm-param list<T> $validDataType
+     * @return mixed The raw value if type matches, otherwise throws exception
+     * @throws BadMethodCallException If data type is not supported
+     * @psalm-return (
+     *     T is 'array'? array:
+     *     T is 'object'? object:
+     *     T is 'bool'? bool:
+     *     T is 'int'? int:
+     *     T is 'float'? float:
+     *     T is 'string'? string:
+     *     T is 'resource'? mixed:
+     *     T is 'null'? null:
+     *     T is 'callable'? callable:
+     *     T is 'closure'? \Closure:
+     *     mixed
+     * )
+     */
+    public function acceptType(array $validDataType = []): mixed
+    {
+        if (is_array($this->raw) && in_array("array", $validDataType)) {
+            return $this->raw;
+        }
+        if (is_object($this->raw) && in_array("object", $validDataType)) {
+            return $this->raw;
+        }
+        if (is_bool($this->raw) && in_array("bool", $validDataType)) {
+            return $this->raw;
+        }
+        if (is_int($this->raw) && in_array("int", $validDataType)) {
+            return $this->raw;
+        }
+        if (is_float($this->raw) && in_array("float", $validDataType)) {
+            return $this->raw;
+        }
+        if (is_string($this->raw) && in_array("string", $validDataType)) {
+            return $this->raw;
+        }
+        if (is_null($this->raw) && in_array("null", $validDataType)) {
+            return $this->raw;
+        }
+        if (is_callable($this->raw) && in_array("callable", $validDataType)) {
+            return $this->raw;
+        }
+        if (($this->raw instanceof Closure) && in_array("closure", $validDataType)) {
+            return $this->raw;
+        }
+        if (is_resource($this->raw) && in_array("resource", $validDataType)) {
+            return $this->raw;
+        }
+        throw new BadMethodCallException("The DTO data type is not supported!", 1);
+    }
+
+    /**
      * Immutable: Access incremental array
      *
-     * @param callable|null $callback Access array row in the callbacks argument
+     * @param callable|null $callback Access array row in the callback argument
      * @return array|object|null
      */
     public function fetch(?callable $callback = null): array|object|null
@@ -487,7 +549,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
     }
 
     /**
-     * Dump collection into a human-readable array dump
+     * Dump a collection into a human-readable array dump
      *
      * @return void
      * @throws ReflectionException
@@ -498,7 +560,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
     }
 
     /**
-     * Count if row is array. Can be used to validate before @fetch method
+     * Count if the row is an array. Can be used to validate before @fetch method
      *
      * @return int
      */
@@ -530,7 +592,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
         $name = ucfirst($dtoClassName);
         $className = "MaplePHP\\DTO\\Format\\$name";
 
-        if(!in_array($name, self::$helpers)) {
+        if (!in_array($name, self::$helpers)) {
             throw new BadMethodCallException("The DTO class \"$dtoClassName\" is not a Helper class! " .
                 "You can add helper class with 'addHelper' if you wish.", 1);
         }

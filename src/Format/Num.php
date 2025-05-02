@@ -1,4 +1,5 @@
 <?php
+
 /**
  * DEPRECATED
  * @Package:    MaplePHP Format numbers
@@ -62,10 +63,10 @@ final class Num extends FormatAbstract implements FormatInterface
      */
     public function getNumFormatter(): NumberFormatter
     {
-        if(!is_null($this->numInst)) {
+        if (!is_null($this->numInst)) {
             return $this->numInst;
         }
-        if(is_null(self::$defNumInst)) {
+        if (is_null(self::$defNumInst)) {
             throw new \InvalidArgumentException("NumberFormatter instance not set.");
         }
         return self::$defNumInst;

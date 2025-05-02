@@ -8,13 +8,12 @@ use ReflectionException;
 
 interface TraverseInterface
 {
-
     /**
      * Object traverser
      * @param $key
-     * @return Traverse|null
+     * @return Traverse
      */
-    public function __get($key);
+    public function __get($key): self;
 
     /**
      * Immutable formating class
