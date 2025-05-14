@@ -323,6 +323,18 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
     }
 
     /**
+     * Validate the current item
+     *
+     * @example $this->email->validator()->isEmail() // returns bool
+     * @return Validator
+     * @throws ErrorException
+     */
+    public function validator(): Validator
+    {
+        return Validator::value($this->raw);
+    }
+
+    /**
      * Validate the current item and set to fallback (default: null) if not valid
      *
      * @param string $method
@@ -412,7 +424,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
         $new = [];
         $inst = clone $this;
 
-        if (is_null($inst->raw)) {
+        if ($inst->raw === null) {
             $inst->raw = $inst->getData();
         }
 
@@ -479,7 +491,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
         if (is_string($this->raw) && in_array("string", $validDataType)) {
             return $this->raw;
         }
-        if (is_null($this->raw) && in_array("null", $validDataType)) {
+        if ($this->raw === null && in_array("null", $validDataType)) {
             return $this->raw;
         }
         if (is_callable($this->raw) && in_array("callable", $validDataType)) {
@@ -506,12 +518,12 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
         $new = [];
         $inst = clone $this;
 
-        if (is_null($inst->raw)) {
+        if ($inst->raw === null) {
             $inst->raw = $inst->getData();
         }
 
         foreach ($inst->raw as $key => $row) {
-            if (!is_null($callback)) {
+            if ($callback !== null) {
                 if (($get = $callback($inst::value($row), $key, $row, $index)) !== false) {
                     $new[$key] = $get;
                 } else {
@@ -526,7 +538,7 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
                     $value = $row;
                 } else {
                     // Incremental -> value
-                    $value = !is_null($row) ? Format\Str::value($row) : null;
+                    $value = $row !== null ? Format\Str::value($row) : null;
                 }
                 $new[$key] = $value;
             }

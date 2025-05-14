@@ -38,7 +38,7 @@ final class Clock extends FormatAbstract implements FormatInterface
             throw new InvalidArgumentException("Is expecting a string or a convertable string value.", 1);
         }
         $date = new DateTime($value);
-        if (!is_null(self::$defaultTimezone)) {
+        if (self::$defaultTimezone !== null) {
             $date->setTimezone(self::$defaultTimezone);
         }
         parent::__construct($date);
@@ -154,7 +154,7 @@ final class Clock extends FormatAbstract implements FormatInterface
      */
     public function format(string $format = 'Y-m-d H:i:s', ?string $locale = null): string
     {
-        $locale = !is_null($locale) ? $locale : $this->getLocale();
+        $locale = $locale !== null ? $locale : $this->getLocale();
         $translations = $this->getTranslationData($this->raw, $locale);
         if ($translations) {
             return str_replace($translations['find'], $translations['replace'], $this->raw->format($format));

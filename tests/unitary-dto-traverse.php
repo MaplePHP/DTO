@@ -30,6 +30,9 @@ $unit->case("MaplePHP DTO Travers", callback: function () {
         'randSumList' => [12, 77, 62, 626],
     ]);
 
+    $this->validate($obj->email->validator()->isEmail(), function($inst) {
+        return $inst->isTrue();
+    });
 
     $this->add($obj->meta->wildcardSearch("2023-*")->count(), [
         'equal' => 2,

@@ -39,7 +39,7 @@ trait CollectionUtilities
     public function filter(?callable $callback = null, int $mode = 0): self
     {
         $inst = clone $this;
-        $data = is_null($callback) ? $inst->raw : $inst->fetch();
+        $data = $callback === null ? $inst->raw : $inst->fetch();
         $inst->raw = array_filter($data, $callback, $mode);
         return $inst;
     }
@@ -825,6 +825,15 @@ trait CollectionUtilities
         $inst = clone $this;
         if ($this->isset()) {
             $inst->raw = sprintf($add, $inst->raw);
+        }
+        return $inst;
+    }
+
+    public function parseStr(): self
+    {
+        $inst = clone $this;
+        if (is_string($inst->raw)) {
+            parse_str($this->toString(), $inst->raw);
         }
         return $inst;
     }

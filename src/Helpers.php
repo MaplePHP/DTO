@@ -67,7 +67,7 @@ class Helpers
         $exp = explode(".", $key);
         foreach ($exp as $index) {
             $data = is_object($new) ? ($new->{$index} ?? null) : ($new[$index] ?? null);
-            if (is_null($data)) {
+            if ($data === null) {
                 $new = false;
                 break;
             }

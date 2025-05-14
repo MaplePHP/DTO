@@ -101,7 +101,7 @@ final class Encode extends FormatAbstract implements FormatInterface
         if (is_array($this->raw)) {
             $this->raw = Arr::value($this->raw)->walk(function ($value) use ($callback) {
                 $value = Str::value((string)$value)->rawurldecode()->get();
-                if (!is_null($callback)) {
+                if ($callback !== null) {
                     $value = $callback($value);
                 }
                 return $value;
@@ -110,7 +110,7 @@ final class Encode extends FormatAbstract implements FormatInterface
 
         } else {
             $this->raw = Str::value($this->raw)->rawurldecode()->get();
-            if (!is_null($callback)) {
+            if ($callback !== null) {
                 $this->raw = $callback($this->raw);
             }
         }

@@ -838,7 +838,7 @@ final class Str extends FormatAbstract implements FormatInterface
     public function escape(): self
     {
         $inst = clone $this;
-        if (is_null($inst->raw)) {
+        if ($inst->raw === null) {
             $inst->raw = null;
         }
         return $inst->specialchars();

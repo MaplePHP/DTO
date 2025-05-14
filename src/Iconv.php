@@ -509,6 +509,6 @@ class Iconv
      */
     final public function getLength(?int $length = null): int
     {
-        return (is_null($length) || $length > self::STRING_MAX_LENGTH) ? self::STRING_MAX_LENGTH : $length;
+        return ($length === null || $length > self::STRING_MAX_LENGTH) ? self::STRING_MAX_LENGTH : $length;
     }
 }
