@@ -334,6 +334,12 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
         return Validator::value($this->raw);
     }
 
+    // Alias to validator
+    public function expect(): Validator
+    {
+        return Validator::value($this->raw);
+    }
+
     /**
      * Validate the current item and set to fallback (default: null) if not valid
      *
