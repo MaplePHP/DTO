@@ -757,6 +757,11 @@ trait CollectionUtilities
         if (is_string($key) && str_contains($key, ".")) {
             return new self(Helpers::traversArrFromStr($this->toArray(), $key));
         }
+
+        if(is_object($this->raw)) {
+            return new self($this->raw->{$key} ?? false);
+        }
+
         return new self($this->raw[$key] ?? false);
     }
 

@@ -2,6 +2,7 @@
 
 use MaplePHP\DTO\Format\Arr;
 use MaplePHP\DTO\Traverse;
+use MaplePHP\Unitary\Expect;
 
 $unit = new MaplePHP\Unitary\Unit();
 
@@ -11,6 +12,7 @@ $unit->case("MaplePHP DTO Travers", callback: function () {
         "firstname" => "<em>daniel</em>",
         "lastname" => "doe",
         "email" => "john.doe@gmail.com",
+        "contact_email" => "john.doe@gmail.com",
         "slug" => "Lorem ipsum åäö",
         "price" => "1999.99",
         "publish_date" => "2023-08-01 14:35:12",
@@ -29,6 +31,11 @@ $unit->case("MaplePHP DTO Travers", callback: function () {
         'randList' => ['lorem', 'ipsum', 'dolor', 'sit', 'lorem', 'amet', 'sum'],
         'randSumList' => [12, 77, 62, 626],
     ]);
+
+    $this->validate($obj->contact_email->toString(), function(Expect $inst) {
+        $inst->isEmail();
+    });
+
 
     $this->validate($obj->email->validator()->isEmail(), function($inst) {
         return $inst->isTrue();
