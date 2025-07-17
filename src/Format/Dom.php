@@ -9,9 +9,9 @@
 
 namespace MaplePHP\DTO\Format;
 
-use MaplePHP\Output\Dom\Document;
 use InvalidArgumentException;
-use MaplePHP\Output\Interfaces\ElementInterface;
+use MaplePHP\DTO\Dom\Document;
+use MaplePHP\DTO\Interfaces\ElementInterface;
 
 final class Dom extends FormatAbstract
 {

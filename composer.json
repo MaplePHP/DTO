@@ -1,7 +1,7 @@
 {
   "name": "maplephp/dto",
   "type": "library",
-  "version": "v3.0.0",
+  "version": "v3.0.1",
   "description": "DTO library in PHP provides benefits such as encapsulating data, enforcing immutability and facilitating data transformation.",
   "keywords": [
     "dto",
@@ -32,8 +32,7 @@
     }
   ],
   "require": {
-    "php": ">=8.0",
-    "maplephp/swiftrender": "^2.0"
+    "php": ">=8.0"
   },
   "autoload": {
     "psr-4": {
