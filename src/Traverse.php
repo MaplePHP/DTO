@@ -331,12 +331,12 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
      */
     public function validator(): Validator
     {
-        return Validator::value($this->raw);
-    }
-
-    // Alias to validator
-    public function expect(): Validator
-    {
+        if (!class_exists(Validator::class)) {
+            throw new BadMethodCallException(
+                'Missing dependency: The "Validator" class is not available. ' .
+                'Install it with "composer require maplephp/validate" to proceed.'
+            );
+        }
         return Validator::value($this->raw);
     }
 
@@ -348,13 +348,19 @@ class Traverse extends DynamicDataAbstract implements TraverseInterface
      * @return bool
      * @throws ErrorException|BadMethodCallException
      */
-    public function valid(string $method, array $args = []): bool
+    public function isValid(string $method, array $args = []): bool
     {
-        $inp = Validator::value($this->raw);
+        $inp = $this->validator();
         if (!method_exists($inp, $method)) {
             throw new BadMethodCallException("The MaplePHP validation method \"$method\" does not exist!", 1);
         }
         return $inp->{$method}(...$args);
+    }
+
+    // Alias it isValid
+    public function valid(string $method, array $args = []): bool
+    {
+        return $this->isValid($method, $args);
     }
 
     /**

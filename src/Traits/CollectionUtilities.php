@@ -758,7 +758,7 @@ trait CollectionUtilities
             return new self(Helpers::traversArrFromStr($this->toArray(), $key));
         }
 
-        if(is_object($this->raw)) {
+        if (is_object($this->raw)) {
             return new self($this->raw->{$key} ?? false);
         }
 
@@ -834,6 +834,11 @@ trait CollectionUtilities
         return $inst;
     }
 
+    /**
+     * Parses the string into variables
+     *
+     * @return CollectionUtilities|Arr|Traverse
+     */
     public function parseStr(): self
     {
         $inst = clone $this;
@@ -842,6 +847,9 @@ trait CollectionUtilities
         }
         return $inst;
     }
+
+
+
 
     /**
      * Same as value validate but will method chain.
@@ -853,6 +861,16 @@ trait CollectionUtilities
      * @return Arr|self|Traverse
      * @throws ErrorException
      */
+    public function expect(string $method, array $args = [], mixed $fallback = null): self
+    {
+        $inst = clone $this;
+        if (!$this->valid($method, $args)) {
+            $inst->raw = $fallback;
+        }
+        return $inst;
+    }
+
+    // Alias to expect
     public function validOrFallback(string $method, array $args = [], mixed $fallback = null): self
     {
         $inst = clone $this;
