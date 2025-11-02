@@ -8,6 +8,7 @@ use MaplePHP\DTO\Format\Arr;
 use MaplePHP\DTO\Helpers;
 use MaplePHP\DTO\Traverse;
 use MaplePHP\DTO\TraverseInterface;
+use MaplePHP\Validate\Validator;
 
 trait CollectionUtilities
 {
@@ -848,26 +849,16 @@ trait CollectionUtilities
         return $inst;
     }
 
-
-
-
     /**
      * Same as value validate but will method chain.
      * If invalid, then the value will be set to "null" OR whatever you set the fallback
      *
-     * @param string $method
-     * @param array $args
-     * @param mixed|null $fallback
-     * @return Arr|self|Traverse
+     * @return Validator
      * @throws ErrorException
      */
-    public function expect(string $method, array $args = [], mixed $fallback = null): self
+    public function expect(): Validator
     {
-        $inst = clone $this;
-        if (!$this->valid($method, $args)) {
-            $inst->raw = $fallback;
-        }
-        return $inst;
+        return $this->validator();
     }
 
     // Alias to expect

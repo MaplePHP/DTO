@@ -491,6 +491,18 @@ final class Str extends FormatAbstract implements FormatInterface
     }
 
     /**
+     * Lowercase the first letter in text
+     *
+     * @return self
+     */
+    public function lcFirst(): self
+    {
+        $inst = clone $this;
+        $inst->raw = lcfirst($inst->strVal());
+        return $inst;
+    }
+
+    /**
      * Uppercase the first letter in every word
      *
      * @return self
@@ -697,6 +709,20 @@ final class Str extends FormatAbstract implements FormatInterface
     public function camelCaseToArr(): Arr
     {
         return Arr::value($this->explodeCamelCase()->get());
+    }
+
+
+    /**
+     * Will camel case string from a specific separator
+     *
+     * Example: "lorem-ipsum-dolor" -> "loremIpsumDolor"
+     *
+     * @param $sep
+     * @return self
+     */
+    public function camelCaseFromSep($sep = '-'): self
+    {
+        return $this->replace($sep, ' ')->ucWords()->replace(' ', '')->lcfirst();
     }
 
     /**
