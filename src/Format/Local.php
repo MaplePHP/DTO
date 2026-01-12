@@ -30,7 +30,7 @@ final class Local
     {
 
         if (is_string($data)) {
-            if (is_null(self::$dir)) {
+            if (self::$dir === null) {
                 throw new Exception("You need to set default lang directory.", 1);
             }
             if (!is_file(self::$dir . "{$data}.php")) {
@@ -44,7 +44,7 @@ final class Local
                 }
             }
 
-            if (is_null(self::$data[$data])) {
+            if (self::$data[$data] === null) {
                 throw new Exception("Could not propagate the language data object with any information.", 1);
             }
 
@@ -89,10 +89,10 @@ final class Local
 
     public function get(string|array $key, string $fallback = "", ?array $sprint = null): ?string
     {
-        if (is_null($this::$prefix)) {
+        if ($this::$prefix === null) {
             throw new Exception("Lang prefix is null.", 1);
         }
-        if (!is_null($sprint)) {
+        if ($sprint !== null) {
             $this->sprint($sprint);
         }
 
@@ -105,7 +105,7 @@ final class Local
         }
 
         $value = ($this->value[$key][$this::$prefix] ?? $fallback);
-        if (is_null($sprint)) {
+        if ($sprint === null) {
             return $value;
         }
 

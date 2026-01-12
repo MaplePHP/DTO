@@ -2,6 +2,9 @@
 
 DTO stands for **Darn Tidy Object**, a playful twist on the traditional Data Transfer Object. But this isn’t your average DTO. It’s a fully-loaded toolkit for **traversing, transforming, and tidying up structured data** in PHP with style, power, and simplicity.
 
+_It also makes your life easier by ensuring every piece of data is returned in the correct type-helping. Whether you expect an int, string, bool, or even a callable, DTO gives you strict, reliable access to your data with minimal effort._
+
+---
 
 ## 📦 Installation
 
@@ -10,13 +13,15 @@ composer require maplephp/dto
 ```
 
 ## 📘 Documentation
-- [Why DTO?](https://maplephp.github.io/DTO/docs/intro#why-dto)
-- [Traverse Collection](https://maplephp.github.io/DTO/docs/traverse)
-- [Format string](https://maplephp.github.io/DTO/docs/format-string)
-- [Format Number](https://maplephp.github.io/DTO/docs/format-number)
-- [Format Clock](https://maplephp.github.io/DTO/docs/format-clock)
-- [Format Dom](https://maplephp.github.io/DTO/docs/format-dom)
 
+* [Why DTO?](https://maplephp.github.io/DTO/docs/intro#why-dto)
+* [Traverse Collection](https://maplephp.github.io/DTO/docs/traverse)
+* [Format string](https://maplephp.github.io/DTO/docs/format-string)
+* [Format Number](https://maplephp.github.io/DTO/docs/format-number)
+* [Format Clock](https://maplephp.github.io/DTO/docs/format-clock)
+* [Format Dom](https://maplephp.github.io/DTO/docs/format-dom)
+
+---
 
 ## How It Works
 
@@ -56,6 +61,26 @@ echo $obj->article->tagline->strToUpper();
 
 echo $obj->article->content->strExcerpt()->strUcFirst();  
 // Result: 'Lorem ipsum dolor sit amet...'
+```
+
+---
+
+### Correct Type Handling (with ease)
+
+No more clunky `is_numeric` checks or `intval` casts. DTO makes it simple to extract values in the exact type you expect:
+
+```php
+$orderId = $dto->order->id->toInt();
+// Result: 1234 (int)
+```
+
+Handle flexible types cleanly with fallbacks:
+
+```php
+$callback = $dto->settings->onReady->acceptType(['callable', 'null']);
+if (is_callable($callback)) {
+    $callback(); // Result: Runs a startup hook or closure
+}
 ```
 
 ---
@@ -131,3 +156,5 @@ print_r($updated->toArray());
 ---
 
 Now go forth, write cleaner code, and let DTO handle the messy parts.
+
+---

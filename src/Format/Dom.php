@@ -9,9 +9,9 @@
 
 namespace MaplePHP\DTO\Format;
 
-use MaplePHP\Output\Dom\Document;
 use InvalidArgumentException;
-use MaplePHP\Output\Interfaces\ElementInterface;
+use MaplePHP\DTO\Dom\Document;
+use MaplePHP\DTO\Interfaces\ElementInterface;
 
 final class Dom extends FormatAbstract
 {
@@ -152,7 +152,7 @@ final class Dom extends FormatAbstract
     {
         $this->str = Str::value($this->raw);
         $elem = $this->dom->create($this->tag, $this->str)->hideEmptyTag(true);
-        if($this->attr) {
+        if ($this->attr) {
             $elem->attrArr($this->attr);
         }
         return $elem;

@@ -35,6 +35,9 @@ final class Str extends FormatAbstract implements FormatInterface
      */
     public static function value(mixed $value): FormatInterface
     {
+        if (is_array($value) || is_object($value)) {
+            $value = "";
+        }
         return new Str((string)$value);
     }
 
@@ -80,6 +83,25 @@ final class Str extends FormatAbstract implements FormatInterface
         $inst = clone $this;
         $mb = new MB($inst->raw);
         $inst->raw = $mb->strrpos($needle, $encoding);
+        return $inst;
+    }
+
+
+    /**
+     * Get part of string
+     * This method uses multibyte functionality and provides a polyfill if your environment lacks support.
+     *
+     * @param int $start The start position of the substring
+     * @param int|null $length The length of the substring. If null, extract all characters to the end
+     * @param string|null $encoding The character encoding (e.g., 'UTF-8'). Default is null
+     * @return self
+     * @throws ErrorException
+     */
+    public function substr(int $start, ?int $length = null, ?string $encoding = null): self
+    {
+        $inst = clone $this;
+        $mb = new MB($inst->raw);
+        $inst->raw = (string)$mb->substr($start, $length, $encoding);
         return $inst;
     }
 
@@ -148,6 +170,24 @@ final class Str extends FormatAbstract implements FormatInterface
     {
         $inst = clone $this;
         $inst->raw = $inst->contains($needle) ? $needle : false;
+        return $inst;
+    }
+
+
+    /**
+     * Get a substring that appears after the first occurrence of needle
+     * Returns null if the needle is not found in the string
+     *
+     * @param string $needle The substring to search for
+     * @param int $offset Additional offset to add after needle position (default: 0)
+     * @return self
+     * @throws ErrorException
+     */
+    public function getContainAfter(string $needle, int $offset = 0): self
+    {
+        $inst = clone $this;
+        $position = $this->position($needle)->get();
+        $inst->raw = ($position !== false) ? $inst->substr($position + 1 + $offset)->get() : null;
         return $inst;
     }
 
@@ -354,7 +394,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * @param bool $doubleEncode
      * @return self
      */
-    public function entityEncode(int $flags = ENT_QUOTES|ENT_SUBSTITUTE, ?string $encoding = null, bool $doubleEncode = true): self
+    public function entityEncode(int $flags = ENT_QUOTES | ENT_SUBSTITUTE, ?string $encoding = null, bool $doubleEncode = true): self
     {
         $inst = clone $this;
         $inst->raw = htmlentities($inst->strVal(), $flags, $encoding, $doubleEncode);
@@ -368,7 +408,7 @@ final class Str extends FormatAbstract implements FormatInterface
      * @param string|null $encoding
      * @return self
      */
-    public function entityDecode(int $flags = ENT_QUOTES|ENT_SUBSTITUTE, ?string $encoding = null): self
+    public function entityDecode(int $flags = ENT_QUOTES | ENT_SUBSTITUTE, ?string $encoding = null): self
     {
         $inst = clone $this;
         $inst->raw = html_entity_decode($inst->strVal(), $flags, $encoding);
@@ -439,7 +479,7 @@ final class Str extends FormatAbstract implements FormatInterface
     }
 
     /**
-     * Uppercase first letter in text
+     * Uppercase the first letter in text
      *
      * @return self
      */
@@ -451,7 +491,19 @@ final class Str extends FormatAbstract implements FormatInterface
     }
 
     /**
-     * Uppercase first letter in every word
+     * Lowercase the first letter in text
+     *
+     * @return self
+     */
+    public function lcFirst(): self
+    {
+        $inst = clone $this;
+        $inst->raw = lcfirst($inst->strVal());
+        return $inst;
+    }
+
+    /**
+     * Uppercase the first letter in every word
      *
      * @return self
      */
@@ -615,7 +667,7 @@ final class Str extends FormatAbstract implements FormatInterface
     {
         $inst = clone $this;
         $inst->raw = str_replace($find, $replace, $inst->strVal());
-        if(!is_string($inst->raw)) {
+        if (!is_string($inst->raw)) {
             throw new InvalidArgumentException("The value has to be an string value!", 1);
         }
         return $inst;
@@ -657,6 +709,20 @@ final class Str extends FormatAbstract implements FormatInterface
     public function camelCaseToArr(): Arr
     {
         return Arr::value($this->explodeCamelCase()->get());
+    }
+
+
+    /**
+     * Will camel case string from a specific separator
+     *
+     * Example: "lorem-ipsum-dolor" -> "loremIpsumDolor"
+     *
+     * @param $sep
+     * @return self
+     */
+    public function camelCaseFromSep($sep = '-'): self
+    {
+        return $this->replace($sep, ' ')->ucWords()->replace(' ', '')->lcfirst();
     }
 
     /**
@@ -768,7 +834,7 @@ final class Str extends FormatAbstract implements FormatInterface
         foreach ($parts as $part) {
             $method = 'getUrl' . ucfirst($part);
             $subInst = new self($inst->raw);
-            if(!method_exists($subInst, $method)) {
+            if (!method_exists($subInst, $method)) {
                 throw new InvalidArgumentException("The part '$part' does not exist as a part in getUrlParts.", 1);
             }
             $subInst = call_user_func([$subInst, $method]);
@@ -798,7 +864,7 @@ final class Str extends FormatAbstract implements FormatInterface
     public function escape(): self
     {
         $inst = clone $this;
-        if (is_null($inst->raw)) {
+        if ($inst->raw === null) {
             $inst->raw = null;
         }
         return $inst->specialchars();
@@ -808,6 +874,34 @@ final class Str extends FormatAbstract implements FormatInterface
     public function xss(): self
     {
         return $this->escape();
+    }
+
+    /**
+     * Export a variable as a valid PHP string representation
+     * This method uses PHP's var_export() function to get a parseable string representation
+     * of the raw value
+     *
+     * @return self
+     */
+    public function varExport(): self
+    {
+        $inst = clone $this;
+        $inst->raw = var_export($inst->raw, true);
+        return $inst;
+    }
+
+    /**
+     * Export raw value to string and escape special characters like newlines, tabs etc.
+     * This method is used internally to get a readable string representation of the value.
+     *
+     * @return self
+     */
+    public function exportReadableValue(): self
+    {
+        return $this->replace(
+            ["\n", "\r", "\t", "\v", "\0"],
+            ['\\n', '\\r', '\\t', '\\v', '\\0']
+        )->varExport()->replace('\\\\', '\\');
     }
 
     /**
@@ -834,7 +928,7 @@ final class Str extends FormatAbstract implements FormatInterface
     public function compare(string|int|float|bool|null $compare): self
     {
         $inst = clone $this;
-        if(is_numeric($inst->raw)) {
+        if (is_numeric($inst->raw)) {
             $inst->raw = ((float)$inst->raw > 0);
             return $inst;
         }

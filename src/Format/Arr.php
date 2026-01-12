@@ -39,10 +39,10 @@ final class Arr extends FormatAbstract implements FormatInterface
      * @param array $arguments
      * @return mixed
      */
-    function __call(string $name, array $arguments)
+    public function __call(string $name, array $arguments)
     {
         $inst = new Traverse($this->raw);
-        if(!method_exists($inst, $name)) {
+        if (!method_exists($inst, $name)) {
             throw new \BadMethodCallException("Method '$name' does not exist.");
         }
         return $inst->$name(...$arguments);

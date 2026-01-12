@@ -2,6 +2,7 @@
 
 use MaplePHP\DTO\Format\Arr;
 use MaplePHP\DTO\Traverse;
+use MaplePHP\Unitary\Expect;
 
 $unit = new MaplePHP\Unitary\Unit();
 
@@ -11,6 +12,7 @@ $unit->case("MaplePHP DTO Travers", callback: function () {
         "firstname" => "<em>daniel</em>",
         "lastname" => "doe",
         "email" => "john.doe@gmail.com",
+        "contact_email" => "john.doe@gmail.com",
         "slug" => "Lorem ipsum åäö",
         "price" => "1999.99",
         "publish_date" => "2023-08-01 14:35:12",
@@ -30,6 +32,14 @@ $unit->case("MaplePHP DTO Travers", callback: function () {
         'randSumList' => [12, 77, 62, 626],
     ]);
 
+    $this->validate($obj->contact_email->toString(), function(Expect $inst) {
+        $inst->isEmail();
+    });
+
+
+    $this->validate($obj->email->validator()->isEmail(), function($inst) {
+        return $inst->isTrue();
+    });
 
     $this->add($obj->meta->wildcardSearch("2023-*")->count(), [
         'equal' => 2,
@@ -328,7 +338,7 @@ $unit->case("MaplePHP DTO Travers", callback: function () {
     }, "Value should equal to 'john 1'");
 
 
-    $this->add($obj->feed->fetch(), function ($value) {
+    $this->add($obj->feed->fetch(), function ($value, $inst) {
         return ($this->isArray() && count($value) === 2);
     }, "Expect fetch to return an array");
 
@@ -424,5 +434,13 @@ $unit->case("MaplePHP DTO Travers", callback: function () {
     $this->add($obj->shopList->last()->get(), [
         "equal" => "fish"
     ], "last did return wrong value");
+
+
+    /*
+    echo $this->listAllProxyMethods(\MaplePHP\DTO\Format\Str::class, "str");
+    echo $this->listAllProxyMethods(\MaplePHP\DTO\Format\Num::class, "num");
+    echo $this->listAllProxyMethods(\MaplePHP\DTO\Format\Num::class, "clock");
+    echo $this->listAllProxyMethods(\MaplePHP\DTO\Format\Num::class, "dom");
+     */
 
 });

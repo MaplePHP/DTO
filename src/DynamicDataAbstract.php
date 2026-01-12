@@ -9,11 +9,10 @@
 
 namespace MaplePHP\DTO;
 
-abstract class DynamicDataAbstract
+/** @psalm-no-seal-properties */
+abstract class DynamicDataAbstract extends \stdClass
 {
     private object $data;
-
-    abstract public function get();
 
     /**
      * Create a dynamic object that holds a dynamic set of items
@@ -59,11 +58,11 @@ abstract class DynamicDataAbstract
      * Try to get data object item
      *
      * @param $key
-     * @return null
+     * @return self
      */
-    public function __get($key)
+    public function __get($key): self
     {
-        return ($this->data->{$key} ?? null);
+        return ($this->data->{$key} ?? $this);
     }
 
     /**

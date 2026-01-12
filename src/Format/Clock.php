@@ -19,9 +19,9 @@ use InvalidArgumentException;
 
 final class Clock extends FormatAbstract implements FormatInterface
 {
-    static protected ?string $defaultLocale = 'en';
+    protected static ?string $defaultLocale = 'en';
 
-    static protected string|DateTimeZone|null $defaultTimezone = null;
+    protected static string|DateTimeZone|null $defaultTimezone = null;
 
     protected ?string $locale = null;
     protected array $parts = [];
@@ -38,7 +38,7 @@ final class Clock extends FormatAbstract implements FormatInterface
             throw new InvalidArgumentException("Is expecting a string or a convertable string value.", 1);
         }
         $date = new DateTime($value);
-        if(!is_null(self::$defaultTimezone)) {
+        if (self::$defaultTimezone !== null) {
             $date->setTimezone(self::$defaultTimezone);
         }
         parent::__construct($date);
@@ -100,7 +100,7 @@ final class Clock extends FormatAbstract implements FormatInterface
      * @param string $localeCode
      * @return void
      */
-    static public function setDefaultLocale(string $localeCode): void
+    public static function setDefaultLocale(string $localeCode): void
     {
         self::$defaultLocale = $localeCode;
     }
@@ -130,8 +130,10 @@ final class Clock extends FormatAbstract implements FormatInterface
      * @return void
      * @throws \DateInvalidTimeZoneException
      */
-    static public function setDefaultTimezone(string|DateTimeZone $timezone): void
+    public static function setDefaultTimezone(string|DateTimeZone $timezone): void
     {
+        $name = ($timezone instanceof DateTimeZone) ? $timezone->getName() : $timezone;
+        date_default_timezone_set($name);
         self::$defaultTimezone = $timezone instanceof DateTimeZone ? $timezone : new DateTimeZone($timezone);
     }
 
@@ -154,9 +156,9 @@ final class Clock extends FormatAbstract implements FormatInterface
      */
     public function format(string $format = 'Y-m-d H:i:s', ?string $locale = null): string
     {
-        $locale = !is_null($locale) ? $locale : $this->getLocale();
+        $locale = $locale !== null ? $locale : $this->getLocale();
         $translations = $this->getTranslationData($this->raw, $locale);
-        if($translations) {
+        if ($translations) {
             return str_replace($translations['find'], $translations['replace'], $this->raw->format($format));
         }
         return $this->raw->format($format);
@@ -386,14 +388,14 @@ final class Clock extends FormatAbstract implements FormatInterface
     protected function getTranslationData(DateTime $date, string $locale): array
     {
 
-        if($locale !== "en") {
+        if ($locale !== "en") {
             $translations = $this->getTranslation($locale);
-            if($translations === false) {
+            if ($translations === false) {
                 $formatters = $this->getLocaleTranslation($locale);
             }
         }
 
-        if(!isset($translations) && !isset($formatters)) {
+        if (!isset($translations) && !isset($formatters)) {
             return [];
         }
 
@@ -417,7 +419,7 @@ final class Clock extends FormatAbstract implements FormatInterface
     protected function getTranslation(string $locale): array|false
     {
         $translationFile = realpath(__DIR__ . "/../lang/$locale.php");
-        if($translationFile !== false) {
+        if ($translationFile !== false) {
             return require $translationFile;
         }
         return false;
@@ -441,7 +443,7 @@ final class Clock extends FormatAbstract implements FormatInterface
                 'monthFull'   => new IntlDateFormatter($locale, IntlDateFormatter::LONG, IntlDateFormatter::NONE, null, null, 'MMMM'),
                 'monthShort'  => new IntlDateFormatter($locale, IntlDateFormatter::MEDIUM, IntlDateFormatter::NONE, null, null, 'MMM'),
                 'weekdayFull' => new IntlDateFormatter($locale, IntlDateFormatter::FULL, IntlDateFormatter::NONE, null, null, 'EEEE'),
-                'weekdayShort'=> new IntlDateFormatter($locale, IntlDateFormatter::FULL, IntlDateFormatter::NONE, null, null, 'E')
+                'weekdayShort' => new IntlDateFormatter($locale, IntlDateFormatter::FULL, IntlDateFormatter::NONE, null, null, 'E')
             ];
         }
         return $this->parts[$locale];

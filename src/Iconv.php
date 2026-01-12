@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This is a Polyfill library for iconv
  * It is tho recommended to install iconv on the server rather than using the polyfill
@@ -40,16 +41,21 @@ class Iconv
      */
     public function __toString(): string
     {
-        return (string)$this->getValue();
+        return (string)$this->get();
     }
 
     /**
      * Get value
      * @return string|false
      */
-    public function getValue(): string|false
+    public function get(): string|false
     {
         return $this->value;
+    }
+
+    public function getValue(): string|false
+    {
+        return $this->get();
     }
 
     /**
@@ -73,7 +79,7 @@ class Iconv
     public function encode(string $fromEncoding, string $toEncoding): self
     {
         $inst = $this->setEncoding($toEncoding);
-        if(function_exists('iconv') && !$inst->disableVanilla) {
+        if (function_exists('iconv') && !$inst->disableVanilla) {
             $inst->value = iconv($fromEncoding, $toEncoding, $inst->value);
 
         } else {
@@ -86,11 +92,11 @@ class Iconv
                 throw new ErrorException("iconv(): Detected an illegal character in input string");
             }
              */
-            if($fromEncoding !== "utf-8") {
+            if ($fromEncoding !== "utf-8") {
                 // Convert input to UTF-8
                 $inMap = $inst->getMap("from", $fromEncoding);
                 $inst->value = $inst->encodeUtf8($inMap, $inst->value);
-                if($inMap === false) {
+                if ($inMap === false) {
                     throw new ErrorException('iconv_strlen(): Wrong encoding, conversion from "' . $fromEncoding . '"');
                 }
 
@@ -102,7 +108,7 @@ class Iconv
             if ($toEncoding !== 'utf-8') {
                 $outMap = $inst->getMap("to", $toEncoding);
                 $inst->value = $inst->decodeUtf8($inst->value, $outMap, ($translit ? $inst->getMapFile("translit") : []));
-                if($outMap === false) {
+                if ($outMap === false) {
                     throw new ErrorException('iconv_strlen(): Wrong encoding, conversion to "' . $toEncoding . '"');
                 }
             }
@@ -113,7 +119,7 @@ class Iconv
     protected function setEncoding(?string $encoding = null): self
     {
         $inst = clone $this;
-        if(is_string($encoding)) {
+        if (is_string($encoding)) {
             $inst->encoding = $encoding;
         }
         return $inst;
@@ -131,12 +137,12 @@ class Iconv
     public function strlen(?string $encoding = null): int|false
     {
         $inst = $this->setEncoding($encoding);
-        if(function_exists("iconv_strlen") && !$inst->disableVanilla) {
+        if (function_exists("iconv_strlen") && !$inst->disableVanilla) {
             return iconv_strlen($inst->value, $inst->encoding);
         }
-        if(is_string($encoding)) {
+        if (is_string($encoding)) {
             $inst = $this->encode("utf-8", $inst->encoding);
-            if($inst->getValue() === false) {
+            if ($inst->getValue() === false) {
                 return false;
             }
         }
@@ -159,19 +165,19 @@ class Iconv
         $value = "";
         $inst = $this->setEncoding($encoding);
         $length = $inst->getLength($length);
-        if(function_exists("iconv_substr") && !$inst->disableVanilla) {
+        if (function_exists("iconv_substr") && !$inst->disableVanilla) {
             $value = (string)iconv_substr($inst->value, $start, $length, $inst->encoding);
 
         } else {
-            if(is_string($encoding)) {
+            if (is_string($encoding)) {
                 $inst = $inst->encode("utf-8", $inst->encoding);
             }
             $inc = 0;
             $inst->loop($inst->value, function ($character, $charCount) use (&$value, &$inc, $start, $length) {
-                if(($charCount + 1) > $start) {
+                if (($charCount + 1) > $start) {
                     $value .= $character;
                     $inc++;
-                    if($inc >= $length) {
+                    if ($inc >= $length) {
                         return $inc;
                     }
                 }
@@ -201,19 +207,19 @@ class Iconv
         $inc = 0;
         $total = 0;
         $completed = false;
-        if(function_exists("iconv_strpos") && !$inst->disableVanilla) {
+        if (function_exists("iconv_strpos") && !$inst->disableVanilla) {
             return iconv_strpos($inst->value, $needle, $offset, $inst->encoding);
         }
-        if(is_string($encoding)) {
+        if (is_string($encoding)) {
             $inst = $inst->encode("utf-8", $inst->encoding);
         }
         $needleInst = new self($needle);
-        if(is_string($encoding)) {
+        if (is_string($encoding)) {
             $needleInst->encode("utf-8", $inst->encoding);
         }
         $needleLength = $needleInst->strlen();
 
-        if($offset < 0) {
+        if ($offset < 0) {
             $offset = ($inst->strlen() + $offset);
         }
 
@@ -227,13 +233,13 @@ class Iconv
             $encoding
         ) {
 
-            if(($charCount + 1) > $offset) {
+            if (($charCount + 1) > $offset) {
                 $char = (string)$needleInst->substr($inc, 1);
-                if($character === $char) {
+                if ($character === $char) {
                     $inc++;
-                    if($inc === $needleLength) {
+                    if ($inc === $needleLength) {
                         $completed = ($charCount + 1) - $inc;
-                        if(!$this->strposFollowThrough) {
+                        if (!$this->strposFollowThrough) {
                             return $completed;
                         }
                     }
@@ -244,7 +250,7 @@ class Iconv
             $total++;
             return false;
         });
-        if($offset > $total) {
+        if ($offset > $total) {
             throw new ValueError('iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)');
         }
         return ($completed && $inc > 0) ? $completed : false;
@@ -264,7 +270,7 @@ class Iconv
     {
         $inst = $this->setEncoding($encoding);
         $inst = $inst->strposFollowThrough(true);
-        if(function_exists("iconv_strrpos") && !$inst->disableVanilla) {
+        if (function_exists("iconv_strrpos") && !$inst->disableVanilla) {
             return iconv_strrpos($inst->value, $needle, $inst->encoding);
         }
         return $inst->strpos($needle, 0, $encoding);
@@ -280,7 +286,7 @@ class Iconv
     public function clearSuffix(string &$string, string $suffix): bool
     {
         $length = strlen($suffix);
-        if(substr($string, -$length) === $suffix) {
+        if (substr($string, -$length) === $suffix) {
             $string = substr($string, 0, -$length);
             return true;
         }
@@ -310,8 +316,8 @@ class Iconv
      */
     private function getMap(string $type, string $charset): array|false
     {
-        if($map = $this->getMapFile("from.$charset")) {
-            if($type === "to") {
+        if ($map = $this->getMapFile("from.$charset")) {
+            if ($type === "to") {
                 return array_flip($map);
             }
             return $map;
@@ -474,7 +480,7 @@ class Iconv
 
             if (is_callable($call)) {
                 $returnValue = $call($character, $charCount, $int);
-                if($returnValue !== false) {
+                if ($returnValue !== false) {
                     $charCount = $returnValue;
                     break;
                 }
@@ -503,6 +509,6 @@ class Iconv
      */
     final public function getLength(?int $length = null): int
     {
-        return (is_null($length) || $length > self::STRING_MAX_LENGTH) ? self::STRING_MAX_LENGTH : $length;
+        return ($length === null || $length > self::STRING_MAX_LENGTH) ? self::STRING_MAX_LENGTH : $length;
     }
 }

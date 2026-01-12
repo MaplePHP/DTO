@@ -4,12 +4,12 @@ namespace MaplePHP\DTO;
 
 use ReflectionClass;
 
-class Helpers {
-
+class Helpers
+{
     /**
      * @throws \ReflectionException
      */
-    static function debugDump($var, $label = null): void
+    public static function debugDump($var, $label = null): void
     {
         if (is_object($var)) {
             $reflection = new ReflectionClass($var);
@@ -32,11 +32,11 @@ class Helpers {
         }
     }
 
-    static function printFormattedValue($value, $indent = 0): void
+    public static function printFormattedValue($value, $indent = 0): void
     {
         $spacingS = $spacingA = str_repeat("    ", $indent);
-        $spacingB = str_repeat("    ", $indent+1);
-        if($indent > 1) {
+        $spacingB = str_repeat("    ", $indent + 1);
+        if ($indent > 1) {
             $spacingS = "";
         }
         if (is_array($value)) {
@@ -61,19 +61,19 @@ class Helpers {
      * @param string $key
      * @return array|bool
      */
-    static function traversArrFromStr(array $array, string $key): mixed
+    public static function traversArrFromStr(array $array, string $key): mixed
     {
         $new = $array;
         $exp = explode(".", $key);
         foreach ($exp as $index) {
-            if(!isset($new[$index])) {
+            $data = is_object($new) ? ($new->{$index} ?? null) : ($new[$index] ?? null);
+            if ($data === null) {
                 $new = false;
                 break;
             }
-            $new = $new[$index];
+            $new = $data;
         }
         return $new;
     }
 
 }
-

@@ -3,10 +3,12 @@
 namespace MaplePHP\DTO\Traits;
 
 use Closure;
+use ErrorException;
 use MaplePHP\DTO\Format\Arr;
 use MaplePHP\DTO\Helpers;
 use MaplePHP\DTO\Traverse;
 use MaplePHP\DTO\TraverseInterface;
+use MaplePHP\Validate\Validator;
 
 trait CollectionUtilities
 {
@@ -16,7 +18,7 @@ trait CollectionUtilities
      *
      * @param callable $callback A callable to run for each element in each array.
      * @param array $array Supplementary variable list of array arguments
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function map(callable $callback, array ...$array): self
     {
@@ -30,15 +32,15 @@ trait CollectionUtilities
      * https://www.php.net/manual/en/function.array-filter.php
      *
      * @param callable|null $callback The callback function to use
-     *                                   If no callback is supplied, all empty entries of array will be
+     *                                   If no callback is supplied, all empty entries of an array will be
      *                                   removed. See empty() for how PHP defines empty in this case.
      * @param int $mode Flag determining what arguments are sent to callback:
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function filter(?callable $callback = null, int $mode = 0): self
     {
         $inst = clone $this;
-        $data = is_null($callback) ? $inst->raw : $inst->fetch();
+        $data = $callback === null ? $inst->raw : $inst->fetch();
         $inst->raw = array_filter($data, $callback, $mode);
         return $inst;
     }
@@ -49,7 +51,7 @@ trait CollectionUtilities
      *
      * @param callable $callback
      * @param mixed|null $initial
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function reduce(callable $callback, mixed $initial = null): self
     {
@@ -64,7 +66,7 @@ trait CollectionUtilities
      *
      * @param int $length
      * @param bool $preserveKeys
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function chunk(int $length, bool $preserveKeys = false): self
     {
@@ -77,7 +79,7 @@ trait CollectionUtilities
      * Flatten a array
      *
      * @param bool $preserveKeys
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function flatten(bool $preserveKeys = false): self
     {
@@ -99,7 +101,7 @@ trait CollectionUtilities
     /**
      * Flatten array and preserve keys
      *
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function flattenWithKeys(): self
     {
@@ -110,8 +112,8 @@ trait CollectionUtilities
      * Merge two arrays
      *
      * @param array|TraverseInterface $combine
-     * @param bool $before Merge before main collection
-     * @return Arr|CollectionUtilities|Traverse
+     * @param bool $before Merge before the main collection
+     * @return Arr|self|Traverse
      */
     public function merge(array|TraverseInterface $combine, bool $before = false): self
     {
@@ -126,10 +128,10 @@ trait CollectionUtilities
     }
 
     /**
-     * Append array after main collection
+     * Append array after the main collection
      *
      * @param array|TraverseInterface $combine
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function append(array|TraverseInterface $combine): self
     {
@@ -137,10 +139,10 @@ trait CollectionUtilities
     }
 
     /**
-     * Perpend array after main collection
+     * Perpend array after the main collection
      *
      * @param array|TraverseInterface $combine
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function prepend(array|TraverseInterface $combine): self
     {
@@ -155,10 +157,13 @@ trait CollectionUtilities
      * @param int|null $length
      * @param mixed $replacement
      * @param mixed|null $splicedResults
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function splice(
-        int $offset, ?int $length, mixed $replacement = [], mixed &$splicedResults = null
+        int $offset,
+        ?int $length,
+        mixed $replacement = [],
+        mixed &$splicedResults = null
     ): self {
         $inst = clone $this;
         $splicedResults = array_splice($inst->raw, $offset, $length, $replacement);
@@ -173,7 +178,7 @@ trait CollectionUtilities
      * @param int $offset
      * @param int|null $length
      * @param bool $preserveKeys
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function slice(int $offset, ?int $length, bool $preserveKeys = false): self
     {
@@ -187,7 +192,7 @@ trait CollectionUtilities
      * https://www.php.net/manual/en/function.array-diff.php
      *
      * @param array|TraverseInterface $array
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function diff(array|TraverseInterface $array): self
     {
@@ -202,7 +207,7 @@ trait CollectionUtilities
      * https://www.php.net/manual/en/function.array-diff-assoc.php
      *
      * @param array|TraverseInterface $array
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function diffAssoc(array|TraverseInterface $array): self
     {
@@ -217,7 +222,7 @@ trait CollectionUtilities
      * https://www.php.net/manual/en/function.array-diff-key.php
      *
      * @param array|TraverseInterface $array
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function diffKey(array|TraverseInterface $array): self
     {
@@ -232,7 +237,7 @@ trait CollectionUtilities
      * https://www.php.net/manual/en/function.array-unique.php
      *
      * @param int $flags
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function unique(int $flags = SORT_STRING): self
     {
@@ -245,7 +250,7 @@ trait CollectionUtilities
     /**
      * Will only return duplicate items
      *
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function duplicates(): self
     {
@@ -258,7 +263,7 @@ trait CollectionUtilities
      * Exchanges all keys with their associated values in an array
      * https://www.php.net/manual/en/function.array-flip.php
      *
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function flip(): self
     {
@@ -272,7 +277,7 @@ trait CollectionUtilities
      * https://www.php.net/manual/en/function.unset.php
      *
      * @param string ...$keySpread
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function unset(string|int|float|array ...$keySpread): self
     {
@@ -286,10 +291,10 @@ trait CollectionUtilities
     }
 
     /**
-     * Will explode an array item value and then merge it into array in same hierarchy
+     * Will explode an array item value and then merge it into an array in the same hierarchy
      *
      * @param string $separator
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function expMerge(string $separator): self
     {
@@ -314,7 +319,7 @@ trait CollectionUtilities
      *
      * @param int|string|null $columnKey
      * @param int|string|null $indexKey
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function column(int|string|null $columnKey, int|string|null $indexKey = null): self
     {
@@ -332,11 +337,11 @@ trait CollectionUtilities
     }
 
     /**
-     * Shift an element off the beginning of array
+     * Shift an element off the beginning of an array
      * https://www.php.net/manual/en/function.array-shift.php
      *
      * @param mixed $value
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function shift(mixed &$value = null): self
     {
@@ -346,11 +351,11 @@ trait CollectionUtilities
     }
 
     /**
-     * Pop the element off the end of array
+     * Pop the element off the end of an array
      * https://www.php.net/manual/en/function.array-pop.php
      *
      * @param mixed $value
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function pop(mixed &$value = null): self
     {
@@ -364,7 +369,7 @@ trait CollectionUtilities
      * https://www.php.net/manual/en/function.array-unshift.php
      *
      * @param mixed $value
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function unshift(mixed ...$value): self
     {
@@ -374,11 +379,11 @@ trait CollectionUtilities
     }
 
     /**
-     * Push one or more elements onto the end of array
+     * Push one or more elements onto the end of an array
      * https://www.php.net/manual/en/function.array-push.php
      *
      * @param mixed $value
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function push(mixed ...$value): self
     {
@@ -388,12 +393,12 @@ trait CollectionUtilities
     }
 
     /**
-     * Pad array to the specified length with a value
+     * Pad an array to the specified length with a value
      * https://www.php.net/manual/en/function.array-pad.php
      *
      * @param int $length
      * @param mixed $value
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function pad(int $length, mixed $value): self
     {
@@ -409,7 +414,7 @@ trait CollectionUtilities
      * @param int $startIndex
      * @param int $count
      * @param mixed $value
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function fill(int $startIndex, int $count, mixed $value): self
     {
@@ -425,7 +430,7 @@ trait CollectionUtilities
      * @param string|int|float $start
      * @param string|int|float $end
      * @param int|float $step
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function range(string|int|float $start, string|int|float $end, int|float $step = 1): self
     {
@@ -438,7 +443,7 @@ trait CollectionUtilities
      * Shuffle an array
      * https://www.php.net/manual/en/function.shuffle.php
      *
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function shuffle(): self
     {
@@ -452,7 +457,7 @@ trait CollectionUtilities
      * https://www.php.net/manual/en/function.array-rand.php
      *
      * @param int $num
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function rand(int $num = 1): self
     {
@@ -466,7 +471,7 @@ trait CollectionUtilities
      * https://www.php.net/manual/en/function.array-replace.php
      *
      * @param array ...$replacements
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function replace(array ...$replacements): self
     {
@@ -480,7 +485,7 @@ trait CollectionUtilities
      * https://www.php.net/manual/en/function.array-replace.php
      *
      * @param array ...$replacements
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function replaceRecursive(array ...$replacements): self
     {
@@ -494,7 +499,7 @@ trait CollectionUtilities
      * https://www.php.net/manual/en/function.array-reverse.php
      *
      * @param bool $preserveKeys
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function reverse(bool $preserveKeys = false): self
     {
@@ -503,14 +508,24 @@ trait CollectionUtilities
         return $inst;
     }
 
+
+    public function searchWithKey(string $findWithKey, string $matchTo): self
+    {
+        $inst = clone $this;
+        $inst->raw = array_values(array_filter($inst->raw, fn($p) => $p[$findWithKey] === $matchTo))[0] ?? [];
+        return $inst;
+    }
+
+
+
     /**
      * Searches the array for a given value and returns the first corresponding 'key' if
-     * successful to collection
+     * successful to a collection
      * https://www.php.net/manual/en/function.array-search.php
      *
      * @param mixed $needle
      * @param bool $strict
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function search(mixed $needle, bool $strict = false): self
     {
@@ -521,17 +536,17 @@ trait CollectionUtilities
 
     /**
      * Searches the array for a given value and returns the first corresponding 'value' if
-     * successful to collection
+     * successful to a collection
      *
      * @param mixed $needle
      * @param bool $strict
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function find(mixed $needle, bool $strict = false): self
     {
         $inst = clone $this;
         $key = $this->search($needle, $strict)->get();
-        if($key === false) {
+        if ($key === false) {
             $inst->raw = null;
             return $inst;
         }
@@ -539,57 +554,57 @@ trait CollectionUtilities
     }
 
     /**
-     * Searches and filter out the array items that is found
+     * Searches and filter out the array items that are found
      * https://www.php.net/manual/en/function.array-search.php
      *
      * @param mixed $needle
      * @param bool $strict
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function searchFilter(array $needle, bool $strict = false): self
     {
-        return $this->filter(function ($item) use($needle, $strict) {
+        return $this->filter(function ($item) use ($needle, $strict) {
             return !in_array($item, $needle, $strict);
         });
     }
 
     /**
-     * Searches and filter out the array items that is not found
+     * Searches and filter out the array items that are not found
      * https://www.php.net/manual/en/function.array-search.php
      *
      * @param mixed $needle
      * @param bool $strict
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function searchMatch(array $needle, bool $strict = false): self
     {
-        return $this->filter(function ($item) use($needle, $strict) {
+        return $this->filter(function ($item) use ($needle, $strict) {
             return in_array($item, $needle, $strict);
         });
     }
 
     /**
-     * Apply a user supplied function to every member of an array
+     * Apply a user-supplied function to every member of an array
      * https://www.php.net/manual/en/function.array-walk.php
      *
      * @param array $needle
      * @param bool $strict
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function select(array $needle, bool $strict = false): self
     {
-        return $this->filter(function ($keyItem) use($needle, $strict) {
+        return $this->filter(function ($keyItem) use ($needle, $strict) {
             return in_array($keyItem, $needle, $strict);
         }, ARRAY_FILTER_USE_KEY);
     }
 
     /**
-     * Apply a user supplied function to every member of an array
+     * Apply a user-supplied function to every member of an array
      * https://www.php.net/manual/en/function.array-walk.php
      *
      * @param Closure $call
      * @param mixed|null $arg
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function walk(Closure $call, mixed $arg = null): self
     {
@@ -606,7 +621,7 @@ trait CollectionUtilities
      *
      * @param Closure $call
      * @param mixed|null $arg
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function walkRecursive(Closure $call, mixed $arg = null): self
     {
@@ -618,8 +633,8 @@ trait CollectionUtilities
     }
 
     /**
-     * Get first item in collection
-     * @return Arr|CollectionUtilities|Traverse
+     * Get the first item in a collection
+     * @return Arr|self|Traverse
      */
     public function next(): self
     {
@@ -629,8 +644,8 @@ trait CollectionUtilities
     }
 
     /**
-     * Get first item in collection
-     * @return Arr|CollectionUtilities|Traverse
+     * Get the first item in a collection
+     * @return Arr|self|Traverse
      */
     public function prev(): self
     {
@@ -644,7 +659,7 @@ trait CollectionUtilities
      * https://www.php.net/manual/en/function.reset.php
      *
      * @param mixed|null $value
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function reset(mixed &$value = null): self
     {
@@ -658,7 +673,7 @@ trait CollectionUtilities
      * https://www.php.net/manual/en/function.end.php
      *
      * @param mixed|null $value
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function end(mixed &$value = null): self
     {
@@ -668,10 +683,10 @@ trait CollectionUtilities
     }
 
     /**
-     * Get first item in collection
+     * Get the first item in a collection
      * https://www.php.net/manual/en/function.end.php
      *
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function first(): self
     {
@@ -681,10 +696,10 @@ trait CollectionUtilities
     }
 
     /**
-     * Get last item in collection
+     * Get the last item in a collection
      * https://www.php.net/manual/en/function.end.php
      *
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function last(): self
     {
@@ -697,7 +712,7 @@ trait CollectionUtilities
      * Fetch a key from an array
      * https://www.php.net/manual/en/function.key.php
      *
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function key(): self
     {
@@ -714,7 +729,7 @@ trait CollectionUtilities
      * Return all the keys or a subset of the keys of an array
      * https://www.php.net/manual/en/function.array-keys.php
      *
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function keys(): self
     {
@@ -732,7 +747,7 @@ trait CollectionUtilities
      * https://www.php.net/implode
      *
      * @param array|string $separator
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function implode(array|string $separator = ""): self
     {
@@ -742,26 +757,31 @@ trait CollectionUtilities
     }
 
     /**
-     * Will return array item at index/key
+     * Will return the array item at index/key
      * https://www.php.net/manual/en/function.shuffle.php
      *
      * @param int|float|string $key
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function eq(int|float|string $key): self
     {
         if (is_string($key) && str_contains($key, ".")) {
             return new self(Helpers::traversArrFromStr($this->toArray(), $key));
         }
+
+        if (is_object($this->raw)) {
+            return new self($this->raw->{$key} ?? false);
+        }
+
         return new self($this->raw[$key] ?? false);
     }
 
     /**
-     * Extract all array items values in array with a wildcard search ("2025-*")
+     * Extract all array items values in an array with a wildcard search ("2025-*")
      *
      * @param string $search wildcard prefix
      * @param bool $searchByKey
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function wildcardMatch(string $search, bool $searchByKey = false): self
     {
@@ -779,16 +799,16 @@ trait CollectionUtilities
     }
 
     // Alias it wildcardMatch
-    function wildcardSearch(string $search, bool $searchByKey = false): self
+    public function wildcardSearch(string $search, bool $searchByKey = false): self
     {
         return $this->wildcardMatch($search, $searchByKey);
     }
 
     /**
-     * Find all array keys array with a wildcard search ("prefix_*")
+     * Find all array keys with a wildcard search ("prefix_*")
      *
      * @param string $search wildcard prefix
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function wildcardMatchKeys(string $search): self
     {
@@ -796,10 +816,10 @@ trait CollectionUtilities
     }
 
     /**
-     * Create a fallback value if value is Empty/Null/0/false
+     * Create a fallback value if the value is Empty/Null/0/false
      *
      * @param string $fallback
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function fallback(mixed $fallback): self
     {
@@ -814,7 +834,7 @@ trait CollectionUtilities
      * Sprint over values
      *
      * @param string $add
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function sprint(string $add): self
     {
@@ -826,19 +846,36 @@ trait CollectionUtilities
     }
 
     /**
-     * Same as value validate but will method chain.
-     * If invalid then the value will be set to "null" OR whatever you set the fallback
+     * Parses the string into variables
      *
-     * @param string $method
-     * @param array $args
-     * @param mixed|null $fallback
-     * @return Arr|CollectionUtilities|Traverse
-     * @throws \ErrorException
+     * @return CollectionUtilities|Arr|Traverse
      */
+    public function parseStr(): self
+    {
+        $inst = clone $this;
+        if (is_string($inst->raw)) {
+            parse_str($this->toString(), $inst->raw);
+        }
+        return $inst;
+    }
+
+    /**
+     * Same as value validate but will method chain.
+     * If invalid, then the value will be set to "null" OR whatever you set the fallback
+     *
+     * @return Validator
+     * @throws ErrorException
+     */
+    public function expect(): Validator
+    {
+        return $this->validator();
+    }
+
+    // Alias to expect
     public function validOrFallback(string $method, array $args = [], mixed $fallback = null): self
     {
         $inst = clone $this;
-        if(!$this->valid($method, $args)) {
+        if (!$this->valid($method, $args)) {
             $inst->raw = $fallback;
         }
         return $inst;
@@ -848,13 +885,13 @@ trait CollectionUtilities
      * Calculate the sum of values in an array
      * https://www.php.net/manual/en/function.array-sum.php
      *
-     * @return Arr|CollectionUtilities|Traverse
+     * @return Arr|self|Traverse
      */
     public function sum(): self
     {
         $inst = clone $this;
         $arr = $this->raw;
-        if(!is_array($arr)) {
+        if (!is_array($arr)) {
             $arr = $this->toArray();
         }
         $inst->raw = array_sum($arr);
