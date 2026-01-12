@@ -508,6 +508,16 @@ trait CollectionUtilities
         return $inst;
     }
 
+
+    public function searchWithKey(string $findWithKey, string $matchTo): self
+    {
+        $inst = clone $this;
+        $inst->raw = array_values(array_filter($inst->raw, fn($p) => $p[$findWithKey] === $matchTo))[0] ?? [];
+        return $inst;
+    }
+
+
+
     /**
      * Searches the array for a given value and returns the first corresponding 'key' if
      * successful to a collection
