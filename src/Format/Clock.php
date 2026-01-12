@@ -132,6 +132,8 @@ final class Clock extends FormatAbstract implements FormatInterface
      */
     public static function setDefaultTimezone(string|DateTimeZone $timezone): void
     {
+        $name = ($timezone instanceof DateTimeZone) ? $timezone->getName() : $timezone;
+        date_default_timezone_set($name);
         self::$defaultTimezone = $timezone instanceof DateTimeZone ? $timezone : new DateTimeZone($timezone);
     }
 
