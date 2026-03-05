@@ -130,3 +130,5 @@ $unit->case("MaplePHP DTO Clock", callback: function () {
     ], "setDefaultLocale fi_FI: Failed");
 
 });
+
+return $unit;
