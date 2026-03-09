@@ -30,6 +30,9 @@
       "homepage": "https://wazabii.se"
     }
   ],
+  "scripts": {
+    "test": "php vendor/bin/unitary"
+  },
   "require": {
     "php": ">=8.2"
   },
@@ -41,5 +44,12 @@
       "MaplePHP\\DTO\\": "src"
     }
   },
-  "minimum-stability": "dev"
+  "extra": {
+    "branch-alias": {
+      "dev-main": "3.x-dev",
+      "dev-develop": "3.x-dev"
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
 }
