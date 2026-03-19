@@ -14,12 +14,12 @@ composer require maplephp/dto
 
 ## 📘 Documentation
 
-* [Why DTO?](https://maplephp.github.io/DTO/docs/intro#why-dto)
-* [Traverse Collection](https://maplephp.github.io/DTO/docs/traverse)
-* [Format string](https://maplephp.github.io/DTO/docs/format-string)
-* [Format Number](https://maplephp.github.io/DTO/docs/format-number)
-* [Format Clock](https://maplephp.github.io/DTO/docs/format-clock)
-* [Format Dom](https://maplephp.github.io/DTO/docs/format-dom)
+* [Why DTO?](https://maplephp.github.io/dto/docs/intro#why-dto)
+* [Traverse Collection](https://maplephp.github.io/dto/docs/traverse)
+* [Format string](https://maplephp.github.io/dto/docs/format-string)
+* [Format Number](https://maplephp.github.io/dto/docs/format-number)
+* [Format Clock](https://maplephp.github.io/dto/docs/format-clock)
+* [Format Dom](https://maplephp.github.io/dto/docs/format-dom)
 
 ---
 
