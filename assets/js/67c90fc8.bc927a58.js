@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkdto=globalThis.webpackChunkdto||[]).push([[6685],{6132(o){o.exports=JSON.parse('{"metadata":{"permalink":"/dto/blog","page":1,"postsPerPage":10,"totalPages":1,"totalCount":4,"blogDescription":"Blog","blogTitle":"Blog"}}')}}]);
